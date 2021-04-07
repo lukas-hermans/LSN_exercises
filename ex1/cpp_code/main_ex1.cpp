@@ -13,10 +13,9 @@ int main()
     int L = M / N;  // number of throws per block
 
     // input ex. 01.3
-    int N_intervals = 100;         // number of subintervals of [0, 1)
-    double int_length = 1 / 100.0; // length of one interval
-    int repeat = 100;              // number of repetition for calculation of chi2
-    int n = 10000;                 // number of draws per repition
+    int N_intervals = 100;   // number of subintervals of [0, 1)
+    int N_repetitions = 100; // number of repetitions for calculation of chi2
+    int n = 10000;           // number of draws per repetion
 
     int seed[4] = {4, 13, 9, 17}; // seed for Rannyu generator
     Random rnd = Random(seed);    // prepared instance for Rannyu generator
