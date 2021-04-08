@@ -1,0 +1,6 @@
+ex1:
+    - make tools::count more efficient (binary search)
+    - make tools::prog_mean more efficient (do not always calculate whole sum)
+
+- vector operation library?
+- comment makefile

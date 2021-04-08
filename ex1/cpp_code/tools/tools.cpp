@@ -28,6 +28,15 @@ namespace tools
         return vec;
     }
 
+    // Returns a vector of an integer sequence specified by start, stop (is included) and step.
+    std::vector<int> vec_arange(int start, int stop, int step)
+    {
+        std::vector<int> vec;
+        for (int i = start; i < stop + 1; i += step)
+            vec.push_back(i);
+        return vec;
+    }
+
     // Computes progressive mean and its a error for a vector vec and returns it as a vector of two vectors.
     std::vector<std::vector<double>> prog_mean(std::vector<double> vec)
     {
@@ -51,19 +60,6 @@ namespace tools
         }
 
         return std::vector<std::vector<double>>{vec_prog, vec_error_prog};
-    }
-
-    // Write data consisting of two columns into a file in a given path.
-    void write_data(std::string path, std::string header, std::vector<double> column1, std::vector<double> column2)
-    {
-        int N = column1.size();
-        std::ofstream file(path);
-        file << header << std::endl;
-        for (int i = 0; i < N; i++)
-        {
-            file << i + 1 << ", " << column1[i] << ", " << column2[i] << std::endl;
-        }
-        file.close();
     }
 
     // Searches for the subinterval in which the draw lies and increases the corresponding entry of the counter vector by 1.
@@ -90,6 +86,19 @@ namespace tools
         }
 
         return chi2;
+    }
+
+    // Write data consisting of two columns into a file in a given path.
+    void write_data(std::vector<int> row_num, std::vector<double> column1, std::vector<double> column2, std::string path, std::string header)
+    {
+        int N = column1.size();
+        std::ofstream file(path);
+        file << header << std::endl;
+        for (int i = 0; i < N; i++)
+        {
+            file << row_num[i] << ", " << column1[i] << ", " << column2[i] << std::endl;
+        }
+        file.close();
     }
 
 } // namespace tools
