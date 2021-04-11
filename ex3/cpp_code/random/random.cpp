@@ -13,6 +13,7 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 #include <cmath>
 #include <cstdlib>
 #include <vector>
+#include <string>
 #include "random.h"
 
 using namespace std;
@@ -50,8 +51,8 @@ void Random ::SaveSeed()
 
 double Random ::Gauss(double mean, double sigma)
 {
-   double s = Rannyu();
-   double t = Rannyu();
+   double s = this->Rannyu();
+   double t = this->Rannyu();
    double x = sqrt(-2. * log(1. - s)) * cos(2. * M_PI * t);
    return mean + x * sigma;
 }
@@ -100,58 +101,63 @@ void Random ::SetRandom(int *s, int p1, int p2)
    return;
 }
 
-// Returns an exponentially distributed random variable (computed via the inversion method from a uniformally distributed variable).
-double Random::exponential_draw(double lambda)
+// Returns a vector of N prices calculated from blocks of size L using a direct calculation.
+// Type argument specifies the option.
+// It can be "put" or any other string, where any other string is considered as "call".
+vector<double> Random::blocking_method_direct(string type, int N, int L, double S_0, double T, double K, double r, double sigma)
 {
-   double y_uniform = this->Rannyu();
-   return -1 / lambda * log(1 - y_uniform);
-}
-
-// Returns an Cauchy-Lorentzian distributed random variable (computed via the inversion method from a uniformally distributed variable).
-double Random::cauchy_lorentz_draw(double gamma, double mu)
-{
-   double y_uniform = this->Rannyu();
-   return mu + gamma * tan(M_PI * (y_uniform - 0.5));
-}
-
-// Returns a vector of N random variables calculated from blocks of size L.
-vector<double> Random::blocking_method(int N, int L)
-{
-   vector<double> r;
+   vector<double> price; // to store option price
 
    double sum;
+   double Z;   // to store standard normal number temporarily
+   double S_T; // to store asset price at time T temporarily
    for (int i = 0; i < N; i++)
    {
       sum = 0;
       for (int j = 0; j < L; j++)
       {
-         sum += (this->Rannyu());
+         Z = (this->Gauss(0, 1));
+         S_T = S_0 * exp((r - pow(sigma, 2) / 2) * T + sigma * Z * sqrt(T));
+         (type == "put") ? (sum += exp(-r * T) * max(0.0, K - S_T)) : (sum += exp(-r * T) * max(0.0, S_T - K));
       }
 
-      r.push_back(sum / (double)L); // append random variable of block i
+      price.push_back(sum / (double)L); // append price of block i
    }
 
-   return r;
+   return price;
 }
 
-// Returns a vector of N variances for each of the N blocks of size L.
-vector<double> Random::blocking_method_var(int N, int L)
+// Returns a vector of N prices calculated from blocks of size L using a discretized calculation.
+// Type argument specifies the option.
+// It can be "put" or any other string, where any other string is considered as "call".
+vector<double> Random::blocking_method_discretized(string type, int N, int L, int N_steps, double S_0, double T, double K, double r, double sigma)
 {
-   vector<double> r_var;
+   vector<double> price; // to store option price
 
    double sum;
+   double Z;      // to store standard normal number temporarily
+   double S_disc; // to store discretely calculated asset price (progressively)
+   double S_T;    // to store asset price at time T temporarily
    for (int i = 0; i < N; i++)
    {
       sum = 0;
       for (int j = 0; j < L; j++)
       {
-         sum += pow((this->Rannyu()) - 0.5, 2);
+         S_disc = S_0;
+         for (int step = 0; step < N_steps; step++) // discretized calculation of asset price at time T
+         {
+            Z = (this->Gauss(0, 1));
+            S_disc = S_disc * exp((r - 0.5 * pow(sigma, 2)) * T / N_steps + sigma * Z * sqrt(T / N_steps));
+         }
+         S_T = S_disc;
+
+         (type == "put") ? (sum += exp(-r * T) * max(0.0, K - S_T)) : (sum += exp(-r * T) * max(0.0, S_T - K));
       }
 
-      r_var.push_back(sum / (double)L); // append random variable of block i
+      price.push_back(sum / (double)L); // append price of block i
    }
 
-   return r_var;
+   return price;
 }
 
 /****************************************************************

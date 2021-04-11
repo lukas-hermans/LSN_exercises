@@ -8,6 +8,7 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 *****************************************************************
 *****************************************************************/
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -33,10 +34,8 @@ public:
   double Rannyu(void);
   double Rannyu(double min, double max);
   double Gauss(double mean, double sigma);
-  double exponential_draw(double lambda);
-  double cauchy_lorentz_draw(double gamma, double mu);
-  vector<double> blocking_method(int N, int L);
-  vector<double> blocking_method_var(int N, int L);
+  vector<double> blocking_method_direct(string type, int N, int L, double S_0, double T, double K, double r, double sigma);
+  vector<double> blocking_method_discretized(string type, int N, int L, int N_steps, double S_0, double T, double K, double r, double sigma);
 };
 
 #endif // __Random__
