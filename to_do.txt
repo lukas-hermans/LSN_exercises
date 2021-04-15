@@ -1,8 +1,12 @@
 ex1:
     - make tools::count more efficient (binary search)
     - make tools::prog_mean more efficient (do not always calculate whole sum)
+    - avoid "," at line end (usecols in np.loadtxt)
+    - avoid repetition for uniform, exponential and lorentzian distribution 
 
 ex2:
+    - make tools::prog_mean more efficient (do not always calculate whole sum)
+    - implement p(x) = c(1-x^2) using rejection method
 
 ex3:
     - make tools::prog_mean more efficient (do not always calculate whole sum)

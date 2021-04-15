@@ -33,10 +33,9 @@ public:
   double Rannyu(void);
   double Rannyu(double min, double max);
   double Gauss(double mean, double sigma);
-  double exponential_draw(double lambda);
-  double lorentzian_draw(double gamma, double mu);
-  vector<double> blocking_method(int N, int L);
-  vector<double> blocking_method_var(int N, int L);
+  double draw_p();
+  vector<double> blocking_method_uniform(int N, int L);
+  vector<double> blocking_method_p(int N, int L);
 };
 
 #endif // __Random__

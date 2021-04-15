@@ -100,58 +100,59 @@ void Random ::SetRandom(int *s, int p1, int p2)
    return;
 }
 
-// Returns an exponentially distributed random variable (computed via the inversion method from a uniformally distributed variable).
-double Random::exponential_draw(double lambda)
+// Draw a random number distributed according to PDF p(x) = 2*(1-x).
+double Random::draw_p()
 {
-   double y_uniform = this->Rannyu();
-   return -1 / lambda * log(1 - y_uniform);
+   double y_uniform = (this->Rannyu());
+   return 1 + sqrt(1 - y_uniform);
 }
 
-// Returns an Lorentzian distributed random variable (computed via the inversion method from a uniformally distributed variable).
-double Random::lorentzian_draw(double gamma, double mu)
+// Uniform Monte Carlo calculation of integral over pi/2*cos(pi*x/2) from 0 to 1.
+// N is the number of blocks of size L.
+// Returns a vector of the value of the integral for the N blocks.
+vector<double> Random::blocking_method_uniform(int N, int L)
 {
-   double y_uniform = this->Rannyu();
-   return mu + gamma * tan(M_PI * (y_uniform - 0.5));
-}
+   vector<double> I; // for storage of value of integral I over integrand specified above
 
-// Returns a vector of N random variables calculated from blocks of size L.
-vector<double> Random::blocking_method(int N, int L)
-{
-   vector<double> r;
-
+   double rand_num;
    double sum;
    for (int i = 0; i < N; i++)
    {
       sum = 0;
       for (int j = 0; j < L; j++)
       {
-         sum += (this->Rannyu());
+         rand_num = (this->Rannyu());
+         sum += M_PI / 2 * cos(M_PI * rand_num / 2);
       }
 
-      r.push_back(sum / (double)L); // append random variable of block i
+      I.push_back(sum / (double)L); // append random variable of block i
    }
 
-   return r;
+   return I;
 }
 
-// Returns a vector of N variances for each of the N blocks of size L.
-vector<double> Random::blocking_method_var(int N, int L)
+// Importance sampling of integral over pi/2*cos(pi*x/2) from 0 to 1 using distribution p (see draw_p method above).
+// N is the number of blocks of size L.
+// Returns a vector of the value of the integral for the N blocks.
+vector<double> Random::blocking_method_p(int N, int L)
 {
-   vector<double> r_var;
+   vector<double> I; // for storage of value of integral I over integrand specified above
 
+   double rand_num;
    double sum;
    for (int i = 0; i < N; i++)
    {
       sum = 0;
       for (int j = 0; j < L; j++)
       {
-         sum += pow((this->Rannyu()) - 0.5, 2);
+         rand_num = (this->draw_p());
+         sum += M_PI / 2 * cos(M_PI * rand_num / 2) / (2 * (1 - rand_num));
       }
 
-      r_var.push_back(sum / (double)L); // append random variable of block i
+      I.push_back(sum / (double)L); // append random variable of block i
    }
 
-   return r_var;
+   return I;
 }
 
 /****************************************************************
