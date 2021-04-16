@@ -1,3 +1,4 @@
+1
 1.4
 108
 1.1
@@ -6,6 +7,7 @@
 10000
 1000
 
+  ReadInput >> restart;
   ReadInput >> temp;
   ReadInput >> npart;
   ReadInput >> rho;
