@@ -1,0 +1,546 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ovito.pipeline &#8212; OVITO 3.4.4 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="shortcut icon" href="../_static/ovito.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ovito.vis" href="ovito_vis.html" />
+    <link rel="prev" title="ovito.modifiers" href="ovito_modifiers.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ovito_vis.html" title="ovito.vis"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ovito_modifiers.html" title="ovito.modifiers"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">OVITO 3.4.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="docutils literal notranslate"><span class="pre">ovito.pipeline</span></code></a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ovito.pipeline">
+<span id="ovito-pipeline"></span><h1><code class="docutils literal notranslate"><span class="pre">ovito.pipeline</span></code><a class="headerlink" href="#module-ovito.pipeline" title="Permalink to this headline">¶</a></h1>
+<p>This module contains object types that are part of OVITO’s data pipeline system.</p>
+<p><strong>Pipelines:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#ovito.pipeline.Pipeline" title="ovito.pipeline.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a></p></li>
+<li><p><a class="reference internal" href="#ovito.pipeline.Modifier" title="ovito.pipeline.Modifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">Modifier</span></code></a> (base class)</p></li>
+</ul>
+</div></blockquote>
+<p><strong>Data sources:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#ovito.pipeline.StaticSource" title="ovito.pipeline.StaticSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">StaticSource</span></code></a></p></li>
+<li><p><a class="reference internal" href="#ovito.pipeline.FileSource" title="ovito.pipeline.FileSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileSource</span></code></a></p></li>
+</ul>
+</div></blockquote>
+<dl class="py class">
+<dt id="ovito.pipeline.FileSource">
+<em class="property">class </em><code class="sig-prename descclassname">ovito.pipeline.</code><code class="sig-name descname">FileSource</code><a class="headerlink" href="#ovito.pipeline.FileSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>This object type serves as a <a class="reference internal" href="#ovito.pipeline.Pipeline.source" title="ovito.pipeline.Pipeline.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Pipeline.source</span></code></a> and takes care of reading the input data for a <a class="reference internal" href="#ovito.pipeline.Pipeline" title="ovito.pipeline.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a> from an external file.</p>
+<p>You normally do not need to create an instance of this class yourself; the <a class="reference internal" href="ovito_io.html#ovito.io.import_file" title="ovito.io.import_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">import_file()</span></code></a> function does it for you and wires the fully configured <code class="xref py py-class docutils literal notranslate"><span class="pre">FileSource</span></code> to the new <a class="reference internal" href="#ovito.pipeline.Pipeline" title="ovito.pipeline.Pipeline"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Pipeline</span></code></a>. However, if needed, the <a class="reference internal" href="#ovito.pipeline.FileSource.load" title="ovito.pipeline.FileSource.load"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FileSource.load()</span></code></a> method allows you to load a different input file later on and replace the input of the existing pipeline with a new dataset:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ovito.io</span> <span class="k">import</span> <span class="n">import_file</span>
+
+<span class="c1"># Create a new pipeline with a FileSource:</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">import_file</span><span class="p">(</span><span class="s1">&#39;input/first_file.dump&#39;</span><span class="p">)</span>
+
+<span class="c1"># Get the data from the first file:</span>
+<span class="n">data1</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+
+<span class="c1"># Use FileSource.load() method to replace the pipeline&#39;s input with a different file </span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;input/second_file.dump&#39;</span><span class="p">)</span>
+
+<span class="c1"># Now the pipeline gets its input data from the new file:</span>
+<span class="n">data2</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Furthermore, you will encounter other <code class="xref py py-class docutils literal notranslate"><span class="pre">FileSource</span></code> objects in conjunction with certain modifiers that need secondary input data from a separate file. The <a class="reference internal" href="ovito_modifiers.html#ovito.modifiers.CalculateDisplacementsModifier" title="ovito.modifiers.CalculateDisplacementsModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">CalculateDisplacementsModifier</span></code></a>, for example, manages its own <code class="xref py py-class docutils literal notranslate"><span class="pre">FileSource</span></code> for loading reference particle positions from a separate input file. Another example is the <a class="reference internal" href="ovito_modifiers.html#ovito.modifiers.LoadTrajectoryModifier" title="ovito.modifiers.LoadTrajectoryModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">LoadTrajectoryModifier</span></code></a>, which employs its own separate <code class="xref py py-class docutils literal notranslate"><span class="pre">FileSource</span></code> instance to load the particle trajectories from disk and combine them with the topology data previously loaded by the main <code class="xref py py-class docutils literal notranslate"><span class="pre">FileSource</span></code> of the data pipeline.</p>
+<p><strong>Data access</strong></p>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">FileSource</span></code> class provides two ways of accessing the data that is loaded from the external input file(s). For read-only access to the data, the <a class="reference internal" href="#ovito.pipeline.FileSource.compute" title="ovito.pipeline.FileSource.compute"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FileSource.compute()</span></code></a> method should be called. It loads the data of a specific frame from the input simulation trajectory and returns it as a new <a class="reference internal" href="ovito_data.html#ovito.data.DataCollection" title="ovito.data.DataCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataCollection</span></code></a> object:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># This creates a new Pipeline with an attached FileSource.</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">import_file</span><span class="p">(</span><span class="s1">&#39;input/simulation.dump&#39;</span><span class="p">)</span>
+
+<span class="c1"># Request data of animation frame 0 from the FileSource.</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>To modify or amend the <a class="reference internal" href="ovito_data.html#ovito.data.DataCollection" title="ovito.data.DataCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataCollection</span></code></a> that was loaded by the <code class="xref py py-class docutils literal notranslate"><span class="pre">FileSource</span></code>, you should insert a <a class="reference internal" href="../introduction/custom_modifiers.html#writing-custom-modifiers"><span class="std std-ref">user-defined modifier function</span></a> into the pipeline. A typical use case is assigning the radii and names to particle types loaded from a simulation file that doesn’t contain named atom types:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">import_file</span><span class="p">(</span><span class="s1">&#39;input/simulation.dump&#39;</span><span class="p">)</span>
+
+<span class="c1"># User-defined modifier function that assigns names and radii to numeric atom types:</span>
+<span class="k">def</span> <span class="nf">setup_atom_types</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">types</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">particles_</span><span class="o">.</span><span class="n">particle_types_</span>
+    <span class="n">types</span><span class="o">.</span><span class="n">type_by_id_</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Cu&quot;</span>
+    <span class="n">types</span><span class="o">.</span><span class="n">type_by_id_</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="mf">1.35</span>
+    <span class="n">types</span><span class="o">.</span><span class="n">type_by_id_</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Zr&quot;</span>
+    <span class="n">types</span><span class="o">.</span><span class="n">type_by_id_</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="mf">1.55</span>
+
+<span class="n">pipeline</span><span class="o">.</span><span class="n">modifiers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">setup_atom_types</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="ovito.pipeline.FileSource.compute">
+<code class="sig-name descname">compute</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">frame</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ovito.pipeline.FileSource.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Requests data from this data source. The <code class="xref py py-class docutils literal notranslate"><span class="pre">FileSource</span></code> will load it from the external file if needed.</p>
+<p>The optional <em>frame</em> parameter determines the frame to retrieve, which must be in the range 0 through (<a class="reference internal" href="#ovito.pipeline.FileSource.num_frames" title="ovito.pipeline.FileSource.num_frames"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_frames</span></code></a>-1).
+If no frame number is specified, the current time slider position is used (will always be frame 0 for scripts not running in the context of an interactive OVITO session).</p>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">FileSource</span></code> uses a caching mechanism to keep the data for one or more frames in memory. Thus, invoking <code class="xref py py-meth docutils literal notranslate"><span class="pre">compute()</span></code>
+repeatedly to retrieve the same frame will typically be very fast.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>frame</strong> (<em>int</em>) – The source frame to retrieve.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A new <a class="reference internal" href="ovito_data.html#ovito.data.DataCollection" title="ovito.data.DataCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataCollection</span></code></a> containing the loaded data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ovito.pipeline.FileSource.data">
+<em class="property">property </em><code class="sig-name descname">data</code><a class="headerlink" href="#ovito.pipeline.FileSource.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>This field provides access to the internal <a class="reference internal" href="ovito_data.html#ovito.data.DataCollection" title="ovito.data.DataCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataCollection</span></code></a>, i.e. the master copy of the data loaded from the input file (at frame 0).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ovito.pipeline.FileSource.load">
+<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">location</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">params</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ovito.pipeline.FileSource.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a new input file, from which this data source will retrieve its data from.</p>
+<p>The function accepts additional keyword arguments, which are forwarded to the format-specific file importer.
+For further information, please see the documentation of the <a class="reference internal" href="ovito_io.html#ovito.io.import_file" title="ovito.io.import_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">import_file()</span></code></a> function,
+which has the same function interface as this method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>location</strong> (<em>str</em>) – The local file(s) or remote URL to load.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ovito.pipeline.FileSource.num_frames">
+<em class="property">property </em><code class="sig-name descname">num_frames</code><a class="headerlink" href="#ovito.pipeline.FileSource.num_frames" title="Permalink to this definition">¶</a></dt>
+<dd><p>This read-only attribute reports the number of frames found in the input file or sequence of input files. The data for the individual frames can be obtained using the <a class="reference internal" href="#ovito.pipeline.FileSource.compute" title="ovito.pipeline.FileSource.compute"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compute()</span></code></a> method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ovito.pipeline.FileSource.source_path">
+<em class="property">property </em><code class="sig-name descname">source_path</code><a class="headerlink" href="#ovito.pipeline.FileSource.source_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>This read-only attribute returns the path(s) or URL(s) of the file(s) where this <code class="xref py py-class docutils literal notranslate"><span class="pre">FileSource</span></code> retrieves its input data from.
+You can change the source path by calling <a class="reference internal" href="#ovito.pipeline.FileSource.load" title="ovito.pipeline.FileSource.load"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load()</span></code></a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="ovito.pipeline.Modifier">
+<em class="property">class </em><code class="sig-prename descclassname">ovito.pipeline.</code><code class="sig-name descname">Modifier</code><a class="headerlink" href="#ovito.pipeline.Modifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the base class for all modifier types in OVITO. See the <a class="reference internal" href="ovito_modifiers.html#module-ovito.modifiers" title="ovito.modifiers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ovito.modifiers</span></code></a> module for a list of concrete modifier types that can be inserted into a data <a class="reference internal" href="#ovito.pipeline.Pipeline" title="ovito.pipeline.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a>.</p>
+<dl class="py method">
+<dt id="ovito.pipeline.Modifier.enabled">
+<em class="property">property </em><code class="sig-name descname">enabled</code><a class="headerlink" href="#ovito.pipeline.Modifier.enabled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Controls whether the modifier is applied to the data. Disabled modifiers are skipped during evaluation of a data pipeline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="ovito.pipeline.Pipeline">
+<em class="property">class </em><code class="sig-prename descclassname">ovito.pipeline.</code><code class="sig-name descname">Pipeline</code><a class="headerlink" href="#ovito.pipeline.Pipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class encapsulates a data pipeline, consisting of a <em>data source</em> and a chain of zero or more <em>modifiers</em>, 
+which manipulate the data on the way through the pipeline.</p>
+<p><strong>Pipeline creation</strong></p>
+<p>Every pipeline has a <em>data source</em>, which loads or dynamically generates the input data entering the 
+pipeline. This source is accessible through the <a class="reference internal" href="#ovito.pipeline.Pipeline.source" title="ovito.pipeline.Pipeline.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Pipeline.source</span></code></a> field and may be replaced with a different kind of source object if needed. 
+For pipelines created by the <a class="reference internal" href="ovito_io.html#ovito.io.import_file" title="ovito.io.import_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">import_file()</span></code></a> function, the data source is automatically set to be a 
+<a class="reference internal" href="#ovito.pipeline.FileSource" title="ovito.pipeline.FileSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileSource</span></code></a> object, which loads the input data 
+from the external file and feeds it into the pipeline. Another kind of data source is the 
+<a class="reference internal" href="#ovito.pipeline.StaticSource" title="ovito.pipeline.StaticSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">StaticSource</span></code></a>, which can be used if you want to programmatically specify the input data for the pipeline 
+instead of loading it from a file.</p>
+<p>The modifiers that are part of the pipeline are accessible through the <a class="reference internal" href="#ovito.pipeline.Pipeline.modifiers" title="ovito.pipeline.Pipeline.modifiers"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Pipeline.modifiers</span></code></a> field. 
+This list is initially empty and you can populate it with the modifier types found in the <a class="reference internal" href="ovito_modifiers.html#module-ovito.modifiers" title="ovito.modifiers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ovito.modifiers</span></code></a> module. 
+Note that it is possible to employ the same <a class="reference internal" href="#ovito.pipeline.Modifier" title="ovito.pipeline.Modifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">Modifier</span></code></a> instance in more than one pipeline. And it is 
+okay to use the same data source object for several pipelines, letting them process the same input data.</p>
+<p><strong>Pipeline evaluation</strong></p>
+<p>Once the pipeline is set up, its computation results can be requested by calling <a class="reference internal" href="#ovito.pipeline.Pipeline.compute" title="ovito.pipeline.Pipeline.compute"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compute()</span></code></a>, which means that the input data will be loaded/generated by the <a class="reference internal" href="#ovito.pipeline.Pipeline.source" title="ovito.pipeline.Pipeline.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a> 
+and all modifiers of the pipeline are applied to the data one after the other. The <a class="reference internal" href="#ovito.pipeline.Pipeline.compute" title="ovito.pipeline.Pipeline.compute"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compute()</span></code></a> method 
+returns a new <a class="reference internal" href="ovito_data.html#ovito.data.DataCollection" title="ovito.data.DataCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataCollection</span></code></a> storing the data objects produced by the pipeline. 
+Under the hood, an automatic caching system ensures that unnecessary file accesses and computations are avoided. 
+Repeatedly calling <a class="reference internal" href="#ovito.pipeline.Pipeline.compute" title="ovito.pipeline.Pipeline.compute"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compute()</span></code></a> will not trigger a recalculation of the pipeline’s results unless you 
+alter the pipeline’s data source, the chain of modifiers, or a modifier’s parameters.</p>
+<p><strong>Usage example</strong></p>
+<p>The following code example shows how to create a new pipeline by importing an MD simulation file and inserting a <a class="reference internal" href="ovito_modifiers.html#ovito.modifiers.SliceModifier" title="ovito.modifiers.SliceModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">SliceModifier</span></code></a> to
+cut away some of the particles. Finally, the total number of remaining particles is printed.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ovito.io</span> <span class="k">import</span> <span class="n">import_file</span>
+<span class="kn">from</span> <span class="nn">ovito.modifiers</span> <span class="k">import</span> <span class="n">SliceModifier</span>
+
+<span class="c1"># Import a simulation file. This creates a Pipeline object.</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">import_file</span><span class="p">(</span><span class="s1">&#39;input/simulation.dump&#39;</span><span class="p">)</span>
+
+<span class="c1"># Insert a modifier that operates on the data:</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">modifiers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SliceModifier</span><span class="p">(</span><span class="n">normal</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">distance</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+<span class="c1"># Compute the effect of the slice modifier by evaluating the pipeline.</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Remaining particle count:&quot;</span><span class="p">,</span> <span class="n">output</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you would like to access the unmodified input data of the pipeline, i.e. <em>before</em> it has been processed by any of the modifiers,
+you can call the <a class="reference internal" href="#ovito.pipeline.FileSource.compute" title="ovito.pipeline.FileSource.compute"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FileSource.compute()</span></code></a> method instead:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Access the pipeline&#39;s input data provided by the FileSource:</span>
+<span class="nb">input</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Input particle count:&quot;</span><span class="p">,</span> <span class="nb">input</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Data visualization</strong></p>
+<p>If you intend to produce graphical renderings of a output data produced by a pipeline,
+you must make the pipeline part of the current three-dimensional scene by calling the <a class="reference internal" href="#ovito.pipeline.Pipeline.add_to_scene" title="ovito.pipeline.Pipeline.add_to_scene"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Pipeline.add_to_scene()</span></code></a> method.</p>
+<p><strong>Data export</strong></p>
+<p>To export the generated data of the pipeline to an output file, simply call the <a class="reference internal" href="ovito_io.html#ovito.io.export_file" title="ovito.io.export_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">ovito.io.export_file()</span></code></a> function with the pipeline.</p>
+<dl class="py method">
+<dt id="ovito.pipeline.Pipeline.add_to_scene">
+<code class="sig-name descname">add_to_scene</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ovito.pipeline.Pipeline.add_to_scene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inserts the pipeline into the three-dimensional scene by appending it to the <a class="reference internal" href="ovito.html#ovito.Scene.pipelines" title="ovito.Scene.pipelines"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ovito.Scene.pipelines</span></code></a> list.
+The visual representation of the pipeline’s output data will appear in rendered images and in the interactive viewports of the
+graphical OVITO program.</p>
+<p>You can remove the pipeline from the scene again using <a class="reference internal" href="#ovito.pipeline.Pipeline.remove_from_scene" title="ovito.pipeline.Pipeline.remove_from_scene"><code class="xref py py-meth docutils literal notranslate"><span class="pre">remove_from_scene()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ovito.pipeline.Pipeline.compute">
+<code class="sig-name descname">compute</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">frame</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ovito.pipeline.Pipeline.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes and returns the results of this data pipeline.</p>
+<p>This method requests an evaluation of the pipeline and blocks until the input data has been obtained from the
+data <a class="reference internal" href="#ovito.pipeline.Pipeline.source" title="ovito.pipeline.Pipeline.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a> and all modifiers have been applied to the data. When invoking the <code class="xref py py-meth docutils literal notranslate"><span class="pre">compute()</span></code> method repeatedly
+without changing the pipeline between calls, it may return immediately with the cached results from an earlier evaluation.</p>
+<p>The optional <em>frame</em> parameter determines at which animation time the pipeline is evaluated. Frame numbering starts at 0.
+If you don’t specify a frame number, the current time slider position is used (will always be frame 0 for scripts not running in the context of an interactive OVITO session).</p>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">compute()</span></code> method will raise a <code class="docutils literal notranslate"><span class="pre">RuntimeError</span></code> if the pipeline could not be successfully evaluated for some reason.
+This can happen due to invalid modifier parameters or file I/O errors, for example.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>frame</strong> (<em>int</em>) – The animation frame number at which the pipeline should be evaluated.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A <a class="reference internal" href="ovito_data.html#ovito.data.DataCollection" title="ovito.data.DataCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataCollection</span></code></a> produced by the data pipeline.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ovito.pipeline.Pipeline.modifiers">
+<em class="property">property </em><code class="sig-name descname">modifiers</code><a class="headerlink" href="#ovito.pipeline.Pipeline.modifiers" title="Permalink to this definition">¶</a></dt>
+<dd><p>The sequence of modifiers in the pipeline.</p>
+<p>This list contains any modifiers that are applied to the input data provided by the pipeline’s data <a class="reference internal" href="#ovito.pipeline.Pipeline.source" title="ovito.pipeline.Pipeline.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a>. You
+can add and remove modifiers as needed using standard Python <code class="docutils literal notranslate"><span class="pre">append()</span></code> and <code class="docutils literal notranslate"><span class="pre">del</span></code> operations. The
+head of the list represents the beginning of the pipeline, i.e. the first modifier receives the data from the
+data <a class="reference internal" href="#ovito.pipeline.Pipeline.source" title="ovito.pipeline.Pipeline.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a>, manipulates it and passes the results on to the second modifier in the list and so forth.</p>
+<p>Example: Adding a new modifier to the end of a data pipeline:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span><span class="o">.</span><span class="n">modifiers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">WrapPeriodicImagesModifier</span><span class="p">())</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ovito.pipeline.Pipeline.remove_from_scene">
+<code class="sig-name descname">remove_from_scene</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ovito.pipeline.Pipeline.remove_from_scene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the visual representation of the pipeline from the scene by deleting it from the <a class="reference internal" href="ovito.html#ovito.Scene.pipelines" title="ovito.Scene.pipelines"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ovito.Scene.pipelines</span></code></a> list.
+The output data of the pipeline will disappear from the viewports.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ovito.pipeline.Pipeline.source">
+<em class="property">property </em><code class="sig-name descname">source</code><a class="headerlink" href="#ovito.pipeline.Pipeline.source" title="Permalink to this definition">¶</a></dt>
+<dd><p>The object that provides the data entering the pipeline. This typically is a <a class="reference internal" href="#ovito.pipeline.FileSource" title="ovito.pipeline.FileSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileSource</span></code></a> instance if the pipeline was created by a call to <a class="reference internal" href="ovito_io.html#ovito.io.import_file" title="ovito.io.import_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">import_file()</span></code></a>. You can assign a new source to the pipeline if needed. See the <a class="reference internal" href="#module-ovito.pipeline" title="ovito.pipeline"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ovito.pipeline</span></code></a> module for a list of available pipeline source types. Note that you can even make several pipelines share the same source object.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="ovito.pipeline.ReferenceConfigurationModifier">
+<em class="property">class </em><code class="sig-prename descclassname">ovito.pipeline.</code><code class="sig-name descname">ReferenceConfigurationModifier</code><a class="headerlink" href="#ovito.pipeline.ReferenceConfigurationModifier" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Base class</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#ovito.pipeline.Modifier" title="ovito.pipeline.Modifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">ovito.pipeline.Modifier</span></code></a></p>
+</dd>
+</dl>
+<p>This is the common base class of analyis modifiers that perform some kind of comparison
+of the current particle configuration with a reference configuration. For example,
+the <a class="reference internal" href="ovito_modifiers.html#ovito.modifiers.CalculateDisplacementsModifier" title="ovito.modifiers.CalculateDisplacementsModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">CalculateDisplacementsModifier</span></code></a>, the <a class="reference internal" href="ovito_modifiers.html#ovito.modifiers.AtomicStrainModifier" title="ovito.modifiers.AtomicStrainModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">AtomicStrainModifier</span></code></a>
+and the <a class="reference internal" href="ovito_modifiers.html#ovito.modifiers.WignerSeitzAnalysisModifier" title="ovito.modifiers.WignerSeitzAnalysisModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">WignerSeitzAnalysisModifier</span></code></a> are modifier types that require
+a reference configuration as additional input.</p>
+<p><strong>Constant and sliding reference configurations</strong></p>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">ReferenceConfigurationModifier</span></code> base class provides various fields that
+allow you to specify the reference particle configuration. By default, frame 0 of the currently loaded
+simulation sequence is used as reference. You can select any other frame with the <a class="reference internal" href="#ovito.pipeline.ReferenceConfigurationModifier.reference_frame" title="ovito.pipeline.ReferenceConfigurationModifier.reference_frame"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reference_frame</span></code></a> field.
+Sometimes an incremental analysis is desired, instead of a fixed reference configuration. That means the sliding reference configuration and the current configuration
+are separated along the time axis by a constant period (<em>delta t</em>). The incremental analysis mode is activated by
+setting the <a class="reference internal" href="#ovito.pipeline.ReferenceConfigurationModifier.use_frame_offset" title="ovito.pipeline.ReferenceConfigurationModifier.use_frame_offset"><code class="xref py py-attr docutils literal notranslate"><span class="pre">use_frame_offset</span></code></a> flag and specifying the desired <a class="reference internal" href="#ovito.pipeline.ReferenceConfigurationModifier.frame_offset" title="ovito.pipeline.ReferenceConfigurationModifier.frame_offset"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame_offset</span></code></a>.</p>
+<p><strong>External reference configuration file</strong></p>
+<p>By default, the reference particle positions are obtained by evaluating the same data pipeline that also
+provides the current particle positions, i.e. which the modifier is part of. That means any modifiers preceding this modifier in the pipeline
+will also act upon the reference particle configuration, but not modifiers that follow in the pipeline.</p>
+<p>Instead of taking it from the same data pipeline, you can explicitly provide a reference configuration by loading it from a separate data file.
+To this end the <a class="reference internal" href="#ovito.pipeline.ReferenceConfigurationModifier.reference" title="ovito.pipeline.ReferenceConfigurationModifier.reference"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reference</span></code></a> field contains a <a class="reference internal" href="#ovito.pipeline.FileSource" title="ovito.pipeline.FileSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileSource</span></code></a> object and you can
+use its <a class="reference internal" href="#ovito.pipeline.FileSource.load" title="ovito.pipeline.FileSource.load"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load()</span></code></a> method to load the reference particle positions from a separate file.</p>
+<p><strong>Handling of periodic boundary conditions and cell deformations</strong></p>
+<p>Certain analysis modifiers such as the <a class="reference internal" href="ovito_modifiers.html#ovito.modifiers.CalculateDisplacementsModifier" title="ovito.modifiers.CalculateDisplacementsModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">CalculateDisplacementsModifier</span></code></a> and the <a class="reference internal" href="ovito_modifiers.html#ovito.modifiers.AtomicStrainModifier" title="ovito.modifiers.AtomicStrainModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">AtomicStrainModifier</span></code></a>
+calculate the displacements particles experienced between the reference and the current configuration.
+Since particle coordinates in periodic simulation cells are often stored in a <em>wrapped</em> form,
+caculating the displacement vectors is non-trivial when particles have crossed the periodic boundaries.
+By default, the <em>minimum image convention</em> is used in these cases, but you can turn if off by
+setting <a class="reference internal" href="#ovito.pipeline.ReferenceConfigurationModifier.minimum_image_convention" title="ovito.pipeline.ReferenceConfigurationModifier.minimum_image_convention"><code class="xref py py-attr docutils literal notranslate"><span class="pre">minimum_image_convention</span></code></a> to <code class="docutils literal notranslate"><span class="pre">False</span></code>, for example if the input particle coordinates
+are given in unwrapped form.</p>
+<p>Furthermore, if the simulation cell of the reference and the current configuration are different, it makes
+a slight difference whether displacements are calculated in the reference or in the current frame.
+The <a class="reference internal" href="#ovito.pipeline.ReferenceConfigurationModifier.affine_mapping" title="ovito.pipeline.ReferenceConfigurationModifier.affine_mapping"><code class="xref py py-attr docutils literal notranslate"><span class="pre">affine_mapping</span></code></a> property controls the type of coordinate mapping that is used.</p>
+<dl class="py method">
+<dt id="ovito.pipeline.ReferenceConfigurationModifier.affine_mapping">
+<em class="property">property </em><code class="sig-name descname">affine_mapping</code><a class="headerlink" href="#ovito.pipeline.ReferenceConfigurationModifier.affine_mapping" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Selects the type of affine deformation applied to the particle coordinates of either the reference or the current configuration prior to the actual analysis computation. Must be one of the following modes:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ReferenceConfigurationModifier.AffineMapping.Off</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ReferenceConfigurationModifier.AffineMapping.ToReference</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ReferenceConfigurationModifier.AffineMapping.ToCurrent</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<p>When affine mapping is disabled (<code class="docutils literal notranslate"><span class="pre">AffineMapping.Off</span></code>), particle displacement vectors are simply calculated from the difference of current and reference positions, irrespective of the cell shape the reference and current configuration. Note that this can introduce a small geometric error if the shape of the periodic simulation cell changes considerably. The mode <code class="docutils literal notranslate"><span class="pre">AffineMapping.ToReference</span></code> applies an affine transformation to the current configuration such that all particle positions are first mapped to the reference cell before calculating the displacement vectors. The last option, <code class="docutils literal notranslate"><span class="pre">AffineMapping.ToCurrent</span></code>, does the reverse: it maps the reference particle positions to the deformed cell before calculating the displacements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">ReferenceConfigurationModifier.AffineMapping.Off</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ovito.pipeline.ReferenceConfigurationModifier.frame_offset">
+<em class="property">property </em><code class="sig-name descname">frame_offset</code><a class="headerlink" href="#ovito.pipeline.ReferenceConfigurationModifier.frame_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>The relative frame offset when using a sliding reference configuration (if <a class="reference internal" href="#ovito.pipeline.ReferenceConfigurationModifier.use_frame_offset" title="ovito.pipeline.ReferenceConfigurationModifier.use_frame_offset"><code class="xref py py-attr docutils literal notranslate"><span class="pre">use_frame_offset</span></code></a> == <code class="docutils literal notranslate"><span class="pre">True</span></code>). Negative frame offsets correspond to reference configurations that precede the current configuration in time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default</dt>
+<dd class="field-odd"><p>-1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ovito.pipeline.ReferenceConfigurationModifier.minimum_image_convention">
+<em class="property">property </em><code class="sig-name descname">minimum_image_convention</code><a class="headerlink" href="#ovito.pipeline.ReferenceConfigurationModifier.minimum_image_convention" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <code class="docutils literal notranslate"><span class="pre">False</span></code>, then displacements are calculated from the particle coordinates in the reference and the current configuration as is. Note that in this case the calculated displacements of particles that have crossed a periodic simulation cell boundary will be wrong if their coordinates are stored in a wrapped form. If <code class="docutils literal notranslate"><span class="pre">True</span></code>, then the minimum image convention is applied when calculating the displacements of particles that have crossed a periodic boundary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ovito.pipeline.ReferenceConfigurationModifier.reference">
+<em class="property">property </em><code class="sig-name descname">reference</code><a class="headerlink" href="#ovito.pipeline.ReferenceConfigurationModifier.reference" title="Permalink to this definition">¶</a></dt>
+<dd><p>A pipeline <a class="reference internal" href="#ovito.pipeline.Pipeline.source" title="ovito.pipeline.Pipeline.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a> object that provides the reference particle positions. By default this field is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case the modifier obtains the reference particle positions from data pipeline it is part of. You can explicitly assign a data source object such as a <a class="reference internal" href="#ovito.pipeline.FileSource" title="ovito.pipeline.FileSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileSource</span></code></a> or a <a class="reference internal" href="#ovito.pipeline.StaticSource" title="ovito.pipeline.StaticSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">StaticSource</span></code></a> to this field to specify an explicit reference configuration.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># The modifier that requires a reference config:</span>
+<span class="n">mod</span> <span class="o">=</span> <span class="n">CalculateDisplacementsModifier</span><span class="p">()</span>
+
+<span class="c1"># Load the reference config from a separate input file.</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">reference</span> <span class="o">=</span> <span class="n">FileSource</span><span class="p">()</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;input/simulation.0.dump&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Default</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ovito.pipeline.ReferenceConfigurationModifier.reference_frame">
+<em class="property">property </em><code class="sig-name descname">reference_frame</code><a class="headerlink" href="#ovito.pipeline.ReferenceConfigurationModifier.reference_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>The frame number to use as reference configuration. Ignored if <a class="reference internal" href="#ovito.pipeline.ReferenceConfigurationModifier.use_frame_offset" title="ovito.pipeline.ReferenceConfigurationModifier.use_frame_offset"><code class="xref py py-attr docutils literal notranslate"><span class="pre">use_frame_offset</span></code></a> is set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default</dt>
+<dd class="field-odd"><p>0</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ovito.pipeline.ReferenceConfigurationModifier.use_frame_offset">
+<em class="property">property </em><code class="sig-name descname">use_frame_offset</code><a class="headerlink" href="#ovito.pipeline.ReferenceConfigurationModifier.use_frame_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines whether a sliding reference configuration is taken at a constant time offset (specified by <a class="reference internal" href="#ovito.pipeline.ReferenceConfigurationModifier.frame_offset" title="ovito.pipeline.ReferenceConfigurationModifier.frame_offset"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame_offset</span></code></a>) relative to the current frame. If <code class="docutils literal notranslate"><span class="pre">False</span></code>, a constant reference configuration is used (set by the <a class="reference internal" href="#ovito.pipeline.ReferenceConfigurationModifier.reference_frame" title="ovito.pipeline.ReferenceConfigurationModifier.reference_frame"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reference_frame</span></code></a> parameter) irrespective of the current frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="ovito.pipeline.StaticSource">
+<em class="property">class </em><code class="sig-prename descclassname">ovito.pipeline.</code><code class="sig-name descname">StaticSource</code><a class="headerlink" href="#ovito.pipeline.StaticSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serves as a data <a class="reference internal" href="#ovito.pipeline.Pipeline.source" title="ovito.pipeline.Pipeline.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a> for a <a class="reference internal" href="#ovito.pipeline.Pipeline" title="ovito.pipeline.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a>. 
+A <code class="xref py py-class docutils literal notranslate"><span class="pre">StaticSource</span></code> manages a <a class="reference internal" href="ovito_data.html#ovito.data.DataCollection" title="ovito.data.DataCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataCollection</span></code></a>, which it will pass to the <a class="reference internal" href="#ovito.pipeline.Pipeline" title="ovito.pipeline.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a> as input data. 
+One typically initializes a <code class="xref py py-class docutils literal notranslate"><span class="pre">StaticSource</span></code> with a collection of data objects, then wiring it to a <a class="reference internal" href="#ovito.pipeline.Pipeline" title="ovito.pipeline.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a> as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ovito.pipeline</span> <span class="k">import</span> <span class="n">StaticSource</span><span class="p">,</span> <span class="n">Pipeline</span>
+<span class="kn">from</span> <span class="nn">ovito.data</span> <span class="k">import</span> <span class="n">DataCollection</span><span class="p">,</span> <span class="n">SimulationCell</span><span class="p">,</span> <span class="n">Particles</span>
+<span class="kn">from</span> <span class="nn">ovito.modifiers</span> <span class="k">import</span> <span class="n">CreateBondsModifier</span>
+<span class="kn">from</span> <span class="nn">ovito.io</span> <span class="k">import</span> <span class="n">export_file</span>
+
+<span class="c1"># Insert a new SimulationCell object into a data collection:</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">DataCollection</span><span class="p">()</span>
+<span class="n">cell</span> <span class="o">=</span> <span class="n">SimulationCell</span><span class="p">(</span><span class="n">pbc</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+<span class="n">cell</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">cell</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">cell</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+
+<span class="c1"># Create a Particles object containing two particles:</span>
+<span class="n">particles</span> <span class="o">=</span> <span class="n">Particles</span><span class="p">()</span>
+<span class="n">particles</span><span class="o">.</span><span class="n">create_property</span><span class="p">(</span><span class="s1">&#39;Position&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]])</span>
+<span class="n">data</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">particles</span><span class="p">)</span>
+
+<span class="c1"># Create a new Pipeline with a StaticSource as data source:</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span><span class="n">source</span> <span class="o">=</span> <span class="n">StaticSource</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">))</span>
+
+<span class="c1"># Apply a modifier:</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">modifiers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CreateBondsModifier</span><span class="p">(</span><span class="n">cutoff</span> <span class="o">=</span> <span class="mf">3.0</span><span class="p">))</span>
+
+<span class="c1"># Write pipeline results to an output file:</span>
+<span class="n">export_file</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="s1">&#39;output/structure.data&#39;</span><span class="p">,</span> <span class="s1">&#39;lammps/data&#39;</span><span class="p">,</span> <span class="n">atom_style</span><span class="o">=</span><span class="s1">&#39;bond&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="ovito.pipeline.StaticSource.compute">
+<code class="sig-name descname">compute</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">frame</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ovito.pipeline.StaticSource.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a copy of the <a class="reference internal" href="ovito_data.html#ovito.data.DataCollection" title="ovito.data.DataCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataCollection</span></code></a> stored in this source’s <a class="reference internal" href="#ovito.pipeline.StaticSource.data" title="ovito.pipeline.StaticSource.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a> field.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>frame</strong> – This parameter is ignored, because the data of a <code class="xref py py-class docutils literal notranslate"><span class="pre">StaticSource</span></code> is not time-dependent.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A new <a class="reference internal" href="ovito_data.html#ovito.data.DataCollection" title="ovito.data.DataCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataCollection</span></code></a> containing the data stored in this <code class="xref py py-class docutils literal notranslate"><span class="pre">StaticSource</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ovito.pipeline.StaticSource.data">
+<em class="property">property </em><code class="sig-name descname">data</code><a class="headerlink" href="#ovito.pipeline.StaticSource.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="ovito_data.html#ovito.data.DataCollection" title="ovito.data.DataCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataCollection</span></code></a> managed by this object, which will be fed to the pipeline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../index.html">Table of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/running.html">OVITO’s Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/overview.html">High-level overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/file_io.html">File I/O</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/pipelines.html">Data pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/data_model.html">Data model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/data_manipulation.html">Manipulating data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/custom_modifiers.html">User-defined modifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/rendering.html">Rendering &amp; visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/advanced_topics.html">Advanced topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/examples.html">Code examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/version_changes.html">OVITO 2.9 Migration Guide</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="ovito.html"><code class="docutils literal notranslate"><span class="pre">ovito</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="ovito_data.html"><code class="docutils literal notranslate"><span class="pre">ovito.data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="ovito_io.html"><code class="docutils literal notranslate"><span class="pre">ovito.io</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="ovito_io_ase.html"><code class="docutils literal notranslate"><span class="pre">ovito.io.ase</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="ovito_modifiers.html"><code class="docutils literal notranslate"><span class="pre">ovito.modifiers</span></code></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">ovito.pipeline</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="ovito_vis.html"><code class="docutils literal notranslate"><span class="pre">ovito.vis</span></code></a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ovito_vis.html" title="ovito.vis"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ovito_modifiers.html" title="ovito.modifiers"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">OVITO 3.4.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="docutils literal notranslate"><span class="pre">ovito.pipeline</span></code></a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021 OVITO GmbH.
+    </div>
+  </body>
+</html>

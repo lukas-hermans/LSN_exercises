@@ -1,0 +1,102 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Freeze property</title><link rel="stylesheet" type="text/css" href="manual.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="OVITO User Manual"><link rel="up" href="particles.modifiers.html" title="Modifiers"><link rel="prev" href="particles.modifiers.expression_select.html" title="Expression selection"><link rel="next" href="particles.modifiers.generate_trajectory_lines.html" title="Generate trajectory lines"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><a href="https://www.ovito.org/"><img src="images/ovito_logo.png" border="0" width="84"></a><table width="100%" summary="Navigation header"><tr><td width="20%" align="left"><a accesskey="h" href="index.html">Table of Contents</a></td><th width="60%" align="center">Freeze property</th><td width="20%" align="right"><a accesskey="u" href="particles.modifiers.html">Up</a></td></tr><tr><td width="20%" align="left"><a accesskey="p" href="particles.modifiers.expression_select.html">Prev</a> </td><th width="60%" align="center">Modifiers</th><td width="20%" align="right"> <a accesskey="n" href="particles.modifiers.generate_trajectory_lines.html">Next</a></td></tr></table></div><div class="section" id="particles.modifiers.freeze_property"><div class="titlepage"><div><div><h3 class="title">Freeze property</h3></div></div></div>
+  
+
+  <p>
+    </p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/modifiers/freeze_property_panel.png" width="270"></div></div></div><p>
+    This modifier copies the instantaneous values of a particle property from a specified animation time to all other times.
+    This basically fixes or freezes the property values. The <span class="emphasis"><em>Freeze Property</em></span> modifier is useful in situations
+    where varying information from different timesteps of a simulation shall be put in relation to each other.
+  </p>
+
+  <p>
+    The modifier operates as follows: The per-particle values of the selected input property are retrieved at the selected time (frame 0 of the
+    loaded animation by default). These values are then written back to the selected output property, which may or may not be the same
+    as the input property. This will happen for all frames of the current animation. Thus, it will be appear as if the values of the output
+    property remain at the same constant values the input property had at the selected animation time.
+    The modifier can be used to "freeze" particle property values that, otherwise, would be changing with simulation time.
+  </p>
+
+  <p>
+    If the input and output properties are not the same, the modifier performs a copy operation of the property values. However,
+    keep in mind that it doesn't do so on an ordinary frame-by-frame basis: It rather copies the values of the input property sampled
+    at a particular point in time across the temporal domain. If you want to simply copy a particle property on a frame-by-frame basis,
+    you can use the <a class="link" href="particles.modifiers.compute_property.html" title="Compute property">Compute Property</a> modifier instead.
+  </p>
+
+  <p>
+    The <span class="emphasis"><em>Freeze Property</em></span> modifier can be used for various purposes, which will be illustrated with the help
+    of the following examples. In general it provides a way to make per-particle information available at an animation time where it wouldn't
+    be available otherwise.
+  </p>
+
+  <div class="simplesect" id="idp4350800"><div class="titlepage"><div><div><h4 class="title">Example 1</h4></div></div></div>
+    
+    <p>
+    </p><div class="informalfigure">
+        <div class="informaltable">
+          <table class="informaltable" style="border: none;"><colgroup><col><col><col></colgroup><tbody><tr valign="bottom"><td style="" valign="bottom">Initial frame:</td><td style="" valign="bottom">Without <span class="emphasis"><em>Freeze Property</em></span> modifier:</td><td style="" valign="bottom">With <span class="emphasis"><em>Freeze Property</em></span> modifier:</td></tr><tr valign="top"><td style="" valign="top">
+              <div class="mediaobject"><img src="images/modifiers/freeze_property_example1_initial.png"></div>
+                </td><td style="" valign="top">
+                  <div class="mediaobject"><img src="images/modifiers/freeze_property_example1_without.png"></div>
+                </td><td style="" valign="top">
+              <div class="mediaobject"><img src="images/modifiers/freeze_property_example1_with.png"></div>
+                </td></tr></tbody></table>
+        </div>
+      </div><p>
+      The first picture shows the initial frame of a simulation sequence. The <a class="link" href="particles.modifiers.color_coding.html" title="Color coding">Color coding</a>
+      modifier was used here to color particles according to their X coordinates.
+      During the course of the simulation, the particles move as a shear deformation is applied (second picture).
+      Due to this motion, the particle colors are automatically updated by OVITO's pipeline system, because the <a class="link" href="particles.modifiers.color_coding.html" title="Color coding">Color coding</a> dynamically
+      recomputes the colors on every simulation frame on the basis of the <span class="emphasis"><em>current</em></span> particle coordinates.
+    </p>
+    <p>
+      Sometimes this type of dynamic recalculation is not desired. Instead, we would like particles to keep their initial colors
+      that were assigned to them by the <a class="link" href="particles.modifiers.color_coding.html" title="Color coding">Color coding</a> modifier at frame 0.
+      The <span class="emphasis"><em>Freeze property</em></span> modifier allows us to suppress the dynamic updating by resetting the
+      the <code class="literal">Color</code> property to the values it had at the initial frame. In other words, the modifier lets us
+      "bake in" the values of a dynamically computed particle property such that it becomes static and no longer changes with simulation time.
+    </p>
+  </div>
+
+
+  <div class="simplesect" id="idp4369440"><div class="titlepage"><div><div><h4 class="title">Example 2</h4></div></div></div>
+    
+    <p>
+      The modifier is useful for comparing a per-particle property that changes over time with its initial
+      value at the beginning of a simulation. Let's suppose, for instance, we want to compute the difference by which
+      each particle's potential energy changes during the course of a simulation.
+      For this example, let's assume that the varying potential energy of each particle, as computed by the simulation code at each timestep,
+      has been loaded from the simulation data file and is available as a particle property named <code class="literal">Potential Energy</code>.
+    </p>
+    <p>
+      We can use the <span class="emphasis"><em>Freeze property</em></span> modifier to take a snapshot of the initial particle energies at frame 0
+      by selecting <code class="literal">Potential Energy</code> as the source property. In this case we do not want to overwrite the current
+      values with the initial ones, because we are going to compute the difference between the two.
+      That is why we set the <span class="emphasis"><em>output property</em></span> parameter to the user-defined property name <code class="literal">Initial Energy</code>.
+      This will let the modifier put the stored energy values to a new property and preserve the current values
+      of the <code class="literal">Potential Energy</code> property.
+    </p>
+    <p>
+      Finally, we can use the <a class="link" href="particles.modifiers.compute_property.html" title="Compute property">Compute Property</a> modifier to compute
+      the difference between the particle property <code class="literal">Potential Energy</code> (which is time-dependent) and the newly generated property <code class="literal">Initial Energy</code>
+      (which remain static, thanks to the <span class="emphasis"><em>Freeze property</em></span> modifier).
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp4377392"><div class="titlepage"><div><div><h4 class="title">Example 3</h4></div></div></div>
+    
+	  <p>
+	     Another typical application for this modifier is described in <a class="link" href="howto.marker_particles.html" title="Visualize internal motion using marker particles">this tutorial</a>.
+	  </p>
+  </div>
+
+  <div class="simplesect" id="idp4379632"><div class="titlepage"><div><div><h4 class="title">See also</h4></div></div></div>
+    
+    <p>
+      <a class="pydoc-link" href="python/modules/ovito_modifiers.html#ovito.modifiers.FreezePropertyModifier" target="_top"><code class="classname">FreezePropertyModifier</code> (Python API)</a><a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a>
+    </p>
+  </div>
+
+</div><p class="footer_copyright">© 2021  OVITO GmbH</p><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="particles.modifiers.expression_select.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="particles.modifiers.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="particles.modifiers.generate_trajectory_lines.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Expression selection </td><td width="20%" align="center"><a accesskey="h" href="index.html">Table of Contents</a></td><td width="40%" align="right" valign="top"> Generate trajectory lines</td></tr></table></div></body></html>

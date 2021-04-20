@@ -1,0 +1,151 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Grain segmentation</title><link rel="stylesheet" type="text/css" href="manual.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="OVITO User Manual"><link rel="up" href="particles.modifiers.html" title="Modifiers"><link rel="prev" href="particles.modifiers.elastic_strain.html" title="Elastic strain calculation"><link rel="next" href="particles.modifiers.expand_selection.html" title="Expand selection"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><a href="https://www.ovito.org/"><img src="images/ovito_logo.png" border="0" width="84"></a><table width="100%" summary="Navigation header"><tr><td width="20%" align="left"><a accesskey="h" href="index.html">Table of Contents</a></td><th width="60%" align="center">Grain segmentation</th><td width="20%" align="right"><a accesskey="u" href="particles.modifiers.html">Up</a></td></tr><tr><td width="20%" align="left"><a accesskey="p" href="particles.modifiers.elastic_strain.html">Prev</a> </td><th width="60%" align="center">Modifiers</th><td width="20%" align="right"> <a accesskey="n" href="particles.modifiers.expand_selection.html">Next</a></td></tr></table></div><div class="section" id="particles.modifiers.grain_segmentation"><div class="titlepage"><div><div><h3 class="title">Grain segmentation</h3></div></div></div>
+  
+  <p>
+    This modifier identifies the individual grains in a polycrystalline microstructure by grouping atoms
+    in crystal regions having similar local lattice orientations. The algorithm works in three steps:
+    </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">The local structural environment and orientation of each atom is determined using the <a class="link" href="particles.modifiers.polyhedral_template_matching.html" title="Polyhedral template matching">Polyhedral Template Matching</a> (PTM) modifier.</li><li class="listitem">A graph representation of the input structure is created using the neighbors of each atom, where each atom is a graph node and each neighbor bond is a graph edge.</li><li class="listitem">Grains are formed by hierarchical clustering of the graph.</li></ol></div><p>
+  </p>
+  <p>
+  The modifier assigns a new property named <code class="literal">Grain</code> to particles
+  to indicate which grain each atom belongs to (encoded as an integer grain identifier). The special grain identifier 0 means an atom does not 
+  belong to any grain.
+  The modifier furthermore computes a mean lattice orientation for each identified grain and outputs a list of
+  all grains as a <a class="link" href="scene_objects.data_table.html" title="Data tables">data table</a>.
+  </p>
+
+  <div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">IMPORTANT NOTICE:</h3>
+    <p>
+      This modifier and the underlying algorithm are still considered experimental. Please use this 
+      early preview version with caution and help us improve the algorithm by reporting any issues you may observe when applying it to your simulations.
+      This documentation page is only preliminary and will be further expanded in a future version of OVITO.
+    </p>
+  </div>
+
+  <p>
+  The grain segmentation algorithm is illustrated in the figures below. The local structural environment is determined for every atom using PTM (left). PTM also determines the local orientations (coloured, middle) but does not explicitly
+  group atoms into grains. Hierarchical clustering is used to identify grains (right).
+  </p>
+
+  <p>
+      </p><div class="informaltable">
+        <table class="informaltable" style="border-collapse: collapse;border-top: 1px solid ; border-bottom: 1px solid ; border-left: 1px solid ; border-right: 1px solid ; "><colgroup><col class="ptm"><col class="orientations"><col class="segmented"></colgroup><thead><tr><th style="border-right: 1px solid ; ">Structure</th><th style="border-right: 1px solid ; ">Lattice orientation</th><th style="">Segmented grains</th></tr></thead><tbody><tr align="right" valign="center"><td style="border-right: 1px solid ; " align="center" valign="center"><img src="images/modifiers/grain_segmentation_ptm.png" width="270"></td><td style="border-right: 1px solid ; " align="center" valign="center"><img src="images/modifiers/grain_segmentation_orientations.png" width="270"></td><td style="" align="center" valign="center"><img src="images/modifiers/grain_segmentation_segmented.png" width="270"></td></tr></tbody></table>
+      </div><p>
+  </p>
+
+    <div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/modifiers/grain_segmentation_panel.png" width="270"></div></div></div>
+    <div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/modifiers/grain_segmentation_table.png" width="459"></div></div></div>
+
+  <div class="simplesect" id="idp4198048"><div class="titlepage"><div><div><h4 class="title">Algorithm selection</h4></div></div></div>
+    
+    <p>
+    The modifier creates grains by performing hierarchical clustering on the nearest-neighbor atom graph. 
+    Two types of hierarchical clustering algorithms are implemented:
+    </p>
+
+    <div class="variablelist"><dl class="variablelist"><dt><span class="term">Graph Clustering (automatic / manual)</span></dt><dd>
+          <p>
+          Graph edge weights are initialized as <code class="literal">exp(-d<sup>2</sup>/3)</code>, where <code class="literal">d</code> is the misorientation 
+          in degrees between two neighboring atoms. Grains are built up by contracting edges using the <span class="emphasis"><em>Node Pair Sampling</em></span> method 
+          of <a class="ulink" href="https://arxiv.org/abs/1806.01664" target="_top">Bonald et al.</a>
+          </p>
+          <p>
+            This algorithm produces good segmentations in a range of microstructure types. It performs well on low-angle grain boundaries and can discriminate between grains and sub-grains.
+            A drawback is that the merge distance threshold parameter does not have an intuitive physical meaning. 
+          </p>
+          <p>
+            The automatic mode alleviates this problem by choosing a good merge threshold automatically for you using a statistical 
+            analysis of the sequence of graph merging steps, stopping the merging of crystallite clusters as soon as a 
+            deviation from the regular exponential behavior is observed.
+          </p>
+        </dd><dt><span class="term">Minimum Spanning Tree</span></dt><dd>
+          <p>
+            In this algorithm the graph gets replaced by its <a class="ulink" href="https://en.wikipedia.org/wiki/Minimum_spanning_tree" target="_top">minimum spanning tree.</a>
+            The edge weights are the misorientation angles between neighboring atoms.
+            Grains are built up by contracting edges in sorted order (by misorientation, low to high).
+            The distance of a contraction (or merge) is simply the edge misorientation.
+          </p>
+
+          <p>
+            This is a fast algorithm which has lower memory usage. The merge distance has a simple interpretation (misorientation between neighboring atoms or crystal clusters) and is scale invariant.
+            Drawbacks are that it can produce poor results in microstructures containing low-angle grain boundaries, and it performs poorly in the presense of local perturbations due to, e.g., thermal atomic displacements or elastic lattice distortions. 
+            This method is best suited for low-temperature simulations.
+          </p>
+
+          <p>
+            This approach is similar to that of <a class="ulink" href="https://doi.org/10.1007/s11837-013-0831-9" target="_top">Panzarino and Rupert</a>. The key differences are the use of PTM (more robust structural determination),
+            a faster algorithm (minutes instead of days), and the formulation as a hierarchical clustering problem (effects of cutoff choices are visible).
+          </p>
+        </dd></dl></div>
+  </div>
+
+  <div class="simplesect" id="idp4211168"><div class="titlepage"><div><div><h4 class="title">Parameters and options</h4></div></div></div>
+    
+    <p>
+
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term">Log merge threshold</span></dt><dd>
+          <p>
+            Specifies the maximum graph edge contraction distance and determines the resulting number and sizes of grains. A lower threshold produces more (and smaller) grains; a larger threshold produces fewer (and larger) grains. The scatter plot ("Log merge distance" vs "Merge size") can be used to select an appropriate merge threshold value.
+            If the grains are well-separated, the scatter plot will contain a dense cluster at low distances, and a few isolated points at higher distances. An ideal threshold lies after the dense cluster, but before the isolated points (see screenshot).
+            Note that this threshold parameter can be set to a negative value, because it is specified on a logarithmic distance scale.
+          </p>
+        </dd><dt><span class="term">Minimum grain size</span></dt><dd>
+          <p>
+            Grains below this size are dissolved. The atoms contained within are set as 'orphan' atoms (see option <span class="emphasis"><em>Adopt orphan atoms</em></span>).
+          </p>
+        </dd><dt><span class="term">Adopt orphan atoms</span></dt><dd>
+          <p>
+            After clustering has been performed by the algorithm, some atoms might not be assigned to a grain, so-called 'orphan' atoms (due to <a class="ulink" href="https://doi.org/10.1016/j.commatsci.2016.11.027" target="_top">Hoffrogge and Barrales-Mora</a>).
+            This includes atoms that are part of grain boundaries. This option lets the modifier assign these orphan atoms to the nearest grain.
+          </p>
+        </dd><dt><span class="term">Handle coherent interfaces/stacking faults</span></dt><dd>
+          <p>
+            This option lets the algorithm merge atoms having hexagonal crystal structures (e.g. HCP) with atoms having cubic  
+            structures (e.g. FCC) at stacking faults or other types of coherent crystal interfaces. 
+            Thus, stacking faults will become part of the surrounding grain if this option is enabled. 
+            Furthermore, atoms belonging to the cores of coherent twin boundaries will be attributed to one of the two adjacent grains. 
+          </p>
+        </dd><dt><span class="term">Color particles by grain</span></dt><dd>
+          <p>
+            This option assigns each grain a unique color for easier visualization of the grain structure.
+          </p>
+        </dd><dt><span class="term">Output bonds</span></dt><dd>
+          <p>
+            Whether to visualize the edges of the initial neighbor graph as bonds between atoms. 
+            Local lattice disorientations are output as a bond property named <code class="literal">Disorientation</code>,
+            which may be visualized using the <a class="link" href="particles.modifiers.color_coding.html" title="Color coding">Color coding</a> modifier of OVITO.
+            This output option is mainly meant for debugging purposes and has large memory requirements. 
+            It is not recommended for large datasets.
+          </p>
+        </dd></dl></div><p>
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp4228528"><div class="titlepage"><div><div><h4 class="title">Example</h4></div></div></div>
+    
+    <p>
+      The panel below illustrates the effect of varying the merge threshold in a polycrystalline graphene sample, using the <span class="emphasis"><em>Graph Clustering</em></span> algorithm.
+      A good segmentation into 6 grains is achieved using a merge threshold of 14 (left).
+      Reducing the threshold to 13.5 reveals a subgrain structure in the largest grain (middle). A further reduction of the threshold to 12.5 splits the largest grain into three subgrains (right).
+    </p>
+
+    <p>
+      Note that the difference between subgrains and grains is not well defined. It is therefore up to the user to decide upon the best threshold value.
+    </p>
+
+    <p>
+        </p><div class="informaltable">
+          <table class="informaltable" style="border-collapse: collapse;border-top: 1px solid ; border-bottom: 1px solid ; border-left: 1px solid ; border-right: 1px solid ; "><colgroup><col class="6 grains"><col class="7 grains"><col class="8 grains"></colgroup><thead><tr><th style="border-right: 1px solid ; ">6 grains</th><th style="border-right: 1px solid ; ">7 grains</th><th style="">8 grains</th></tr></thead><tbody><tr align="right" valign="center"><td style="border-right: 1px solid ; " align="center" valign="center"><img src="images/modifiers/grains_graphene_panel1.png" width="270"></td><td style="border-right: 1px solid ; " align="center" valign="center"><img src="images/modifiers/grains_graphene_panel2.png" width="270"></td><td style="" align="center" valign="center"><img src="images/modifiers/grains_graphene_panel3.png" width="270"></td></tr><tr align="right" valign="center"><td style="border-right: 1px solid ; " align="center" valign="center"><img src="images/modifiers/grains_graphene_1.png" width="270"></td><td style="border-right: 1px solid ; " align="center" valign="center"><img src="images/modifiers/grains_graphene_2.png" width="270"></td><td style="" align="center" valign="center"><img src="images/modifiers/grains_graphene_3.png" width="270"></td></tr></tbody></table>
+        </div><p>
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp4250416"><div class="titlepage"><div><div><h4 class="title">See also</h4></div></div></div>
+    
+    <p>
+      <a class="pydoc-link" href="python/modules/ovito_modifiers.html#ovito.modifiers.GrainSegmentationModifier" target="_top"><code class="classname">GrainSegmentationModifier</code> (Python API)</a><a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a>
+    </p>
+  </div>
+
+</div><p class="footer_copyright">© 2021  OVITO GmbH</p><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="particles.modifiers.elastic_strain.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="particles.modifiers.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="particles.modifiers.expand_selection.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Elastic strain calculation </td><td width="20%" align="center"><a accesskey="h" href="index.html">Table of Contents</a></td><td width="40%" align="right" valign="top"> Expand selection</td></tr></table></div></body></html>

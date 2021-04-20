@@ -1,0 +1,82 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Particles (visual element)</title><link rel="stylesheet" type="text/css" href="manual.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="OVITO User Manual"><link rel="up" href="visual_elements.html" title="Visual elements"><link rel="prev" href="visual_elements.html" title="Visual elements"><link rel="next" href="visual_elements.bonds.html" title="Bonds (visual element)"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><a href="https://www.ovito.org/"><img src="images/ovito_logo.png" border="0" width="84"></a><table width="100%" summary="Navigation header"><tr><td width="20%" align="left"><a accesskey="h" href="index.html">Table of Contents</a></td><th width="60%" align="center">Particles (visual element)</th><td width="20%" align="right"><a accesskey="u" href="visual_elements.html">Up</a></td></tr><tr><td width="20%" align="left"><a accesskey="p" href="visual_elements.html">Prev</a> </td><th width="60%" align="center">Visual elements</th><td width="20%" align="right"> <a accesskey="n" href="visual_elements.bonds.html">Next</a></td></tr></table></div><div class="section" id="visual_elements.particles"><div class="titlepage"><div><div><h3 class="title">Particles (visual element)</h3></div></div></div>
+  
+  
+
+  <p>
+
+    </p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/visual_elements/particles_panel.png" width="270"></div></div></div><p>
+
+    This <a class="link" href="visual_elements.html" title="Visual elements">visual element</a> is responsible for rendering particles in the viewports.
+    Typically, particles are visualized as simple spheres, but you can switch to other, more complex geometric shapes
+    if desired.
+  </p>
+  <p>
+    The <span class="emphasis"><em>Particles</em></span> visual element provides a set of parameters controlling the
+    visual representation of all particles, which will be described in the section below.
+    Additionally, the visualization is affected by certain properties, listed in the following table, that particles may optionally
+    possess. By setting the values of these particle properties, for example using the <a class="link" href="particles.modifiers.compute_property.html" title="Compute property">
+    Compute property</a> modifier, you can control the visualization on a per-particle basis.
+    </p><div class="informaltable">
+      <table class="informaltable" style="border-collapse: collapse;border-top: 1px solid ; border-bottom: 1px solid ; border-left: 1px solid ; border-right: 1px solid ; "><colgroup><col class="name"><col class="datatype"><col class="description"></colgroup><thead><tr><th style="border-right: 1px solid ; border-bottom: 1px solid ; ">Particle property</th><th style="border-right: 1px solid ; border-bottom: 1px solid ; ">Data type / Components</th><th style="border-bottom: 1px solid ; ">Description</th></tr></thead><tbody><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; "><code class="literal">Color</code></td><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Real (R, G, B)</td><td style="border-bottom: 1px solid ; "><p>Controls the display color of individual particles. Red, green and blue components are in the range [0,1].</p></td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; "><code class="literal">Radius</code></td><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Real</td><td style="border-bottom: 1px solid ; "><p>Controls the display size of individual particles.</p></td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; "><code class="literal">Particle Type</code></td><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Integer</td><td style="border-bottom: 1px solid ; "><p>Used to determine size and color if the <span class="emphasis"><em>Radius</em></span> or <span class="emphasis"><em>Color</em></span> properties are not present.</p></td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; "><code class="literal">Transparency</code></td><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Real</td><td style="border-bottom: 1px solid ; "><p>Controls the transparency of individual particles. Must be in the range [0,1].</p></td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; "><code class="literal">Aspherical Shape</code></td><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Real (X, Y, Z)</td><td style="border-bottom: 1px solid ; "><p>Controls the size of particles with a non-symmetric shape. The exact interpretation
+            of this property depends on the selected <span class="emphasis"><em>Shape</em></span> setting, see section below.</p></td></tr><tr><td style="border-right: 1px solid ; "><code class="literal">Orientation</code></td><td style="border-right: 1px solid ; ">Real (X, Y, Z, W)</td><td style=""><p>Specifies the orientation of particles with non-symmetric shapes.
+                The rotation of each particle is specified in terms of a <a class="ulink" href="https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation" target="_top">quaternion</a>.
+                See <a class="link" href="howto.aspherical_particles.html" title="Non-spherical particle shapes">this page</a> for more information.
+            </p></td></tr></tbody></table>
+    </div><p>
+  </p>
+
+   <div class="simplesect" id="idp2724624"><div class="titlepage"><div><div><h4 class="title">Parameters</h4></div></div></div>
+    
+
+    <div class="variablelist"><dl class="variablelist"><dt><span class="term">Shape</span></dt><dd>
+          <p>Selects the display shape of particles. The current program version offers the choice between
+          the following modes:
+          </p><div class="variablelist"><dl class="variablelist"><dt><span class="term">Sphere/Ellipsoid</span></dt><dd>Particles are visualized as 3d spheres. Unless the <code class="literal">Aspherical Shape</code> particle property
+                has been defined; then they are rendered as <a class="link" href="howto.aspherical_particles.html" title="Non-spherical particle shapes">ellipsoidal particles</a>.
+                In this case, the three components of the <code class="literal">Aspherical Shape</code> vector property control the
+                half lengths of the principal axes of each ellipsoid and the scalar <code class="literal">Radius</code> property is ignored.
+              </dd><dt><span class="term">Circle</span></dt><dd>Particles are visualized as flat-shaded circles facing the viewer.
+              Note that some <a class="link" href="rendering.html" title="Image and movie rendering">rendering engines</a> do not support this mode.</dd><dt><span class="term">Cube/Box</span></dt><dd>Particles are visualized as cubes if the <code class="literal">Aspherical Shape</code> particle property
+              is not present. The <code class="literal">Radius</code> property can be used to
+              control the edge half-length of the cubes in this case.
+              If the <code class="literal">Aspherical Shape</code> particle property is present, particles are rendered as non-cubic boxes
+              with the given half-lengths along the three edges.
+              </dd><dt><span class="term">Square</span></dt><dd>Particles are visualized as flat-shaded squares facing the viewer.
+              Note that some <a class="link" href="rendering.html" title="Image and movie rendering">rendering engines</a> do not support this mode.</dd><dt><span class="term">Cylinder</span></dt><dd>Particles are visualized as cylinders.
+                The X-component of the <code class="literal">Aspherical Shape</code> vector property controls the cylinder radius
+                of particles in this mode, and the Z-component controls the length of the cylindrical particles.
+                By default, cylinders are aligned along the z-axis. If present, the <code class="literal">Orientation</code>
+                particle property rotates the cylinders.
+              </dd><dt><span class="term">Spherocylinder</span></dt><dd>Particles are visualized as cylinders with round caps at each end (capsules). The behavior is the
+              same as for mode <span class="emphasis"><em>Cylinder</em></span>.
+              </dd></dl></div><p>
+          </p>
+        </dd><dt><span class="term">Default particle radius</span></dt><dd>
+          <p>Specifies the display size of particles that have an otherwise unspecified size.
+          This size value is only used for particles for which none of the following applies:
+          </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>The <code class="literal">Radius</code> particle property has a non-zero value.</p></li><li class="listitem"><p>The particle's type, as specified by the <code class="literal">Particle Type</code>, has a non-zero radius.</p></li></ul></div><p>
+          In other words, this parameter provides a fallback value if no display size has been set on a
+          per-particle basis or on a per-type basis.
+          </p>
+        </dd><dt><span class="term">Rendering quality</span></dt><dd>
+          <p>This parameter controls the method used for rendering the particles in the interactive viewports. The following modes are available and affect only the rendering of spherical particles:
+		    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term">Low</span></dt><dd><p>Particles are rendered as texture-mapped imposters facing the viewer. Particles do not have depth in this mode,
+		        and intersections between spherical particles may not be displayed correctly. This mode is the fastest.</p></dd><dt><span class="term">Medium</span></dt><dd><p>Particles are rendered as texture-mapped imposters facing the viewer. An OpenGL fragment shader is used
+		        to compute depth information for each rendered pixel to produce reasonable looking sphere-sphere intersections for overlapping particles.</p></dd><dt><span class="term">High</span></dt><dd><p>Particles are rendered as true spheres using an OpenGL fragment shader, which computes the ray-sphere intersection for every
+		        rendered pixel.</p></dd><dt><span class="term">Automatic</span></dt><dd><p>OVITO automatically switches between the three quality levels above depending on the number of particles to render in the interactive viewports. For
+		        less than 4,000 particles, the high-quality method is used. For more than 400,000 particles, the lowest quality mode is used. Irrespective of the
+		        particle number, high-quality mode is always used to produce a final output image.</p></dd></dl></div><p>
+          </p>
+        </dd></dl></div>
+    </div>
+
+   <div class="simplesect" id="idp2758240"><div class="titlepage"><div><div><h4 class="title">See also</h4></div></div></div>
+    
+    <p>
+      <a class="pydoc-link" href="python/modules/ovito_vis.html#ovito.vis.ParticlesVis" target="_top"><code class="classname">ParticlesVis</code> (Python API)</a><a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a>
+    </p>
+   </div>
+
+</div><p class="footer_copyright">© 2021  OVITO GmbH</p><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="visual_elements.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="visual_elements.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="visual_elements.bonds.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Visual elements </td><td width="20%" align="center"><a accesskey="h" href="index.html">Table of Contents</a></td><td width="40%" align="right" valign="top"> Bonds (visual element)</td></tr></table></div></body></html>

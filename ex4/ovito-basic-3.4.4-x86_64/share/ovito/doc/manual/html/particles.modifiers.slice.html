@@ -1,0 +1,90 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Slice</title><link rel="stylesheet" type="text/css" href="manual.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="OVITO User Manual"><link rel="up" href="particles.modifiers.html" title="Modifiers"><link rel="prev" href="particles.modifiers.bin_and_reduce.html" title="Spatial binning pro"><link rel="next" href="particles.modifiers.smooth_trajectory.html" title="Smooth trajectory"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><a href="https://www.ovito.org/"><img src="images/ovito_logo.png" border="0" width="84"></a><table width="100%" summary="Navigation header"><tr><td width="20%" align="left"><a accesskey="h" href="index.html">Table of Contents</a></td><th width="60%" align="center">Slice</th><td width="20%" align="right"><a accesskey="u" href="particles.modifiers.html">Up</a></td></tr><tr><td width="20%" align="left"><a accesskey="p" href="particles.modifiers.bin_and_reduce.html">Prev</a> </td><th width="60%" align="center">Modifiers</th><td width="20%" align="right"> <a accesskey="n" href="particles.modifiers.smooth_trajectory.html">Next</a></td></tr></table></div><div class="section" id="particles.modifiers.slice"><div class="titlepage"><div><div><h3 class="title">Slice</h3></div></div></div>
+  
+
+  <p>
+    </p><div class="informalfigure">
+      <div class="informaltable">
+        <table class="informaltable" style="border: none;"><colgroup><col><col></colgroup><tbody><tr valign="bottom"><td style="" valign="bottom">Input:</td><td style="" valign="bottom">Output (slab width = 0):</td><td style="" valign="bottom">Output (slab width &gt; 0):</td></tr><tr valign="top"><td style="" valign="top">
+		        <div class="mediaobject"><img src="images/modifiers/slice_example_input.png"></div>
+              </td><td style="" valign="top">
+		        <div class="mediaobject"><img src="images/modifiers/slice_example_output1.png"></div>
+              </td><td style="" valign="top">
+		        <div class="mediaobject"><img src="images/modifiers/slice_example_output2.png"></div>
+              </td></tr></tbody></table>
+      </div>
+    </div><p>
+
+    </p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/modifiers/slice_panel.png" width="270"></div></div></div><p>
+
+    This modifier either deletes or selects all elements on one side of an infinite cutting plane.
+    Alternatively, the modifier can cut out a slab of a given thickness from the structure (see pictures).
+  </p>
+
+  <div class="simplesect" id="idp5092912"><div class="titlepage"><div><div><h4 class="title">Parameters</h4></div></div></div>
+    
+
+    <div class="variablelist"><dl class="variablelist"><dt><span class="term">Distance</span></dt><dd>
+          <p>
+          The (signed) distance of the cutting plane from the origin
+          of the simulation coordinate system, measured parallel to the cutting plane
+          normal.</p>
+        </dd><dt><span class="term">Normal (X,Y,Z)</span></dt><dd>
+          <p>Components of the cutting plane normal vector. This vector does not
+          have to be a unit vector. Note that you can click on the blue label
+          next to each input field to reset the normal vector to point
+          along the corresponding coordinate axis.</p>
+        </dd><dt><span class="term">Slab width</span></dt><dd>
+          <p>
+          Specifies the width of the slab to cut out from the input structure.
+          If this value is zero, which it is by default, everything on one side of the
+          cutting plane is deleted. If the <span class="emphasis"><em>slab width</em></span>
+          parameter is set to a positive value, a slab of the given thickness is cut out.</p>
+        </dd><dt><span class="term">Reverse orientation</span></dt><dd>
+          <p>Effectively flips the cutting plane's orientation. If the <span class="emphasis"><em>slab width</em></span>
+          parameter is zero, activating this option will remove all elements on the opposite side
+          of the plane. Otherwise this option will let the modifier cut away a slab of
+          the given thickness from the input structure.</p>
+        </dd><dt><span class="term">Create selection (do not delete)</span></dt><dd>
+          <p>This option lets the modifier select elements instead of deleting them.</p>
+        </dd><dt><span class="term">Apply to selection only</span></dt><dd>
+          <p>Restricts the effect of the modifier to the subset of elements that are currently selected.</p>
+        </dd><dt><span class="term">Visualize plane</span></dt><dd>
+          <p>Lets the modifier generate polygonal geometry to visualize the plane's intersection with the simulation cell in rendered images.</p>
+        </dd></dl></div>
+  </div>
+
+  <div class="simplesect" id="idp5109152"><div class="titlepage"><div><div><h4 class="title">Alignment functions</h4></div></div></div>
+    
+
+    <p>
+      The following buttons in the panel let you automatically position and align the cutting plane:
+      </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p><span class="guibutton">Move plane to simulation box center</span> positions the plane in the
+          center of the simulation cell. The current plane orientation is kept.</p></li><li class="listitem"><p><span class="guibutton">Align view direction to plane normal</span> rotates the viewing
+        direction of the active viewport such that it is parallel to the cutting plane's normal vector.</p></li><li class="listitem"><p><span class="guibutton">Align plane normal to view direction</span> rotates the cutting plan
+        such that its normal vector becomes parallel to the viewing direction of the active viewport.</p></li><li class="listitem"><p><span class="guibutton">Pick three points</span> lets you pick three spatial points
+        in the viewports. The cutting plane will be repositioned such that it goes
+        through all three points.</p></li></ul></div><p>
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp5114912"><div class="titlepage"><div><div><h4 class="title">Animation</h4></div></div></div>
+    
+    <p>
+      The position of the cutting plane can be animated. Use the <span class="guibutton">A</span> button
+      next to each numerical parameter field to open the corresponding keyframe animation dialog.
+      See the <a class="link" href="usage.animation.html" title="Animating parameters and the camera">animation section</a> of this manual for more information on this topic.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp5117104"><div class="titlepage"><div><div><h4 class="title">See also</h4></div></div></div>
+    
+    <p>
+      <a class="pydoc-link" href="python/modules/ovito_modifiers.html#ovito.modifiers.SliceModifier" target="_top"><code class="classname">SliceModifier</code> (Python API)</a><a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a>
+    </p>
+  </div>
+
+</div><p class="footer_copyright">© 2021  OVITO GmbH</p><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="particles.modifiers.bin_and_reduce.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="particles.modifiers.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="particles.modifiers.smooth_trajectory.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Spatial binning<a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a> </td><td width="20%" align="center"><a accesskey="h" href="index.html">Table of Contents</a></td><td width="40%" align="right" valign="top"> Smooth trajectory</td></tr></table></div></body></html>

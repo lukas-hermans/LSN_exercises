@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Example O3: Highlight a particle &#8212; OVITO 3.4.4 documentation</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/rtd.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="shortcut icon" href="../../../_static/ovito.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="OVITO 2.9 Migration Guide" href="../../version_changes.html" />
+    <link rel="prev" title="Example O2: Including data plots in rendered images" href="data_plot.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../version_changes.html" title="OVITO 2.9 Migration Guide"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="data_plot.html" title="Example O2: Including data plots in rendered images"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">OVITO 3.4.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../examples.html" accesskey="U">Code examples</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Example O3: Highlight a particle</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="example-o3-highlight-a-particle">
+<span id="example-highlight-particle-overlay"></span><h1>Example O3: Highlight a particle<a class="headerlink" href="#example-o3-highlight-a-particle" title="Permalink to this headline">¶</a></h1>
+<img alt="../../../_images/python_script_highlight_example.png" src="../../../_images/python_script_highlight_example.png" />
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ovito.vis</span> <span class="k">import</span> <span class="n">ParticlesVis</span>
+<span class="kn">from</span> <span class="nn">PySide2.QtCore</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">PySide2.QtGui</span> <span class="k">import</span> <span class="o">*</span>
+
+<span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+
+    <span class="c1"># Get output data collection of first scene pipeline.</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">pipelines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">frame</span><span class="p">)</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">positions</span>
+    <span class="n">pindex</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># The index of the particle to be highlighted</span>
+
+    <span class="c1"># Project center point of particle.</span>
+    <span class="n">xy</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">project_point</span><span class="p">(</span><span class="n">positions</span><span class="p">[</span><span class="n">pindex</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">xy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">return</span>
+
+    <span class="c1"># Determine display radius of the particle.</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">if</span> <span class="s1">&#39;Radius&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">particles</span><span class="p">:</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">particles</span><span class="p">[</span><span class="s1">&#39;Radius&#39;</span><span class="p">][</span><span class="n">pindex</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">radius</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">particle_types</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">particle_type</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">particle_types</span><span class="p">[</span><span class="n">pindex</span><span class="p">]</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">particle_types</span><span class="o">.</span><span class="n">type_by_id</span><span class="p">(</span><span class="n">particle_type</span><span class="p">)</span><span class="o">.</span><span class="n">radius</span>
+    <span class="k">if</span> <span class="n">radius</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">radius</span>
+
+    <span class="c1"># Calculate screen-space size of the particle in pixels.</span>
+    <span class="n">screen_radius</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">project_size</span><span class="p">(</span><span class="n">positions</span><span class="p">[</span><span class="n">pindex</span><span class="p">],</span> <span class="n">radius</span><span class="p">)</span>
+
+    <span class="c1"># Draw a dashed circle around the particle.</span>
+    <span class="n">pen</span> <span class="o">=</span> <span class="n">QPen</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">DashLine</span><span class="p">)</span>
+    <span class="n">pen</span><span class="o">.</span><span class="n">setWidth</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">pen</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">))</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">pen</span><span class="p">)</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">painter</span><span class="o">.</span><span class="n">drawEllipse</span><span class="p">(</span><span class="n">QPointF</span><span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">screen_radius</span><span class="p">,</span> <span class="n">screen_radius</span><span class="p">)</span>
+
+    <span class="c1"># Draw an arrow pointing at the particle.</span>
+    <span class="n">arrow_shape</span> <span class="o">=</span> <span class="n">QPolygonF</span><span class="p">()</span>
+    <span class="n">arrow_shape</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QPointF</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">arrow_shape</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QPointF</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+    <span class="n">arrow_shape</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QPointF</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+    <span class="n">arrow_shape</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QPointF</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+    <span class="n">arrow_shape</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QPointF</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span><span class="o">-</span><span class="mi">5</span><span class="p">))</span>
+    <span class="n">arrow_shape</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QPointF</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="o">-</span><span class="mi">5</span><span class="p">))</span>
+    <span class="n">arrow_shape</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QPointF</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="o">-</span><span class="mi">10</span><span class="p">))</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">QPen</span><span class="p">())</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">painter</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">QBrush</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)))</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">painter</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">QPointF</span><span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">painter</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="o">-</span><span class="mf">45.0</span><span class="p">)</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">painter</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">QPointF</span><span class="p">(</span><span class="n">screen_radius</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">painter</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">painter</span><span class="o">.</span><span class="n">drawPolygon</span><span class="p">(</span><span class="n">arrow_shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../../../index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../running.html">OVITO’s Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">High-level overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../file_io.html">File I/O</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pipelines.html">Data pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data_model.html">Data model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data_manipulation.html">Manipulating data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../custom_modifiers.html">User-defined modifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rendering.html">Rendering &amp; visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../advanced_topics.html">Advanced topics</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Code examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../version_changes.html">OVITO 2.9 Migration Guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/ovito.html"><code class="docutils literal notranslate"><span class="pre">ovito</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/ovito_data.html"><code class="docutils literal notranslate"><span class="pre">ovito.data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/ovito_io.html"><code class="docutils literal notranslate"><span class="pre">ovito.io</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/ovito_io_ase.html"><code class="docutils literal notranslate"><span class="pre">ovito.io.ase</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/ovito_modifiers.html"><code class="docutils literal notranslate"><span class="pre">ovito.modifiers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/ovito_pipeline.html"><code class="docutils literal notranslate"><span class="pre">ovito.pipeline</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/ovito_vis.html"><code class="docutils literal notranslate"><span class="pre">ovito.vis</span></code></a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../version_changes.html" title="OVITO 2.9 Migration Guide"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="data_plot.html" title="Example O2: Including data plots in rendered images"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">OVITO 3.4.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../examples.html" >Code examples</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Example O3: Highlight a particle</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021 OVITO GmbH.
+    </div>
+  </body>
+</html>

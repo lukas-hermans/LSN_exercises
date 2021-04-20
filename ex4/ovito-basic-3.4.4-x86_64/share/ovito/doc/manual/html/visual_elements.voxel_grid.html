@@ -1,0 +1,44 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Voxel grid (visual element)</title><link rel="stylesheet" type="text/css" href="manual.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="OVITO User Manual"><link rel="up" href="visual_elements.html" title="Visual elements"><link rel="prev" href="visual_elements.triangle_mesh.html" title="Triangle mesh (visual element)"><link rel="next" href="visual_elements.trajectory_lines.html" title="Trajectory lines (visual element)"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><a href="https://www.ovito.org/"><img src="images/ovito_logo.png" border="0" width="84"></a><table width="100%" summary="Navigation header"><tr><td width="20%" align="left"><a accesskey="h" href="index.html">Table of Contents</a></td><th width="60%" align="center">Voxel grid (visual element)</th><td width="20%" align="right"><a accesskey="u" href="visual_elements.html">Up</a></td></tr><tr><td width="20%" align="left"><a accesskey="p" href="visual_elements.triangle_mesh.html">Prev</a> </td><th width="60%" align="center">Visual elements</th><td width="20%" align="right"> <a accesskey="n" href="visual_elements.trajectory_lines.html">Next</a></td></tr></table></div><div class="section" id="visual_elements.voxel_grid"><div class="titlepage"><div><div><h3 class="title">Voxel grid (visual element)</h3></div></div></div>
+  
+  
+
+  <p>
+    </p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/visual_elements/voxel_grid_panel.png" width="270"></div></div></div><p>
+
+    This type of <a class="link" href="visual_elements.html" title="Visual elements">visual element</a> controls the visual appearance of 
+    <a class="link" href="scene_objects.voxel_grid.html" title="Voxel grids">Voxel grid</a> data objects, which are structured grids of 
+    2- or 3-dimensional cells (voxels), each associated with one or more numeric values.
+  </p>
+
+  <p>
+    </p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/visual_elements/voxel_grid_example.png" width="270"></div></div></div><p>
+    This visual element renders the voxel grid as a solid object showing just the voxel cells on the outer 
+    boundaries of the domain. Note that by default the voxel cells will all appear gray, because they do not have a 
+    color assigned to them yet. You can use the <a class="link" href="particles.modifiers.color_coding.html" title="Color coding">Color coding</a> modifier
+    to given them a color and visualize a numeric field quantity associated with the grid cells as in this example.
+  </p>
+
+  <div class="simplesect" id="idp2893792"><div class="titlepage"><div><div><h4 class="title">Parameters</h4></div></div></div>
+    
+    <div class="variablelist"><dl class="variablelist"><dt><span class="term">Transparency</span></dt><dd>
+          <p>The degree of semi-transparency to use when rendering the grid surfaces.</p>
+        </dd><dt><span class="term">Highlight edges</span></dt><dd>
+          <p>Activates the rendering of wireframe lines along the edges of the grid cells.</p>
+        </dd><dt><span class="term">Interpolate colors</span></dt><dd>
+          <p>
+            </p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/visual_elements/voxel_grid_example_interpolated.png" width="270"></div></div></div><p>
+            Will smoothly interpolate between the discrete colors of adjacent cells.
+          </p>
+        </dd></dl></div>
+  </div>
+
+  <div class="simplesect" id="idp2903472"><div class="titlepage"><div><div><h4 class="title">See also</h4></div></div></div>
+    
+    <p>
+      <a class="pydoc-link" href="python/modules/ovito_vis.html#ovito.vis.VoxelGridVis" target="_top"><code class="classname">VoxelGridVis</code> (Python API)</a><a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a>
+    </p>
+  </div>
+
+</div><p class="footer_copyright">© 2021  OVITO GmbH</p><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="visual_elements.triangle_mesh.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="visual_elements.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="visual_elements.trajectory_lines.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Triangle mesh (visual element) </td><td width="20%" align="center"><a accesskey="h" href="index.html">Table of Contents</a></td><td width="40%" align="right" valign="top"> Trajectory lines (visual element)</td></tr></table></div></body></html>

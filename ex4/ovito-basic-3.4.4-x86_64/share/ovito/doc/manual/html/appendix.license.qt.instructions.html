@@ -1,0 +1,84 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Build instructions for Qt</title><link rel="stylesheet" type="text/css" href="manual.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="OVITO User Manual"><link rel="up" href="credits.html" title="Licensing information"><link rel="prev" href="appendix.GFDL.html" title="GNU Free Documentation License"><link rel="next" href="appendix.license.tachyon.html" title="Tachyon license"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><a href="https://www.ovito.org/"><img src="images/ovito_logo.png" border="0" width="84"></a><table width="100%" summary="Navigation header"><tr><td width="20%" align="left"><a accesskey="h" href="index.html">Table of Contents</a></td><th width="60%" align="center">Build instructions for Qt</th><td width="20%" align="right"><a accesskey="u" href="credits.html">Up</a></td></tr><tr><td width="20%" align="left"><a accesskey="p" href="appendix.GFDL.html">Prev</a> </td><th width="60%" align="center">Licensing information</th><td width="20%" align="right"> <a accesskey="n" href="appendix.license.tachyon.html">Next</a></td></tr></table></div><div class="section" id="appendix.license.qt.instructions"><div class="titlepage"><div><div><h2 class="title">Build instructions for Qt</h2></div></div></div>
+  
+
+  <p>
+    The OVITO package includes a binary version of the Qt libraries licensed under the GNU Lesser General Public License (LGPLv3).
+    In accordance with the requirements of this license, this page provides instructions on how to obtain or rebuild compatible versions of these binaries from source.
+  </p>
+
+  <div class="simplesect" id="idp6111904"><div class="titlepage"><div><div><h3 class="title">Windows</h3></div></div></div>
+    
+    <p>
+      OVITO for Windows is built against the original, unmodified binary DLLs of Qt 5.15.2 (MSVC 2019 64-bit) distributed by the Qt Company.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp6113552"><div class="titlepage"><div><div><h3 class="title">Linux</h3></div></div></div>
+    
+    <p>
+      OVITO for Linux includes Qt libraries that have been built from the unmodified sources of Qt 5.15.1 distributed by the Qt Company.
+      The following commands have been used to generate them:
+</p><pre class="programlisting">
+# Build platform: CentOS 6.9
+# Compiler: g++ 7.1 (CentOS devtoolset-7)
+./configure \
+    -opensource \
+    -confirm-license \
+    -shared \
+    -nomake examples \
+    -qt-libpng \
+    -qt-libjpeg \
+    -qt-pcre \
+    -xcb \
+    -bundled-xcb-xinput \
+    -xkbcommon \
+    -no-cups \
+    -pch \
+    -no-eglfs \
+    -no-linuxfb \
+    -skip qtactiveqt \
+    -skip qtconnectivity \
+    -skip qt3d \
+    -skip qtcanvas3d \
+    -skip qtdatavis3d \
+    -skip qtcharts \
+    -skip qtlocation \
+    -skip qtsensors \
+    -skip qtdeclarative \
+    -skip qtdoc \
+    -skip qtgraphicaleffects \
+    -skip qtmultimedia \
+    -skip qtquickcontrols \
+    -skip qtquickcontrols2 \
+    -skip qtpurchasing \
+    -skip qtremoteobjects \
+    -skip qtsensors \
+    -skip qtserialport \
+    -skip qttranslations \
+    -skip qtwebchannel \
+    -skip qtgamepad \
+    -skip qtscript \
+    -skip qtserialbus \
+    -skip qtvirtualkeyboard \
+    -skip qtwayland \
+    -skip qtwebengine \
+    -skip qtwebsockets \
+    -skip qtwebview \
+    -skip qtwebglplugin \
+    -skip qtxmlpatterns \
+    -no-use-gold-linker \
+    -prefix $HOME/progs/qt5
+make
+make install
+</pre><p>
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp6116608"><div class="titlepage"><div><div><h3 class="title">macOS</h3></div></div></div>
+    
+    <p>
+      OVITO for macOS ships with a standard installation of the Qt 5.15.2 framework distributed by the Qt Company.
+    </p>
+  </div>
+
+</div><p class="footer_copyright">© 2021  OVITO GmbH</p><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="appendix.GFDL.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="credits.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="appendix.license.tachyon.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">GNU Free Documentation License </td><td width="20%" align="center"><a accesskey="h" href="index.html">Table of Contents</a></td><td width="40%" align="right" valign="top"> Tachyon license</td></tr></table></div></body></html>

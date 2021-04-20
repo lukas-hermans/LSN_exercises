@@ -1,0 +1,86 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Spatial binning pro</title><link rel="stylesheet" type="text/css" href="manual.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="OVITO User Manual"><link rel="up" href="particles.modifiers.html" title="Modifiers"><link rel="prev" href="particles.modifiers.select_particle_type.html" title="Select type"><link rel="next" href="particles.modifiers.slice.html" title="Slice"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><a href="https://www.ovito.org/"><img src="images/ovito_logo.png" border="0" width="84"></a><table width="100%" summary="Navigation header"><tr><td width="20%" align="left"><a accesskey="h" href="index.html">Table of Contents</a></td><th width="60%" align="center">Spatial binning<a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a></th><td width="20%" align="right"><a accesskey="u" href="particles.modifiers.html">Up</a></td></tr><tr><td width="20%" align="left"><a accesskey="p" href="particles.modifiers.select_particle_type.html">Prev</a> </td><th width="60%" align="center">Modifiers</th><td width="20%" align="right"> <a accesskey="n" href="particles.modifiers.slice.html">Next</a></td></tr></table></div><div class="section" id="particles.modifiers.bin_and_reduce"><div class="titlepage"><div><div><h3 class="title">Spatial binning<a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a></h3></div></div></div>
+  
+
+  <p>
+    </p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/modifiers/bin_and_reduce_panel.png" width="270"></div></div></div><p>
+    </p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/visual_elements/voxel_grid_example.png" width="270"></div></div></div><p>
+
+    This modifier generates a 1-, 2- or 3-dimensional grid covering the simulation domain and assigns each particle
+    into one of the uniformly sized bins. It then performs a reduction operation for a selected particle property,
+    mapping the values of all particles contained in a cell to a single output value.
+    This modifier can thus be used to project the per-particle data to a <a class="link" href="scene_objects.voxel_grid.html" title="Voxel grids">structured grid</a>, for example to coarse-grain
+    the atomistic data and generate a continuous field representation of a particle property.
+    You can choose between different reduction operations, e.g. sum, average (mean), minimum or maximum.
+  </p>
+
+  <p>
+    The bin grid can be one-, two- or three-dimensional, i.e. the simulation domain can be subdivided into equally
+    sized bins along one, two or all three of its axes. The spatial bins are always aligned parallel to the simulation
+    cell edges.
+  </p>
+
+  <div class="simplesect" id="idp5052432"><div class="titlepage"><div><div><h4 class="title">Data output options</h4></div></div></div>
+    
+
+    <p>
+      When mapping the particle values to a one-dimensional bin grid using this modifier, you can subsequently
+      access the computed data table in the <a class="link" href="data_inspector.data_tables.html" title="Data tables (data inspector)">data inspector panel</a>.
+      From here you can export the bin values to a text file.
+    </p>
+
+    <p>
+      When mapping the particle values to a three-dimensional <a class="link" href="scene_objects.voxel_grid.html" title="Voxel grids">voxel grid</a> using this modifier, you can subsequently
+      employ the <a class="link" href="particles.modifiers.create_isosurface.html" title="Create isosurface">Create isosurface</a> modifier to
+      render iso-level surfaces of the computed field.
+    </p>
+
+    <p>
+      When creating two- or three-dimensional grids, you can also
+      export the computed grid data to a text file using OVITO's <a class="link" href="usage.export.html" title="Exporting data">file export</a> function.
+      Pick the <span class="emphasis"><em>"VTK Voxel Grid"</em></span> format as the output format.
+    </p>
+
+  </div>
+
+  <div class="simplesect" id="idp5058272"><div class="titlepage"><div><div><h4 class="title">Parameters</h4></div></div></div>
+    
+
+    <div class="variablelist"><dl class="variablelist"><dt><span class="term">Input property</span></dt><dd>
+          <p>The source particle property the reduction operation should be applied to.</p>
+        </dd><dt><span class="term">Use only selected elements</span></dt><dd>
+          <p>Restricts the calculation to the subset of particles that are currently selected.</p>
+        </dd><dt><span class="term">Binning direction(s)</span></dt><dd>
+          <p>This option selects the axes of the simulation cell along which the bins are created. It determines the dimensionality of
+          the generated grid.</p>
+        </dd><dt><span class="term">Number of bins</span></dt><dd>
+          <p>Number of bins in each of the active binning directions.</p>
+        </dd><dt><span class="term">Reduction operation</span></dt><dd>
+          <p>The type of reduction operation to be carried out. Available are sum, mean, min or max.
+          There is an additional option "sum divided by bin volume", which sums over all particles of a bin and then divides the result
+          by the volume of the bin. This option is intended to compute pressure (or stress) within
+          bins from the per-atom virial.
+          </p>
+        </dd><dt><span class="term">Compute first derivative</span></dt><dd>
+          <p>Numerically computes the first derivative of the binned data using a finite differences
+          approximation. This works only for one-dimensional bin grids. (It is useful to e.g. compute the derivative
+          of a velocity profile to obtain the local shear rate.)</p>
+        </dd><dt><span class="term">Fix property axis range</span></dt><dd>
+          <p>If selected, the plotted property range (or color scale for 2D grids) will be set to the values given
+          in the "From:" and "To:" fields. Otherwise, the minimum and maximum data values will be used to automatically adjust the plotting range.</p>
+        </dd></dl></div>
+  </div>
+
+  <div class="simplesect" id="idp5073616"><div class="titlepage"><div><div><h4 class="title">See also</h4></div></div></div>
+    
+    <p>
+      <a class="pydoc-link" href="python/modules/ovito_modifiers.html#ovito.modifiers.SpatialBinningModifier" target="_top"><code class="classname">SpatialBinningModifier</code> (Python API)</a><a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a>
+    </p>
+  </div>
+
+</div><p class="footer_copyright">© 2021  OVITO GmbH</p><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="particles.modifiers.select_particle_type.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="particles.modifiers.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="particles.modifiers.slice.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Select type </td><td width="20%" align="center"><a accesskey="h" href="index.html">Table of Contents</a></td><td width="40%" align="right" valign="top"> Slice</td></tr></table></div></body></html>

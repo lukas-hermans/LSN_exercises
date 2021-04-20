@@ -1,0 +1,99 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Particle properties</title><link rel="stylesheet" type="text/css" href="manual.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="OVITO User Manual"><link rel="up" href="usage.html" title="Usage"><link rel="prev" href="usage.viewports.html" title="Viewport windows"><link rel="next" href="usage.modification_pipeline.html" title="Data pipeline"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><a href="https://www.ovito.org/"><img src="images/ovito_logo.png" border="0" width="84"></a><table width="100%" summary="Navigation header"><tr><td width="20%" align="left"><a accesskey="h" href="index.html">Table of Contents</a></td><th width="60%" align="center">Particle properties</th><td width="20%" align="right"><a accesskey="u" href="usage.html">Up</a></td></tr><tr><td width="20%" align="left"><a accesskey="p" href="usage.viewports.html">Prev</a> </td><th width="60%" align="center">Usage</th><td width="20%" align="right"> <a accesskey="n" href="usage.modification_pipeline.html">Next</a></td></tr></table></div><div class="section" id="usage.particle_properties"><div class="titlepage"><div><div><h2 class="title">Particle properties</h2></div></div></div>
+  
+
+  <div class="simplesect" id="idp161728"><div class="titlepage"><div><div><h3 class="title">Definition</h3></div></div></div>
+    
+	  <p>
+			<span class="emphasis"><em>Particle properties</em></span> are attributes (typically numerical information) associated with each particle.
+			They play a central role in the data model of OVITO. Common examples for particle properties are position, chemical type or velocity.
+			In OVITO's data model, all particles in a dataset uniformly possess the same set of properties (but their <span class="emphasis"><em>values</em></span> may be different). 
+			In other words, it is not possible for only some particles to have a certain attribute while others do not. 
+			The set of properties associated with all particles can dynamically change though.
+		</p>
+		<p>
+		  Note that this concept of uniform properties is very general and applies to other entity classes as well. For instance, in OVITO the interatomic bonds may be
+			associated with <span class="emphasis"><em>bond properties</em></span>, e.g. bond type or bond color. So keep in mind that, even though the following introduction primarily focuses on particle properties,
+			it applies to other classes of properties in the same manner.
+		</p>
+		<p>
+			OVITO allows you to associate an arbitrary number of properties with the particles. Each property is identified by its unique name, for example <code class="literal">Position</code> or
+			<code class="literal">Potential Energy</code>. OVITO has a built-in list of commonly-used property names including the mentioned two, but
+			you are free to define properties with other names as needed. The <code class="literal">Position</code> property plays a special role though, because it is always present.
+			Clearly, there cannot be any particles without a position. Other standard properties such as <code class="literal">Color</code>, <code class="literal">Radius</code> or <code class="literal">Selection</code>
+			have a special meaning to the program as well, because their values affect how OVITO renders the particles. By assigning values to these properties, 
+			you control the visual appearance of particles.
+		</p>
+	  <p>
+			In OVITO, per-particle property values can have different data types (real or integer) and dimensionality (e.g. scalar, vector, tensor), depending on the 
+			property at hand. The <code class="literal">Position</code> property, for instance, is a vector property with three components per particle, referred to as 
+			<code class="literal">Position.X</code>, <code class="literal">Position.Y</code> and <code class="literal">Position.Z</code> within OVITO's user interface. 
+	  </p>
+	</div>
+
+  <div class="simplesect" id="idp162064"><div class="titlepage"><div><div><h3 class="title">How are properties assigned?</h3></div></div></div>
+    
+		<p>
+		  An initial set of properties is automatically created by OVITO whenever you open a simulation data file.
+			The values of standard properties such as <code class="literal">Position</code>, <code class="literal">Particle Type</code> and <code class="literal">Velocity</code>
+			are typically initialized from the data in the loaded file. Some file formats such as <span class="emphasis"><em>LAMMPS dump</em></span> and the <a class="ulink" href="http://libatoms.github.io/QUIP/io.html#module-ase.io.extxyz" target="_top">extended XYZ
+			format</a> can store an arbitrary number of extra data columns with additional per-atom attributes. 
+			These attributes from the input file are automatically mapped to corresponding particle properties during import.
+		</p>
+		<p>
+			</p><div class="informalfigure">
+					<div class="screenshot"><div class="mediaobject"><img src="images/usage/properties/particle_inspection_example.png" width="405"></div></div>
+			</div><p>
+		  To find out which properties are currently associated with the particles, you can open OVITO's <a class="link" href="data_inspector.html" title="Data inspector">Data Inspector</a>, 
+			which is shown in the screenshot. Alternatively, you can simply position the mouse cursor over a particle in the viewports,
+			and OVITO will display the values of all its properties in the status bar.
+		</p>
+		<p>
+		  OVITO provides a rich set of functions for modifying the assigned properties of particles. These so-called <span class="emphasis"><em>modifiers</em></span>
+			will be introduced in more detail in a following section of this manual. But to already give you an idea:
+			The <a class="link" href="particles.modifiers.assign_color.html" title="Assign color">Assign color</a> modifier function lets you assign a uniform color of your choice
+			to all currently selected particles. It does that by setting the <code class="literal">Color</code> property of the
+			particles to the given RGB value (if the <code class="literal">Color</code> property doesn't exist yet, it is automatically created). 
+			Which of the particles are currently selected is determined by the value of their <code class="literal">Selection</code> property (convention: 0=unselected, 1=selected). 
+		</p>
+		<p>
+		  Fittingly, OVITO provides a number of particle selection modifiers, which allow you to set the value of the <code class="literal">Selection</code> property.
+			For example, the <a class="link" href="particles.modifiers.select_particle_type.html" title="Select type">Select type</a> modifier inspects the <code class="literal">Particle Type</code>
+			property of each particle to decide whether or not to select the particle, allowing you to pick all atoms of a particular chemical type, for example.
+		</p>
+		<p>
+		  Another typical modifier is the <a class="link" href="particles.modifiers.coordination_analysis.html" title="Coordination analysis">Coordination Analysis</a> modifier.
+			It computes the number of neighbors of each particle within a given cutoff range and stores the computation results in a new particle property named <code class="literal">Coordination</code>. 
+			Subsequently, you can refer to the values of this property, for example to select particles having a coordination number in a certain range
+			or to color particles based on their coordination number (see <a class="link" href="particles.modifiers.color_coding.html" title="Color coding">Color Coding</a> modifier).
+		</p>			
+		<p>
+		  Of course it is possible to export the particle property values to an output file. OVITO supports a variety of output formats for that (see the 
+			<a class="link" href="usage.export.html" title="Exporting data">data export</a> section of this manual). For instance, the <span class="emphasis"><em>XYZ</em></span> format is a simple table
+			format supporting an arbitrary set of output columns.
+	  </p>
+  </div>
+
+  <div class="simplesect" id="usage.particle_properties.special"><div class="titlepage"><div><div><h3 class="title">Special particle properties</h3></div></div></div>
+    
+	  <p>
+			As mentioned above, certain particle properties play a special role in OVITO, because their values control the visual
+			appearance of the particles as well as other aspects. The following table lists these properties and describes their function:
+	   </p><div class="informaltable">
+				<table class="informaltable" style="border-collapse: collapse;border-top: 1px solid ; border-bottom: 1px solid ; border-left: 1px solid ; border-right: 1px solid ; "><colgroup><col class="name"><col class="datatype"><col class="description"></colgroup><thead><tr><th style="border-right: 1px solid ; border-bottom: 1px solid ; ">Particle property</th><th style="border-right: 1px solid ; border-bottom: 1px solid ; ">Data type / Components</th><th style="border-bottom: 1px solid ; ">Description</th></tr></thead><tbody><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; "><code class="literal">Position</code></td><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Real (X, Y, Z)</td><td style="border-bottom: 1px solid ; "><p>The particle coordinates. For 2-dim. systems, <span class="emphasis"><em>Z</em></span> will be 0.</p></td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; "><code class="literal">Color</code></td><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Real (R, G, B)</td><td style="border-bottom: 1px solid ; "><p>If present, this property controls the display color of particles. Red, green and blue components are in the range [0,1].</p></td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; "><code class="literal">Radius</code></td><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Real</td><td style="border-bottom: 1px solid ; "><p>If present, this property controls the display size of particles.</p></td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; "><code class="literal">Particle Type</code></td><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Integer</td><td style="border-bottom: 1px solid ; "><p>Stores the type identifier of each particle. This also determines the display size and color 
+							if the <span class="emphasis"><em>Radius</em></span> or <span class="emphasis"><em>Color</em></span> property are not present.</p></td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; "><code class="literal">Particle Identifier</code></td><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Integer</td><td style="border-bottom: 1px solid ; "><p>Stores the unique ID of each particle. This information will be used by some modifiers
+   							to track particles over time even if the storage order changes.</p></td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; "><code class="literal">Transparency</code></td><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Real</td><td style="border-bottom: 1px solid ; "><p>A value in the range [0,1] controlling the particle's transparency. If not present, particles are rendered fully opaque.</p></td></tr><tr><td style="border-right: 1px solid ; "><code class="literal">Selection</code></td><td style="border-right: 1px solid ; ">Integer</td><td style=""><p>Stores the current selection state of particles (1 for selected particles; 0 otherwise).</p></td></tr></tbody></table>
+			</div><p>
+		</p>
+	</div>
+
+	<div class="simplesect" id="usage.bond_properties"><div class="titlepage"><div><div><h3 class="title">Special bond properties</h3></div></div></div>
+		
+	  <p>
+	    </p><div class="informaltable">
+				<table class="informaltable" style="border-collapse: collapse;border-top: 1px solid ; border-bottom: 1px solid ; border-left: 1px solid ; border-right: 1px solid ; "><colgroup><col class="name"><col class="datatype"><col class="description"></colgroup><thead><tr><th style="border-right: 1px solid ; border-bottom: 1px solid ; ">Bond property</th><th style="border-right: 1px solid ; border-bottom: 1px solid ; ">Data type / Components</th><th style="border-bottom: 1px solid ; ">Description</th></tr></thead><tbody><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; "><code class="literal">Topology</code></td><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Integer (A, B)</td><td style="border-bottom: 1px solid ; "><p>This bond property is always present and holds the indices of the two particles connected by a bond.</p></td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; "><code class="literal">Bond Type</code></td><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Integer</td><td style="border-bottom: 1px solid ; "><p>Stores the type identifier of each bond. The bond type determines the display color 
+							if the <span class="emphasis"><em>Color</em></span> property is not present.</p></td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; "><code class="literal">Color</code></td><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Real (R, G, B)</td><td style="border-bottom: 1px solid ; "><p>If present, this property controls the display color of individual bonds. Red, green and blue components are in the range [0,1].</p></td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; "><code class="literal">Transparency</code></td><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Real</td><td style="border-bottom: 1px solid ; "><p>A value in the range [0,1] controlling the bonds's transparency. If not present, bonds are rendered fully opaque.</p></td></tr><tr><td style="border-right: 1px solid ; "><code class="literal">Selection</code></td><td style="border-right: 1px solid ; ">Integer</td><td style=""><p>Stores the current selection state of bonds (1 for selected bonds; 0 otherwise).</p></td></tr></tbody></table>
+			</div><p>
+		</p>
+	</div>    
+
+</div><p class="footer_copyright">© 2021  OVITO GmbH</p><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="usage.viewports.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="usage.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="usage.modification_pipeline.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Viewport windows </td><td width="20%" align="center"><a accesskey="h" href="index.html">Table of Contents</a></td><td width="40%" align="right" valign="top"> Data pipeline</td></tr></table></div></body></html>

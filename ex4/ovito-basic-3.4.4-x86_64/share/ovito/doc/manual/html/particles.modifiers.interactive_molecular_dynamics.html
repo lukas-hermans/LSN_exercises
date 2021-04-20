@@ -1,0 +1,64 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Interactive molecular dynamics (IMD)</title><link rel="stylesheet" type="text/css" href="manual.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="OVITO User Manual"><link rel="up" href="particles.modifiers.html" title="Modifiers"><link rel="prev" href="particles.modifiers.identify_diamond_structure.html" title="Identify diamond structure"><link rel="next" href="particles.modifiers.invert_selection.html" title="Invert selection"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><a href="https://www.ovito.org/"><img src="images/ovito_logo.png" border="0" width="84"></a><table width="100%" summary="Navigation header"><tr><td width="20%" align="left"><a accesskey="h" href="index.html">Table of Contents</a></td><th width="60%" align="center">Interactive molecular dynamics (IMD)</th><td width="20%" align="right"><a accesskey="u" href="particles.modifiers.html">Up</a></td></tr><tr><td width="20%" align="left"><a accesskey="p" href="particles.modifiers.identify_diamond_structure.html">Prev</a> </td><th width="60%" align="center">Modifiers</th><td width="20%" align="right"> <a accesskey="n" href="particles.modifiers.invert_selection.html">Next</a></td></tr></table></div><div class="section" id="particles.modifiers.interactive_molecular_dynamics"><div class="titlepage"><div><div><h3 class="title">Interactive molecular dynamics (IMD)</h3></div></div></div>
+  
+
+  <p>
+    </p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/modifiers/interactive_molecular_dynamics_panel.png" width="270"></div></div></div><p>
+    This modifier provides the ability to work with a molecular dynamics program running on another computer and display the results of a simulation 
+    as they are calculated. This technique was first introduced by the <a class="ulink" href="http://www.ks.uiuc.edu/Research/vmd/" target="_top">VMD visualization program</a> and is referred to as 
+    <a class="ulink" href="http://www.ks.uiuc.edu/Research/vmd/imd/" target="_top">Interactive Molecular Dynamics (IMD)</a> by the authors. 
+  </p>
+  <p>
+    This modifier merges the static topology information (e.g. atom types and bonds) loaded from an input file on the local computer with the
+    live trajectory data received from the running molecular dynamics program, which is transmitted through a network connection:
+    </p><div class="screenshot"><div class="mediaobject"><img src="images/modifiers/interactive_molecular_dynamics_schematic.png" width="486"></div></div><p>
+  </p>
+
+  <p>
+    In order to run an IMD simulation it is necessary to have a molecular dynamics program that supports the IMD communication protocol. 
+    To date, the following simulation codes are available:
+    </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><a class="ulink" href="https://lammps.sandia.gov/doc/fix_imd.html" target="_top">LAMMPS</a></li><li class="listitem"><a class="ulink" href="https://hoomd-blue.readthedocs.io/en/stable/module-hoomd-analyze.html#hoomd.analyze.imd" target="_top">HOOMD</a></li><li class="listitem"><a class="ulink" href="http://www.ks.uiuc.edu/Research/namd/" target="_top">NAMD</a></li></ul></div><p>
+    Follow the links to learn more about how to set up an IMD simulation in the molecular dynamics program.
+  </p>
+
+  <div class="simplesect" id="idp4492736"><div class="titlepage"><div><div><h4 class="title">Usage</h4></div></div></div>
+    
+    <p>
+      Setting up an IMD session in OVITO involves the following steps:
+      </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+          <p>
+            Load an initial topology file into OVITO. In case of a LAMMPS MD simulation, for example, this would be 
+            a LAMMPS data file containing the list of atoms, their types, initial positions and bond information.
+          </p>
+        </li><li class="listitem">
+          <p>
+            Insert the <span class="emphasis"><em>Interactive molecular dynamics (IMD)</em></span> modifier into the data pipeline.
+          </p>
+        </li><li class="listitem">
+          <p>
+            In the IMD modifier panel, enter the hostname of the computer the MD simulation program is running on
+            (use "localhost" if the MD program runs on the same computer as OVITO).
+            Also enter the network port number that has been set in the MD program.
+            Finally, click the <span class="guibutton">Connect</span> button to establish a network connection 
+            to the running MD program. 
+          </p>
+        </li></ol></div><p>
+      Each time OVITO receives new particle positions from the MD program, it will refresh the interactive viewports.
+      Note that the modifier will only cache the most recent particle coordinates received from the MD program. 
+      Previous frames of the live trajectory will be thrown away. The modifier lets you control the interval at which 
+      MD timesteps are transmitted by the MD program to OVITO. Note that, if timesteps arrive more frequently than 
+      OVITO is able to display them, the modifier may skip some frames. This may be the case if you insert 
+      additional modifiers into the data pipeline that take some time to compute. 
+    </p>
+    <p>
+      The IMD protocol supports only MD simulations with a fixed number of particles. The storage order of particles must also be fixed,
+      as the IMD protocol only transmits a raw list of particle coordinates but not the corresponding particle identifiers. It may thus be necessary to activate 
+      the <span class="emphasis"><em>Sort particles by ID</em></span> option during import of the topology file into OVITO to ensure the 
+      local particle ordering is consistent with the ordering in the MD program.
+    </p>
+    <p>
+      Furthermore, note that the IMD protocol cannot transmit the current simulation box dimensions, and OVITO will use the constant
+      simulation cell loaded from the topology file, even if the simulation cell geometry actually changes in the running MD simulation.
+    </p>
+  </div>
+
+</div><p class="footer_copyright">© 2021  OVITO GmbH</p><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="particles.modifiers.identify_diamond_structure.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="particles.modifiers.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="particles.modifiers.invert_selection.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Identify diamond structure </td><td width="20%" align="center"><a accesskey="h" href="index.html">Table of Contents</a></td><td width="40%" align="right" valign="top"> Invert selection</td></tr></table></div></body></html>

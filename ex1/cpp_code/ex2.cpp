@@ -1,55 +1,85 @@
 #include <vector>
 #include <fstream>
-#include <iostream>
-#include "random/random.h"
+#include <string>
+#include <functional>
+#include "tools/random.h"
+
+void write_dist(std::function<double(Random &)> dist_func, Random &rnd, int N_repetitions, std::vector<int> N_terms, std::string path);
+double uni_variable(Random &rnd);
+double exp_variable(Random &rnd, double lambda);
+double lorentz_variable(Random &rnd, double gamma, double mu);
 
 int main()
 {
-    std::vector<int> N = {1, 2, 10, 100}; // number of terms in sum of random variables
-    int N_repetitions = 10000;            // number of repetitions of sum calculation (=> in total: N_repetitions * N draws)
+    std::vector<int> N_terms = {1, 2, 10, 100}; // number of terms in sum of random variables
+    int N_repetitions = 10000;                  // number of repetitions of sum calculation (=> in total: N_repetitions * N draws)
 
-    // parameters for sampling from exp. and Lorentzian distribution
-    double lambda = 1;
-    double mu = 0;
-    double gamma = 1;
+    double lambda = 1;        // lambda parameter for exponential draws
+    double mu = 0, gamma = 1; // mu and gamma parameter for Lorentzian draw
 
     int seed[4] = {4, 13, 9, 17}; // seed for Rannyu generator
-    Random rnd = Random(seed);    // prepared instance for Rannyu generator
+    Random rnd(seed);             // prepared instance for Rannyu generator
 
-    // create output files and add header
-    std::ofstream file_uniform("../data/uniform.txt"), file_exponential("../data/exponential.txt"), file_lorentzian("../data/lorentzian.txt");
-    for (int n : N)
+    write_dist(uni_variable, rnd, N_repetitions, N_terms, "../data/uniform.txt");
+    write_dist(std::bind(exp_variable, std::placeholders::_1, lambda), rnd, N_repetitions, N_terms, "../data/exponential.txt");
+    write_dist(std::bind(lorentz_variable, std::placeholders::_1, mu, gamma), rnd, N_repetitions, N_terms, "../data/lorentzian.txt");
+
+    return 0;
+}
+
+// Writes draws from a sum of N_terms from random distribution specified by dist_func for N_repetitions into a file specified by path.
+void write_dist(std::function<double(Random &)> dist_func, Random &rnd, int N_repetitions, std::vector<int> N_terms, std::string path)
+{
+    std::ofstream file(path);
+
+    // write header of file
+    for (int n : N_terms)
     {
-        file_uniform << "N=" << n << ", ";
-        file_exponential << "N=" << n << ", ";
-        file_lorentzian << "N=" << n << ", ";
-    }
-
-    // write sum of random variables to corresponding files
-    double sum_uniform, sum_exponential, sum_lorentzian;
-    int counter; // count size of sum
-    for (int i = 0; i < N_repetitions; i++)
-    {
-        file_uniform << std::endl;
-        file_exponential << std::endl;
-        file_lorentzian << std::endl;
-
-        sum_uniform = sum_exponential = sum_lorentzian = 0;
-        counter = 0;
-        for (int n : N) // loop over elements in vector N
+        file << "N_terms = " << n;
+        if (n != N_terms.back()) // no comma after last column
         {
-            while (counter < n) // sum of random variables with n terms (n are elements of vector N)
-            {
-                sum_uniform += rnd.Rannyu();
-                sum_exponential += rnd.exponential_draw(lambda);
-                sum_lorentzian += rnd.lorentzian_draw(gamma, mu);
-                counter++;
-            }
-            file_uniform << sum_uniform / n << ", ";
-            file_exponential << sum_exponential / n << ", ";
-            file_lorentzian << sum_lorentzian / n << ", ";
+            file << ", ";
         }
     }
 
-    return 0;
+    // draw from distribution for all entries in N_terms with N_repetitions
+    // each repetition is a line of the file
+    double sum;
+    for (int i = 0; i < N_repetitions; i++)
+    {
+        file << std::endl;
+
+        sum = 0;
+        for (int n : N_terms)
+        {
+            for (int j = 0; j < n; j++) // calculate sum of n terms
+            {
+                sum += dist_func(rnd);
+            }
+            file << sum / n;
+
+            if (n != N_terms.back()) // no comma after last column
+            {
+                file << ", ";
+            }
+        }
+    }
+}
+
+// Samples a uniformally distributed random variable.
+double uni_variable(Random &rnd)
+{
+    return rnd.Rannyu();
+}
+
+// Samples an exponentially distributed random variable.
+double exp_variable(Random &rnd, double lambda)
+{
+    return rnd.exponential_draw(lambda);
+}
+
+// Samples an Lorentzian distributed random variable.
+double lorentz_variable(Random &rnd, double gamma, double mu)
+{
+    return rnd.lorentzian_draw(gamma, mu);
 }

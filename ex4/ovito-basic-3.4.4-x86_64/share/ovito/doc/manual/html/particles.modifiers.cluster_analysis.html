@@ -1,0 +1,152 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Cluster analysis</title><link rel="stylesheet" type="text/css" href="manual.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="OVITO User Manual"><link rel="up" href="particles.modifiers.html" title="Modifiers"><link rel="prev" href="particles.modifiers.clear_selection.html" title="Clear selection"><link rel="next" href="particles.modifiers.color_coding.html" title="Color coding"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><a href="https://www.ovito.org/"><img src="images/ovito_logo.png" border="0" width="84"></a><table width="100%" summary="Navigation header"><tr><td width="20%" align="left"><a accesskey="h" href="index.html">Table of Contents</a></td><th width="60%" align="center">Cluster analysis</th><td width="20%" align="right"><a accesskey="u" href="particles.modifiers.html">Up</a></td></tr><tr><td width="20%" align="left"><a accesskey="p" href="particles.modifiers.clear_selection.html">Prev</a> </td><th width="60%" align="center">Modifiers</th><td width="20%" align="right"> <a accesskey="n" href="particles.modifiers.color_coding.html">Next</a></td></tr></table></div><div class="section" id="particles.modifiers.cluster_analysis"><div class="titlepage"><div><div><h3 class="title">Cluster analysis</h3></div></div></div>
+  
+
+  <p>
+
+    </p><div class="informalfigure">
+      <div class="informaltable">
+        <table class="informaltable" style="border: none;"><colgroup><col><col></colgroup><tbody><tr valign="bottom"><td style="" valign="bottom">Input:</td><td style="" valign="bottom">Output:</td></tr><tr valign="top"><td style="" valign="top">
+                <div class="mediaobject"><img src="images/modifiers/cluster_analysis_example_input.png" width="162"></div>
+              </td><td style="" valign="top">
+                <div class="mediaobject"><img src="images/modifiers/cluster_analysis_example_output.png" width="162"></div>
+              </td></tr></tbody></table>
+      </div>
+    </div><p>
+
+    </p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/modifiers/cluster_analysis_panel.png" width="270"></div></div></div><p>
+
+    This modifier decomposes the particles into disconnected groups (so-called clusters) based on the 
+    selected neighboring criterion. The neighboring criterion can be distance-based (cutoff range) or topology-based (bond network).
+  </p>
+
+  <p>
+    A <span class="emphasis"><em>cluster</em></span> is defined as a set of connected particles, each of which is within the (indirect) reach of the other particles 
+    in the same cluster. Thus, any two particles from the same cluster are connected by a
+    continuous path consisting of steps that fulfill the selected neighboring criterion.
+    Conversely, two particles will belong to different clusters if
+    there is no such continuous path connecting the two particles on the neighbor graph.
+  </p>
+
+  <div class="simplesect" id="idp3380096"><div class="titlepage"><div><div><h4 class="title">Connectivity criterion</h4></div></div></div>
+    
+    <p>
+      You can choose between two clustering modes: In case of the distance-based mode, two particles are considered
+      connected if they are within a specified proximity range of each other. In case of the bond-based mode, 
+      two particles are considered connected if there exists a bond between them.
+      Note that particles not connected to any other particle will each form a single-particle cluster by itself.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3381696"><div class="titlepage"><div><div><h4 class="title">Cluster numbering</h4></div></div></div>
+    
+    <p>
+      The clusters identified by the modifier are numbered from 1 to <span class="emphasis"><em>N</em></span>, the total number of clusters.
+      The algorithm assigns each input particle to one of these clusters and outputs this information as a new particle property named <code class="literal">Cluster</code>.
+      Note that the ordering of clusters is arbitrary by default and will generally depend on the storage order of input particles.
+      You can, however, activate the <span class="emphasis"><em>Sort clusters by size</em></span> option to request the sorting of cluster IDs by descending particle count.
+      This option guarantees that the first cluster (ID 1) will be the largest one in the system, i.e. the one consisting of the largest number of particles.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3384624"><div class="titlepage"><div><div><h4 class="title">Calculation of centers of mass</h4></div></div></div>
+    
+    <p>
+      The modifier provides the option to compute the center of mass of each cluster. The coordinates will be output as an additional column
+      in the generated clusters table (see below). The center of mass of clusters cut by a periodic simulation
+      cell boundary will be correctly computed. However, if the extent of a cluster is infinite in the sense that it reconnects to itself through the periodic
+      boundaries of the simulation domain, the results will be undefined.
+      Since program release 3.2, OVITO takes into account the individual particle masses when calculting the center of mass.
+      The mass information will be taken from the <code class="literal">Mass</code> property of individual particles (if present) or
+      from the mass value set for each particle type. If neither the <code class="literal">Mass</code> particle property is present
+      nor at least one particle type with a positive mass, then the algorithm assumes that all particles to have the same uniform weight.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3387536"><div class="titlepage"><div><div><h4 class="title">Calculation of gyration radius and gyration tensor</h4></div></div></div>
+    
+    <p>
+      Furthermore, the modifier can compute the <a class="ulink" href="https://en.wikipedia.org/wiki/Radius_of_gyration" target="_top">radius of gyration</a> 
+      of each cluster as well as the <a class="ulink" href="https://en.wikipedia.org/wiki/Gyration_tensor" target="_top">gyration tensor</a>.
+      Both quantities will appear as additional columns in the generated table of clusters. 
+      The symmetric gyration tensor has six independent components: xx, yy, zz, xy, xz, yz (in simulation units of length squared).
+      The data table is accessible in the <a class="link" href="data_inspector.data_tables.html" title="Data tables (data inspector)">data inspector panel</a>:
+      </p><div class="screenshot"><div class="mediaobject"><img src="images/modifiers/cluster_analysis_table.png" width="864"></div></div><p>
+      The calculation of the radius of gyration and the gyration tensor in OVITO follows the <a class="ulink" href="https://lammps.sandia.gov/doc/compute_gyration.html" target="_top">compute gyration</a> command 
+      found in the LAMMPS simulation code. It takes into account the individual particle masses (if present) or the masses assigned to the particle types (if present).
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3394672"><div class="titlepage"><div><div><h4 class="title">Unwrapping of particle coordinates</h4></div></div></div>
+    
+    <p>
+      The modifier provides the option to "unwrap" the coordinates of particles belonging to the same cluster, mapping them from inside the periodic simulation domain to 
+      outside in order for the cluster to appear as a contiguous object. 
+      Note that the unwrapping will yield meaningful results only for finite clusters. It will lead to undefined results for 
+      infinite clusters that are connected to themselves through a periodic cell boundary.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3396352"><div class="titlepage"><div><div><h4 class="title">Coloring option</h4></div></div></div>
+    
+    <p>
+      The modifier option <span class="emphasis"><em>Color particles by cluster</em></span> gives each identified cluster a unique random color
+      and colors the particles according to the clusters they belong to. It can be used to quickly visualize the results of the 
+      clustering algorithm.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3398112"><div class="titlepage"><div><div><h4 class="title">Restriction to selected particles</h4></div></div></div>
+    
+    <p>
+      The option <span class="emphasis"><em>Use only selected particles</em></span> restricts the clustering algorithm to the set of currently selected
+      particles. Unselected particles will be treated as if they do not exist and will be assigned the special cluster ID 0.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3400048"><div class="titlepage"><div><div><h4 class="title">Exporting computation results</h4></div></div></div>
+    
+    <div class="variablelist"><dl class="variablelist"><dt><span class="term">Total number of clusters</span></dt><dd>
+          <p>
+            To export the total number of clusters found by the modifier to a text file (possibly as a function of time),
+            use OVITO's standard <a class="link" href="usage.export.html" title="Exporting data">file export function</a>. Choose "<span class="emphasis"><em>Table of values</em></span>"
+            as output format and make sure that the <code class="literal">ClusterAnalysis.cluster_count</code> global attribute is selected for export.
+          </p>
+        </dd><dt><span class="term">Size of the largest clusters</span></dt><dd>
+          <p>
+            The modifier also outputs the global attribute <code class="literal">ClusterAnalysis.largest_size</code> to report
+            the number of particles in the largest cluster (only if the sort-by-size option is used). This information can be
+            exported from OVITO in the same way as explained above.
+          </p>
+        </dd><dt><span class="term">Particle assignment to clusters</span></dt><dd>
+          <p>
+            To export the list of particles belonging to each cluster to a text file, use OVITO's
+            <a class="link" href="usage.export.html" title="Exporting data">file export function</a>. Choose the <span class="emphasis"><em>XYZ</em></span> output file format
+            and select the <code class="literal">Particle Identifier</code> and the <code class="literal">Cluster</code> properties for export. 
+            This will yield a text file containing each particle's cluster ID.
+          </p>
+        </dd><dt><span class="term">Cluster size list and centers of mass</span></dt><dd>
+          <p>
+            The modifiers outputs the list of identified clusters as a <a class="link" href="scene_objects.data_table.html" title="Data tables">data table</a>,
+            which consists of one row per cluster and columns for the cluster size (number of particles), center of mass and radius of gyration (if their calculation is enabled).
+            You can open this table in the <a class="link" href="data_inspector.data_tables.html" title="Data tables (data inspector)">data inspector panel</a> of OVITO by pressing the <span class="guibutton">Show list of clusters</span>
+            button of the modifier. The data inspector panel provides a function for exporting the table data to a text file.
+          </p>
+        </dd><dt><span class="term">Cluster size distribution</span></dt><dd>
+          <p>
+            Since the cluster table generated by the modifier contains each cluster's size,
+            you can subsequently apply OVITO's <a class="link" href="particles.modifiers.histogram.html" title="Histogram">Histogram modifier</a> to the <code class="literal">Cluster Size</code>
+            column of that table to calculate the cluster size distribution.
+          </p>
+        </dd></dl></div>
+  </div>
+
+  <div class="simplesect" id="idp3417168"><div class="titlepage"><div><div><h4 class="title">See also</h4></div></div></div>
+  
+    <p>
+      <a class="pydoc-link" href="python/modules/ovito_modifiers.html#ovito.modifiers.ClusterAnalysisModifier" target="_top"><code class="classname">ClusterAnalysisModifier</code> (Python API)</a><a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a>
+    </p>
+  </div>
+
+</div><p class="footer_copyright">© 2021  OVITO GmbH</p><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="particles.modifiers.clear_selection.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="particles.modifiers.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="particles.modifiers.color_coding.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Clear selection </td><td width="20%" align="center"><a accesskey="h" href="index.html">Table of Contents</a></td><td width="40%" align="right" valign="top"> Color coding</td></tr></table></div></body></html>

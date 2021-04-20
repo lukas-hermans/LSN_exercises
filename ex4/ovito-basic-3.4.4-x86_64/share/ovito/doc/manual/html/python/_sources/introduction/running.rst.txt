@@ -1,0 +1,167 @@
+.. _scripting_running:
+
+===================================
+OVITO's Python interface
+===================================
+
+The scripting interface of OVITO lets you
+
+   * automate data visualization and analysis steps,
+   * integrate OVITO's data I/O, analysis and rendering capabilities into custom workflows or Python programs,
+   * extend OVITO capbilities by developing new modifiers or viewports layers that integrate into the graphical user interface.
+
+The script programming interface described in this manual consists of a collection of Python functions and classes,
+which expose OVITO's internal data model, data pipeline framework and rendering capabilities.
+
+**Automation scripts**
+
+A common use case for OVITO's programming interface is automating laborious tasks. Python scripts don't 
+require any user interaction and can (repeatedly) perform sequences of actions that you would otherwise have to carry out by 
+hand in the graphical application.
+The following example script :file:`remove_hydrogens.py` loads an atomic structure from a simulation file, selects all hydrogen atoms,
+deletes them, and writes the resulting dataset back to an output file::
+
+   from ovito.io import import_file, export_file
+   from ovito.modifiers import SelectTypeModifier, DeleteSelectedModifier
+
+   pipeline = import_file('input_file.xyz')
+   pipeline.modifiers.append(SelectTypeModifier(property='Particle Type', types={'H'}))
+   pipeline.modifiers.append(DeleteSelectedModifier())
+   export_file(pipeline, 'output_file.xyz', 'xyz', columns=['Particle Type', 'Position.X', 'Position.Y', 'Position.Z']])
+
+Scripts like this example can be easily created with OVITO Pro's :ovitoman:`built-in code generator <../../python_code_generation>` in the graphical user interface.
+You can then execute the Python script from the system terminal using :program:`ovitos`, the preconfigured Python interpreter
+shipping with the OVITO Pro desktop application:
+
+.. code-block:: shell-session
+
+	ovitos remove_hydrogens.py
+
+Alternatively, you can execute the script -- like any other Python program -- using your Python interpreter of choice:
+
+.. code-block:: shell-session
+
+	python remove_hydrogens.py
+
+For this to work, you first need to install the ``ovito`` module in your Python interpreter as will be explained later.
+
+**Running scripts within the desktop application**
+
+A Python script can also be executed right within the context of the running OVITO Pro desktop application.
+This option can be useful especially during script development, because it allows you to directly observe what your script does and
+how the final outcome, for example the data pipeline created by the script, looks like.
+
+Use the *Run Script File* function found in the *File* menu of OVITO Pro to execute an existing Python script file.
+Note that, in this case, all script actions will be executed within the context of the current program session -- as if you 
+would perform them by hand. Alternatively, you can use the :command:`--script` command line option when invoking OVITO from
+the system terminal to execute a given Python script right after application startup.
+
+**User-defined modifiers and viewport overlays**
+
+OVITO's scripting interface furthermore enables you to develop new types of modifiers that can manipulate or analyze data
+in ways not covered by any of the built-in modifiers of the program. So-called *Python script modifiers* (see :ref:`writing_custom_modifiers` section for more information)
+participate in the data pipeline system of OVITO and behave just like the built-in modifiers from a user's perspective.
+Such a user-defined modifier essentially is a Python function written by you that gets executed automatically by OVITO whenever
+the data pipeline is evaluated.
+
+Furthermore, you can write custom viewport layers. A :ovitoman:`script viewport layer <../../viewport_layers.python_script>` is a
+user-defined Python function that gets called by OVITO every time a viewport image is being rendered. This allows you to enrich rendered images or movies
+with custom text and graphics, and include additional information such as data plots that are dynamically generated from the simulation data.
+
+.. _use_ovito_with_system_interpreter:
+
+Installing the ``ovito`` module in your Python interpreter
+--------------------------------------------------------------------
+
+To make OVITO's scripting capabilities available to scripts running in your system's Python interpreter, you first need to install
+the ``ovito`` module. It may be downloaded from the PyPI repository and installed using the :program:`pip install ovito` command.
+For further instruction please refer to https://pypi.org/project/ovito/.
+
+If you are using the *Anaconda* or *Miniconda* environments, you should install the ``ovito`` Python module from our channel as follows:
+
+.. code-block:: shell-session
+
+   conda install --strict-channel-priority -c https://conda.ovito.org -c conda-forge ovito=3
+
+The *conda-forge* channel provides additional dependencies required by OVITO. The ``ovito`` conda package includes both the graphical desktop application OVITO Pro and the ``ovito`` Python module.
+
+.. _ovitos_interpreter:
+
+OVITO's Python interpreter
+----------------------------------
+
+OVITO program packages include a preconfigured Python interpreter named :program:`ovitos` that can execute scripts written in the Python 3.x language.
+:program:`ovitos` already has the ``ovito`` module and all other dependencies preinstalled that are required to run scripts.
+You can execute a Python script from the terminal of your operating system:
+
+.. code-block:: shell-session
+
+	ovitos [-o file] [-g] [script.py] [args...]
+
+The :program:`ovitos` executable is located in the :file:`bin/` subdirectory of OVITO for Linux, in the
+:file:`Ovito.app/Contents/MacOS/` directory of OVITO for macOS, and in the main application directory
+on Windows systems (look for :program:`ovitos.exe`). It should not be confused with :program:`ovito`, which is the
+graphical desktop application.
+
+Let's use a text editor to write a simple Python script file named :file:`hello.py`::
+
+	import ovito
+	print("Hello, this is OVITO %i.%i.%i" % ovito.version)
+
+You can execute the script file from a Linux terminal as follows:
+
+.. code-block:: shell-session
+
+	me@linux:~/ovito-3.0.0-x86_64/bin$ ./ovitos hello.py
+	Hello, this is OVITO 3.0.0
+
+The :program:`ovitos` script interpreter is a console program without a graphical user interface.
+This enables you to run scripts on remote machines or computing clusters that don't possess a graphical display.
+:program:`ovitos` behaves like a regular Python interpreter. Any command line arguments following the
+script name are passed to the script via the ``sys.argv`` variable. Furthermore, it is also possible to start
+an interactive interpreter session by invoking :program:`ovitos` without any arguments.
+
+.. _preloading_program_state:
+
+Preloading session state
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The :command:`-o` command line option tells :program:`ovitos` to load an :file:`.ovito` session state file before executing the
+script. This allows you to preload an existing data pipeline or visualization setup that you have
+previously prepared using the graphical version of OVITO. All script actions will subsequently be performed in the context of this preloaded session.
+This can save you programming work, because things like modifiers and the camera setup already get loaded from the state file and
+you don't need to set everything up programmatically in the script anymore.
+
+Graphical mode
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The :command:`-g` command line option of :program:`ovitos` starts a graphical program session and the script
+will be run in the context of OVITO's main window. This allows you to follow your script's actions as they are being
+executed. This is useful for debugging purposes if you want to visually check the outcome of your script's action during the
+development phase. Keep in mind that the viewports will only show pipelines that have been inserted into the current scene.
+Thus, it is necessary to explicitly call :py:meth:`Pipeline.add_to_scene() <ovito.pipeline.Pipeline.add_to_scene>`
+to make your imported data visible in this mode.
+
+.. _ovitos_nthreads_parameter:
+
+Number of CPU cores
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+OVITO uses all available processor cores by default to perform some computations. To explicitly restrict the program
+to a certain maximum number of parallel threads, use the :command:`--nthreads` command line parameter, e.g. :command:`ovitos --nthreads 1 myscript.py`.
+
+Installing third-party Python modules in :program:`ovitos`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+OVITO's embedded interpreter is a preconfigured version of the standard `CPython <https://en.wikipedia.org/wiki/CPython>`__ interpreter with the
+:py:mod:`ovito` Python package built in. This makes it possible to run scripts both within the graphical program OVITO as well as through the :program:`ovitos`
+command line interpreter. However, OVITO's Python interpreter only ships with the `NumPy <http://www.numpy.org/>`__ and `matplotlib <http://matplotlib.org/>`__
+preinstalled packages.
+
+If you need to call other third-party Python packages from your OVITO scripts, it may be possible to install them in the
+:program:`ovitos` interpreter using the normal *pip* or *setuptools* mechanisms
+(e.g., run :command:`ovitos -m pip install <package>` to install a module from `PyPI <https://pypi.org>`__).
+
+Installing Python extensions that include native code may fail, however, because such extensions may not be compatible
+with the build-time configuration of the embedded CPython interpreter. In this case, it is recommend that you instead install
+the :py:mod:`ovito` module in your system's Python interpreter. Further instructions can be found `here <https://pypi.org/project/ovito/>`__.

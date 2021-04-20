@@ -1,0 +1,94 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>OSPRay renderer pro</title><link rel="stylesheet" type="text/css" href="manual.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="OVITO User Manual"><link rel="up" href="rendering.html" title="Image and movie rendering"><link rel="prev" href="rendering.tachyon_renderer.html" title="Tachyon renderer pro"><link rel="next" href="data_inspector.html" title="Data inspector"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><a href="https://www.ovito.org/"><img src="images/ovito_logo.png" border="0" width="84"></a><table width="100%" summary="Navigation header"><tr><td width="20%" align="left"><a accesskey="h" href="index.html">Table of Contents</a></td><th width="60%" align="center">OSPRay renderer<a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a></th><td width="20%" align="right"><a accesskey="u" href="rendering.html">Up</a></td></tr><tr><td width="20%" align="left"><a accesskey="p" href="rendering.tachyon_renderer.html">Prev</a> </td><th width="60%" align="center">Image and movie rendering</th><td width="20%" align="right"> <a accesskey="n" href="data_inspector.html">Next</a></td></tr></table></div><div class="section" id="rendering.ospray_renderer"><div class="titlepage"><div><div><h3 class="title">OSPRay renderer<a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a></h3></div></div></div>
+  
+
+  <p>
+    </p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/rendering/ospray_renderer_panel.png" width="270"></div></div></div><p>
+    OSPRay is a software-based ray-tracing engine, which can generate high-fidelity renderings of the scene including
+    global illumination effects, shadows and depth of field (focal blur). The OSPRay renderer has a smaller memory footprint than
+    the <a class="link" href="rendering.tachyon_renderer.html" title="Tachyon renderer pro">Tachyon renderer</a>. It is thus suitable for rendering very large datasets
+    with a higher visual quality than the default <a class="link" href="rendering.opengl_renderer.html" title="OpenGL renderer">OpenGL renderer</a>.
+  </p>
+  <p>
+    For more information on the capabilities of the OSPRay engine and its technical background,
+    please visit the <a class="ulink" href="http://www.ospray.org/" target="_top">www.ospray.org</a> website.
+    The OSPRay documentation contains more in-depth information on the various parameters this 
+    rendering engine provides.
+  </p>
+
+  <div class="simplesect" id="idp5558624"><div class="titlepage"><div><div><h4 class="title">Quality parameters</h4></div></div></div>
+    
+
+    <div class="variablelist"><dl class="variablelist"><dt><span class="term">Refinement passes</span></dt><dd>
+          <p>OSPRay uses a progressive rendering method, which further refines the generated image during each rendering pass.
+          This parameter controls the number of refinement passes to compute (default value: 4).</p>
+        </dd><dt><span class="term">Samples per pixel</span></dt><dd>
+          <p>The number of ray-tracing samples computed per pixel of the output image (default value: 2). 
+          Larger values can help reducing aliasing artifacts and will yield better results if the <span class="emphasis"><em>depth of field</em></span> 
+          option has been enabled. </p>
+        </dd><dt><span class="term">Ray recursion depth</span></dt><dd>
+          <p>The maximum number of recursion steps taken during ray-tracing (default value: 10). 
+          Normally, 1 or 2 is enough, but when rendering many overlapping semi-transparent objects, a larger recursion depth may be needed.</p>
+        </dd><dt><span class="term">Denoising filter</span></dt><dd>
+          <p>Applies a denoising filter to the rendered image in order to reduce Monte Carlo noise inherent to stochastic  
+          methods such as path tracing.</p>
+        </dd><dt><span class="term">Depth of field</span></dt><dd>
+          <p>Only objects exactly at the distance from the camera specified by the <span class="emphasis"><em>focal length</em></span> will appear sharp when depth-of-field rendering is active.
+          Objects closer to or further from the camera will appear blurred. If you want a specific object to be in the focus, use the <span class="guibutton">Pick in viewport</span> button
+          and click on that object in the viewport to be rendered. The <span class="emphasis"><em>focal length</em></span> parameter will be automatically adjusted so that the picked location is in focus.
+          The <span class="emphasis"><em>aperture</em></span> radius controls how blurred objects will appear that are out of focus (default: 0.5).
+          </p>
+        </dd></dl></div>
+  </div>
+
+  <div class="simplesect" id="idp5569440"><div class="titlepage"><div><div><h4 class="title">Light sources</h4></div></div></div>
+    
+
+    <div class="variablelist"><dl class="variablelist"><dt><span class="term">Direct light</span></dt><dd>
+          <p>Enables a directional light source that is positioned behind the camera and is pointing roughly along the viewing direction.
+          The <span class="emphasis"><em>angular diameter</em></span> specifies the apparent size (angle in degrees) of the light source.
+          Setting the angular diameter to a value greater than zero yields soft shadows. For instance, the apparent size 
+          of the sun is about 0.53°.</p>
+        </dd><dt><span class="term">Ambient light</span></dt><dd>
+          <p>The ambient light surrounds the entire scene and illuminates it from infinity with constant radiance.</p>
+        </dd><dt><span class="term">Sun-sky light</span></dt><dd>
+          <p>The sun-sky light produces the light typically coming from the sky and the sun in an outdoor scene.
+          The radiance values are calculated using the Ho&#353;ek-Wilkie sky model and solar radiance function. 
+          The zenith of the sky as well as the sun are positioned along the positive Z axis of the scene and are independent of the camera orientation. </p>
+        </dd></dl></div>
+  </div>
+
+  <div class="simplesect" id="idp5580480"><div class="titlepage"><div><div><h4 class="title">Material</h4></div></div></div>
+    
+    <div class="variablelist"><dl class="variablelist"><dt><span class="term">Specular brightness</span></dt><dd>
+          <p>Controls the specular reflectivity of the material (default value: 2%).</p>
+        </dd><dt><span class="term">Shininess</span></dt><dd>
+          <p>This specular Phong exponent is usually in the range between 2.0 and 10000.0 (default value: 10.0).</p>
+        </dd></dl></div>
+  </div>
+
+
+  <div class="simplesect" id="idp5585552"><div class="titlepage"><div><div><h4 class="title">Path Tracer backend</h4></div></div></div>
+    
+
+    <div class="variablelist"><dl class="variablelist"><dt><span class="term">Roulette depth</span></dt><dd>
+          <p>Ray recursion depth at which to start Russian roulette termination (default value: 2).</p>
+        </dd></dl></div>
+
+  </div>
+
+  <div class="simplesect" id="idp5588512"><div class="titlepage"><div><div><h4 class="title">See also</h4></div></div></div>
+  
+    <p>
+      <a class="pydoc-link" href="python/modules/ovito_vis.html#ovito.vis.OSPRayRenderer" target="_top"><code class="classname">OSPRayRenderer</code> (Python API)</a><a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a>
+    </p>
+  </div>
+
+</div><p class="footer_copyright">© 2021  OVITO GmbH</p><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="rendering.tachyon_renderer.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="rendering.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="data_inspector.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Tachyon renderer<a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a> </td><td width="20%" align="center"><a accesskey="h" href="index.html">Table of Contents</a></td><td width="40%" align="right" valign="top"> Data inspector</td></tr></table></div></body></html>

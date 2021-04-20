@@ -1,0 +1,36 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Remote data access</title><link rel="stylesheet" type="text/css" href="manual.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="OVITO User Manual"><link rel="up" href="usage.import.html" title="Importing data"><link rel="prev" href="usage.import.html" title="Importing data"><link rel="next" href="usage.import.multiple_datasets.html" title="Visualizing multiple datasets"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><a href="https://www.ovito.org/"><img src="images/ovito_logo.png" border="0" width="84"></a><table width="100%" summary="Navigation header"><tr><td width="20%" align="left"><a accesskey="h" href="index.html">Table of Contents</a></td><th width="60%" align="center">Remote data access</th><td width="20%" align="right"><a accesskey="u" href="usage.import.html">Up</a></td></tr><tr><td width="20%" align="left"><a accesskey="p" href="usage.import.html">Prev</a> </td><th width="60%" align="center">Importing data</th><td width="20%" align="right"> <a accesskey="n" href="usage.import.multiple_datasets.html">Next</a></td></tr></table></div><div class="section" id="usage.import.remote"><div class="titlepage"><div><div><h3 class="title">Remote data access</h3></div></div></div>
+    
+    <p>
+       OVITO comes with built-in SSH and HTTP(S) clients for accessing files on remote machines. This feature can save you from having to transfer
+       files stored in remote locations, for example on HPC clusters, to your local desktop computer first.
+       To open a file located on a remote host, select
+       <span class="guimenu">File</span> &#8594; <span class="guimenuitem">Load Remote File</span> from the menu.
+    </p>
+    <p>
+       The current version of OVITO does not provide a way to browse directories on remote machines. You have to directly specify
+       the full path to the remote file as an URL of the form:
+       </p><pre class="screen"><span class="command"><strong>    sftp://user@hostname/path/filename</strong></span></pre><p>
+       In this URL, replace <span class="command"><strong>user</strong></span> with the SSH login name for your remote machine,
+       <span class="command"><strong>hostname</strong></span> with the host name of the remote machine,
+       and <span class="command"><strong>/path/filename</strong></span> with the full path to the simulation file that should be loaded.
+       Similarly, you can let OVITO retrieve a data file from a webserver by specifying an URL of the form
+       </p><pre class="screen"><span class="command"><strong>    https://www.website.org/path/filename</strong></span></pre><p>
+    </p>
+    <p>
+       When connecting to the remote machine, OVITO will ask for the login password or the passphrase for the private key to be used for authentication.
+       Once established, the SSH connection is kept alive until the program session ends. OVITO creates a temporary copy of the remote file on the local computer before
+       loading the data into memory to speed up subsequent accesses to all simulation frames. The local data copies are cached until you close OVITO or
+       until you hit the <span class="emphasis"><em>Reload</em></span> button in the <a class="link" href="data_sources.html#scene_objects.file_source" title="External file">External File</a> panel.
+    </p>
+    <div class="simplesect" id="idp93104"><div class="titlepage"><div><div><h4 class="title">Notes</h4></div></div></div>
+      
+      <p>
+        If it exists, OVITO will parse the <code class="filename">~/.ssh/config</code> <a class="ulink" href="https://www.ssh.com/ssh/config" target="_top">configuration file</a> in your home directory to 
+        configure the SSH connection.  
+      </p>
+      <p>
+        When running OVITO from the terminal, you can set the environment variable <code class="envar">OVITO_SSH_LOG=1</code> to activate log output
+        for the built-in SSH client and diagnose possible connection problems.
+      </p>
+    </div>
+  </div><p class="footer_copyright">© 2021  OVITO GmbH</p><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="usage.import.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="usage.import.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="usage.import.multiple_datasets.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Importing data </td><td width="20%" align="center"><a accesskey="h" href="index.html">Table of Contents</a></td><td width="40%" align="right" valign="top"> Visualizing multiple datasets</td></tr></table></div></body></html>

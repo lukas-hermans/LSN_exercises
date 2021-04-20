@@ -1,0 +1,321 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OVITO 2.9 Migration Guide &#8212; OVITO 3.4.4 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="shortcut icon" href="../_static/ovito.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ovito" href="../modules/ovito.html" />
+    <link rel="prev" title="Example O3: Highlight a particle" href="examples/overlays/highlight_particle.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../modules/ovito.html" title="ovito"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples/overlays/highlight_particle.html" title="Example O3: Highlight a particle"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">OVITO 3.4.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">OVITO 2.9 Migration Guide</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ovito-2-9-migration-guide">
+<span id="version-changes"></span><h1>OVITO 2.9 Migration Guide<a class="headerlink" href="#ovito-2-9-migration-guide" title="Permalink to this headline">¶</a></h1>
+<p>This page describes important changes to the Python programming interface introduced with new OVITO 3.0 program releases.
+It is supposed to help script authors adapt their old scripts to the most recent version of the Python API.</p>
+<div class="section" id="migrating-from-ovito-2-9-to-3-0">
+<h2>Migrating from OVITO 2.9 to 3.0<a class="headerlink" href="#migrating-from-ovito-2-9-to-3-0" title="Permalink to this headline">¶</a></h2>
+<p>Release 3 of OVITO introduces significant changes to the Python programming interface. Various classes and methods
+have been deprecated and replaced with new facilities. The old interfaces of OVITO 2 no longer show up in the Python reference documentation,
+however, a backward compatibility layer has been put in place to support execution of old scripts as far as possible.
+Thus, in many cases, old Python scripts written for OVITO 2 should still work, at least for now, but it is recommended
+to update them in order to use the new programming interfaces described in the following.
+The backward compatibility layer will be removed in a future version of OVITO.</p>
+<div class="section" id="data-pipelines-and-data-sources">
+<h3>Data pipelines and data sources<a class="headerlink" href="#data-pipelines-and-data-sources" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">ovito.ObjectNode</span></code> class has been renamed to <a class="reference internal" href="../modules/ovito_pipeline.html#ovito.pipeline.Pipeline" title="ovito.pipeline.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a> and
+moved to the new <a class="reference internal" href="../modules/ovito_pipeline.html#module-ovito.pipeline" title="ovito.pipeline"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ovito.pipeline</span></code></a> module.</p>
+<p>The <a class="reference internal" href="../modules/ovito_pipeline.html#ovito.pipeline.StaticSource" title="ovito.pipeline.StaticSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">StaticSource</span></code></a> is a special type of data source for a <a class="reference internal" href="../modules/ovito_pipeline.html#ovito.pipeline.Pipeline" title="ovito.pipeline.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a>
+and can hold a set of data objects that should be processed by the pipeline. The <a class="reference internal" href="../modules/ovito_pipeline.html#ovito.pipeline.FileSource" title="ovito.pipeline.FileSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileSource</span></code></a>
+class maintains its role as the main data source type for pipelines, reading the input data from an external file.</p>
+<p>The <code class="xref py py-attr docutils literal notranslate"><span class="pre">ObjectNode.output</span></code> field has been removed. It used to provide access to the cached results of the data pipeline
+after a call to <code class="xref py py-meth docutils literal notranslate"><span class="pre">ObjectNode.compute()</span></code>. Now the computation results should be requested using <a class="reference internal" href="../modules/ovito_pipeline.html#ovito.pipeline.Pipeline.compute" title="ovito.pipeline.Pipeline.compute"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compute()</span></code></a> and stored in a local variable instead:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">import_file</span><span class="p">(</span><span class="s1">&#39;simulation.dump&#39;</span><span class="p">)</span>
+<span class="o">...</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../modules/ovito_pipeline.html#ovito.pipeline.Pipeline.compute" title="ovito.pipeline.Pipeline.compute"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Pipeline.compute()</span></code></a> returns a new <a class="reference internal" href="../modules/ovito_data.html#ovito.data.DataCollection" title="ovito.data.DataCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataCollection</span></code></a> containing
+the output data of the pipeline after evaluating any modifiers that are currently part of the pipeline.</p>
+</div>
+<div class="section" id="the-datacollection-class">
+<h3>The <code class="docutils literal notranslate"><span class="pre">DataCollection</span></code> class<a class="headerlink" href="#the-datacollection-class" title="Permalink to this headline">¶</a></h3>
+<p>The new <a class="reference internal" href="../modules/ovito_data.html#ovito.data.DataCollection.objects" title="ovito.data.DataCollection.objects"><code class="xref py py-attr docutils literal notranslate"><span class="pre">objects</span></code></a> field exposes all objects in a data collection as an unordered list.
+You can insert/remove data objects using standard Python list manipulation statements, e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cell</span> <span class="o">=</span> <span class="n">SimulationCell</span><span class="p">()</span>
+<span class="n">data</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The properties <code class="xref py py-attr docutils literal notranslate"><span class="pre">.number_of_particles</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">.number_of_half_bonds</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">.number_of_full_bonds</span></code> have
+been deprecated. Instead, these numbers are now reported by the <a class="reference internal" href="../modules/ovito_data.html#ovito.data.PropertyContainer.count" title="ovito.data.PropertyContainer.count"><code class="xref py py-attr docutils literal notranslate"><span class="pre">count</span></code></a> attribute
+of the <a class="reference internal" href="../modules/ovito_data.html#ovito.data.Particles" title="ovito.data.Particles"><code class="xref py py-class docutils literal notranslate"><span class="pre">Particles</span></code></a> and the <a class="reference internal" href="../modules/ovito_data.html#ovito.data.Bonds" title="ovito.data.Bonds"><code class="xref py py-class docutils literal notranslate"><span class="pre">Bonds</span></code></a> container objects:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">num_particles</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">count</span>
+<span class="n">num_bonds</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">count</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="particle-and-bond-properties">
+<h3>Particle and bond properties<a class="headerlink" href="#particle-and-bond-properties" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleProperty</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">BondProperty</span></code> classes have been replaced with the generic
+<a class="reference internal" href="../modules/ovito_data.html#ovito.data.Property" title="ovito.data.Property"><code class="xref py py-class docutils literal notranslate"><span class="pre">Property</span></code></a> class, which provides the functionality common to all property types in OVITO.
+The <a class="reference internal" href="../modules/ovito_data.html#ovito.data.PropertyContainer" title="ovito.data.PropertyContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">PropertyContainer</span></code></a> class has been introduced as a generic container type for
+<a class="reference internal" href="../modules/ovito_data.html#ovito.data.Property" title="ovito.data.Property"><code class="xref py py-class docutils literal notranslate"><span class="pre">Property</span></code></a> objects. OVITO knows several specializations of this generic container type,
+e.g. <a class="reference internal" href="../modules/ovito_data.html#ovito.data.Particles" title="ovito.data.Particles"><code class="xref py py-class docutils literal notranslate"><span class="pre">Particles</span></code></a>, <a class="reference internal" href="../modules/ovito_data.html#ovito.data.Bonds" title="ovito.data.Bonds"><code class="xref py py-class docutils literal notranslate"><span class="pre">Bonds</span></code></a>, <a class="reference internal" href="../modules/ovito_data.html#ovito.data.VoxelGrid" title="ovito.data.VoxelGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">VoxelGrid</span></code></a> and
+<a class="reference internal" href="../modules/ovito_data.html#ovito.data.DataTable" title="ovito.data.DataTable"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataTable</span></code></a>, that each represent different collections of elements.</p>
+<p>The <a class="reference internal" href="../modules/ovito_data.html#ovito.data.Particles" title="ovito.data.Particles"><code class="xref py py-class docutils literal notranslate"><span class="pre">ovito.data.Particles</span></code></a> container behaves like a dictionary of particle properties,
+providing key-based access to the <a class="reference internal" href="../modules/ovito_data.html#ovito.data.Property" title="ovito.data.Property"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Property</span></code></a> objects it manages.</p>
+<p>The <code class="xref py py-attr docutils literal notranslate"><span class="pre">ParticleProperty.array</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">ParticleProperty.marray</span></code> attributes
+for accessing property values have been deprecated. Instead, the <a class="reference internal" href="../modules/ovito_data.html#ovito.data.Property" title="ovito.data.Property"><code class="xref py py-class docutils literal notranslate"><span class="pre">Property</span></code></a> class itself now behaves like
+a regular Numpy array:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read access:</span>
+<span class="n">pos_property</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">particles</span><span class="p">[</span><span class="s1">&#39;Position&#39;</span><span class="p">]</span>
+<span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pos_property</span><span class="p">)</span> <span class="o">==</span> <span class="n">data</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;XYZ coordinates of first particle:&#39;</span><span class="p">,</span> <span class="n">pos_property</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># Write access:</span>
+<span class="n">pos_property</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">particles_</span><span class="p">[</span><span class="s1">&#39;Position_&#39;</span><span class="p">]</span>
+<span class="n">pos_property</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">displacement</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="simulation-cells">
+<h3>Simulation cells<a class="headerlink" href="#simulation-cells" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="../modules/ovito_data.html#ovito.data.SimulationCell" title="ovito.data.SimulationCell"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulationCell</span></code></a> class now behaves like a Numpy matrix array of shape (3,4), providing direct
+access to the cell vectors and the cell origin. The old <code class="xref py py-attr docutils literal notranslate"><span class="pre">array</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">marray</span></code> accessor attributes have been deprecated:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Expand cell along y-direction by scaling second cell vector</span>
+<span class="n">data</span><span class="o">.</span><span class="n">cell_</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="mf">1.05</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="bonds">
+<h3>Bonds<a class="headerlink" href="#bonds" title="Permalink to this headline">¶</a></h3>
+<p>OVITO 3.x no longer works with a half-bond representation. Older program versions represented each full bond A&lt;–&gt;B
+as two individual half-bonds A–&gt;B and B–&gt;A. Now, only a single record per bond is maintained by OVITO.</p>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">ovito.data.Bonds</span></code> container class stores the bond topology as a standard
+<a class="reference internal" href="../modules/ovito_data.html#ovito.data.Property" title="ovito.data.Property"><code class="xref py py-class docutils literal notranslate"><span class="pre">Property</span></code></a> named <code class="docutils literal notranslate"><span class="pre">Topology</span></code>, which is a <em>N</em> x 2 array of integer indices into the particles list:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">topology</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">bonds</span><span class="p">[</span><span class="s1">&#39;Topology&#39;</span><span class="p">]</span>
+<span class="k">assert</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Bonds.Enumerator</span></code> helper class has been renamed to <a class="reference internal" href="../modules/ovito_data.html#ovito.data.BondsEnumerator" title="ovito.data.BondsEnumerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BondsEnumerator</span></code></a>.</p>
+</div>
+<div class="section" id="file-i-o">
+<h3>File I/O<a class="headerlink" href="#file-i-o" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="../modules/ovito_io.html#ovito.io.import_file" title="ovito.io.import_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">ovito.io.import_file()</span></code></a> function no longer requires the <code class="docutils literal notranslate"><span class="pre">multiple_frames</span></code> flag to load simulation files
+containing more than one frame. Detection of multi-timestep files happens automatically now. Furthermore, <a class="reference internal" href="../modules/ovito_io.html#ovito.io.import_file" title="ovito.io.import_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">import_file()</span></code></a> now
+supports loading file sequences that are specified as an explicit list of file paths. This makes it possible to
+load sets of files that are distributed over everal directories as single animation sequence.</p>
+<p>The <a class="reference internal" href="../modules/ovito_io.html#ovito.io.export_file" title="ovito.io.export_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">ovito.io.export_file()</span></code></a> function now accepts not only a <a class="reference internal" href="../modules/ovito_pipeline.html#ovito.pipeline.Pipeline" title="ovito.pipeline.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a> object which
+generates the data to be exported, but alternatively also any <a class="reference internal" href="../modules/ovito_data.html#ovito.data.DataCollection" title="ovito.data.DataCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataCollection</span></code></a> or individual
+data objects.</p>
+<p>Some of the file format names accepted by <a class="reference internal" href="../modules/ovito_io.html#ovito.io.export_file" title="ovito.io.export_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">export_file()</span></code></a> have been renamed and the new <code class="docutils literal notranslate"><span class="pre">vtk/trimesh</span></code>
+has been added, which allows you to export a <a class="reference internal" href="../modules/ovito_data.html#ovito.data.SurfaceMesh" title="ovito.data.SurfaceMesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">SurfaceMesh</span></code></a> to a VTK geometry file.</p>
+<p>The <code class="xref py py-attr docutils literal notranslate"><span class="pre">FileSource.loaded_file</span></code> attribute has been removed. The path of the input data file is now accessible as an attribute
+of the <a class="reference internal" href="../modules/ovito_data.html#ovito.data.DataCollection" title="ovito.data.DataCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataCollection</span></code></a> interface, e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">import_file</span><span class="p">(</span><span class="s1">&#39;input.dump&#39;</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;SourceFile&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>The old <code class="xref py py-meth docutils literal notranslate"><span class="pre">DataCollection.to_ase_atoms()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">DataCollection.create_from_ase_atoms()</span></code> methods
+have been refactored into the new <a class="reference internal" href="../modules/ovito_io_ase.html#module-ovito.io.ase" title="ovito.io.ase"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ovito.io.ase</span></code></a> module and are now standalone functions named <a class="reference internal" href="../modules/ovito_io_ase.html#ovito.io.ase.ovito_to_ase" title="ovito.io.ase.ovito_to_ase"><code class="xref py py-func docutils literal notranslate"><span class="pre">ovito_to_ase()</span></code></a>
+and <a class="reference internal" href="../modules/ovito_io_ase.html#ovito.io.ase.ase_to_ovito" title="ovito.io.ase.ase_to_ovito"><code class="xref py py-func docutils literal notranslate"><span class="pre">ase_to_ovito()</span></code></a>. The latter requires that the caller provides an existing data collection object
+as destination for the atoms data, e.g. a <a class="reference internal" href="../modules/ovito_pipeline.html#ovito.pipeline.StaticSource" title="ovito.pipeline.StaticSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">StaticSource</span></code></a> instance.</p>
+</div>
+<div class="section" id="changes-to-the-global-dataset-class">
+<h3>Changes to the global <code class="docutils literal notranslate"><span class="pre">DataSet</span></code> class<a class="headerlink" href="#changes-to-the-global-dataset-class" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="xref py py-attr docutils literal notranslate"><span class="pre">ovito.DataSet</span></code> class has been renamed to <a class="reference internal" href="../modules/ovito.html#ovito.Scene" title="ovito.Scene"><code class="xref py py-class docutils literal notranslate"><span class="pre">ovito.Scene</span></code></a> and the singleton class instance is now
+accessible as global variable <a class="reference internal" href="../modules/ovito.html#ovito.scene" title="ovito.scene"><code class="xref py py-data docutils literal notranslate"><span class="pre">ovito.scene</span></code></a>.</p>
+<p>The <code class="xref py py-attr docutils literal notranslate"><span class="pre">DataSet.selected_node</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">DataSet.scene_nodes</span></code> fields have been renamed to
+<a class="reference internal" href="../modules/ovito.html#ovito.Scene.selected_pipeline" title="ovito.Scene.selected_pipeline"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Scene.selected_pipeline</span></code></a> and <a class="reference internal" href="../modules/ovito.html#ovito.Scene.pipelines" title="ovito.Scene.pipelines"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Scene.pipelines</span></code></a> respectively.</p>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">AnimationSettings</span></code> class and the <code class="xref py py-attr docutils literal notranslate"><span class="pre">DataSet.anim</span></code> attribute have been deprecated.
+Because of this, scripts no longer have control over the current time slider position. To determine the number of
+loaded animation frames, use the <a class="reference internal" href="../modules/ovito_pipeline.html#ovito.pipeline.FileSource.num_frames" title="ovito.pipeline.FileSource.num_frames"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FileSource.num_frames</span></code></a> attribute instead.</p>
+</div>
+<div class="section" id="changes-to-modifiers">
+<h3>Changes to modifiers<a class="headerlink" href="#changes-to-modifiers" title="Permalink to this headline">¶</a></h3>
+<p>Several modifier classes have been renamed in OVITO 3.0:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Old modifier name:</p></th>
+<th class="head"><p>New modifier name:</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">SelectExpressionModifier</span></code></p></td>
+<td><p><a class="reference internal" href="../modules/ovito_modifiers.html#ovito.modifiers.ExpressionSelectionModifier" title="ovito.modifiers.ExpressionSelectionModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExpressionSelectionModifier</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DeleteSelectedParticlesModifier</span></code></p></td>
+<td><p><a class="reference internal" href="../modules/ovito_modifiers.html#ovito.modifiers.DeleteSelectedModifier" title="ovito.modifiers.DeleteSelectedModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeleteSelectedModifier</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">SelectParticleTypeModifier</span></code></p></td>
+<td><p><a class="reference internal" href="../modules/ovito_modifiers.html#ovito.modifiers.SelectTypeModifier" title="ovito.modifiers.SelectTypeModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">SelectTypeModifier</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">CombineParticleSetsModifier</span></code></p></td>
+<td><p><a class="reference internal" href="../modules/ovito_modifiers.html#ovito.modifiers.CombineDatasetsModifier" title="ovito.modifiers.CombineDatasetsModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">CombineDatasetsModifier</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">BinAndReduceModifier</span></code></p></td>
+<td><p><a class="reference internal" href="../modules/ovito_modifiers.html#ovito.modifiers.SpatialBinningModifier" title="ovito.modifiers.SpatialBinningModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialBinningModifier</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<p>The following modifier classes have been generalized and gained a new <code class="xref py py-attr docutils literal notranslate"><span class="pre">operate_on</span></code> field that controls what kind(s) of data elements (e.g. particles,
+bonds, voxel data, etc.) the modifier should act on:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="../modules/ovito_modifiers.html#ovito.modifiers.AffineTransformationModifier" title="ovito.modifiers.AffineTransformationModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">AffineTransformationModifier</span></code></a></p></li>
+<li><p><a class="reference internal" href="../modules/ovito_modifiers.html#ovito.modifiers.AssignColorModifier" title="ovito.modifiers.AssignColorModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">AssignColorModifier</span></code></a></p></li>
+<li><p><a class="reference internal" href="../modules/ovito_modifiers.html#ovito.modifiers.ClearSelectionModifier" title="ovito.modifiers.ClearSelectionModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClearSelectionModifier</span></code></a></p></li>
+<li><p><a class="reference internal" href="../modules/ovito_modifiers.html#ovito.modifiers.ColorCodingModifier" title="ovito.modifiers.ColorCodingModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">ColorCodingModifier</span></code></a></p></li>
+<li><p><a class="reference internal" href="../modules/ovito_modifiers.html#ovito.modifiers.ComputePropertyModifier" title="ovito.modifiers.ComputePropertyModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComputePropertyModifier</span></code></a></p></li>
+<li><p><a class="reference internal" href="../modules/ovito_modifiers.html#ovito.modifiers.DeleteSelectedModifier" title="ovito.modifiers.DeleteSelectedModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeleteSelectedModifier</span></code></a></p></li>
+<li><p><a class="reference internal" href="../modules/ovito_modifiers.html#ovito.modifiers.ExpressionSelectionModifier" title="ovito.modifiers.ExpressionSelectionModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExpressionSelectionModifier</span></code></a></p></li>
+<li><p><a class="reference internal" href="../modules/ovito_modifiers.html#ovito.modifiers.InvertSelectionModifier" title="ovito.modifiers.InvertSelectionModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">InvertSelectionModifier</span></code></a></p></li>
+<li><p><a class="reference internal" href="../modules/ovito_modifiers.html#ovito.modifiers.HistogramModifier" title="ovito.modifiers.HistogramModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">HistogramModifier</span></code></a></p></li>
+<li><p><a class="reference internal" href="../modules/ovito_modifiers.html#ovito.modifiers.SelectTypeModifier" title="ovito.modifiers.SelectTypeModifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">SelectTypeModifier</span></code></a></p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="changes-to-rendering-functions">
+<h3>Changes to rendering functions<a class="headerlink" href="#changes-to-rendering-functions" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">RenderSettings</span></code> class and the <code class="xref py py-meth docutils literal notranslate"><span class="pre">Viewport.render()</span></code> method have been deprecated.
+Instead, the <a class="reference internal" href="../modules/ovito_vis.html#ovito.vis.Viewport" title="ovito.vis.Viewport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Viewport</span></code></a> class now supports the new <a class="reference internal" href="../modules/ovito_vis.html#ovito.vis.Viewport.render_image" title="ovito.vis.Viewport.render_image"><code class="xref py py-meth docutils literal notranslate"><span class="pre">render_image()</span></code></a>
+and <a class="reference internal" href="../modules/ovito_vis.html#ovito.vis.Viewport.render_anim" title="ovito.vis.Viewport.render_anim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">render_anim()</span></code></a> methods, which directly accept the required render settings as keyword function
+parameters.</p>
+</div>
+<div class="section" id="changes-to-the-pythonviewportoverlay-class">
+<h3>Changes to the PythonViewportOverlay class<a class="headerlink" href="#changes-to-the-pythonviewportoverlay-class" title="Permalink to this headline">¶</a></h3>
+<p>The signature of user-defined overlay functions has been changed. The <a class="reference internal" href="../modules/ovito_vis.html#ovito.vis.PythonViewportOverlay" title="ovito.vis.PythonViewportOverlay"><code class="xref py py-class docutils literal notranslate"><span class="pre">PythonViewportOverlay</span></code></a>
+now passes a single parameter of the <a class="reference internal" href="../modules/ovito_vis.html#ovito.vis.PythonViewportOverlay.Arguments" title="ovito.vis.PythonViewportOverlay.Arguments"><code class="xref py py-class docutils literal notranslate"><span class="pre">PythonViewportOverlay.Arguments</span></code></a>
+type to the user function, which contains all necessary information. This helper class also provides additional utility methods for
+projecting points from 3d space to 2d screen space, which may be used by the user-defined overlay function.</p>
+</div>
+<div class="section" id="changes-to-display-objects">
+<h3>Changes to display objects<a class="headerlink" href="#changes-to-display-objects" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Display</span></code> base class has been renamed to <a class="reference internal" href="../modules/ovito_vis.html#ovito.vis.DataVis" title="ovito.vis.DataVis"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataVis</span></code></a>. Instead of <em>display objects</em>, the documentation now uses the term
+<em>visual elements</em>. The <a class="reference internal" href="../modules/ovito_vis.html#module-ovito.vis" title="ovito.vis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ovito.vis</span></code></a> module provides various visual element types, each derived from the common <a class="reference internal" href="../modules/ovito_vis.html#ovito.vis.DataVis" title="ovito.vis.DataVis"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataVis</span></code></a>
+base class.</p>
+</div>
+<div class="section" id="surfacemesh-data-object">
+<h3>SurfaceMesh data object<a class="headerlink" href="#surfacemesh-data-object" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="../modules/ovito_data.html#ovito.data.SurfaceMesh" title="ovito.data.SurfaceMesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">SurfaceMesh</span></code></a> class has been greatly extended. It now provides access to
+the periodic <a class="reference internal" href="../modules/ovito_data.html#ovito.data.SurfaceMesh.domain" title="ovito.data.SurfaceMesh.domain"><code class="xref py py-attr docutils literal notranslate"><span class="pre">domain</span></code></a> the surface mesh is embedded in as well as the vertices and faces
+of the mesh. Export of the triangle mesh to a VTK file is now performed using the standard <a class="reference internal" href="../modules/ovito_io.html#ovito.io.export_file" title="ovito.io.export_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">ovito.io.export_file()</span></code></a>
+function (<code class="docutils literal notranslate"><span class="pre">'vtk/trimesh'</span></code> output format).</p>
+<p>Furthermore, the <a class="reference internal" href="../modules/ovito_data.html#ovito.data.SurfaceMesh" title="ovito.data.SurfaceMesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">SurfaceMesh</span></code></a> class now provides the <a class="reference internal" href="../modules/ovito_data.html#ovito.data.SurfaceMesh.locate_point" title="ovito.data.SurfaceMesh.locate_point"><code class="xref py py-meth docutils literal notranslate"><span class="pre">locate_point()</span></code></a> method,
+which can be used to determine whether a spatial point is located on the surface manifold, inside the region enclosed by the surface, or outside.</p>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="running.html">OVITO’s Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">High-level overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_io.html">File I/O</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipelines.html">Data pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_model.html">Data model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_manipulation.html">Manipulating data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_modifiers.html">User-defined modifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rendering.html">Rendering &amp; visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_topics.html">Advanced topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Code examples</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">OVITO 2.9 Migration Guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/ovito.html"><code class="docutils literal notranslate"><span class="pre">ovito</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/ovito_data.html"><code class="docutils literal notranslate"><span class="pre">ovito.data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/ovito_io.html"><code class="docutils literal notranslate"><span class="pre">ovito.io</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/ovito_io_ase.html"><code class="docutils literal notranslate"><span class="pre">ovito.io.ase</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/ovito_modifiers.html"><code class="docutils literal notranslate"><span class="pre">ovito.modifiers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/ovito_pipeline.html"><code class="docutils literal notranslate"><span class="pre">ovito.pipeline</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/ovito_vis.html"><code class="docutils literal notranslate"><span class="pre">ovito.vis</span></code></a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../modules/ovito.html" title="ovito"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples/overlays/highlight_particle.html" title="Example O3: Highlight a particle"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">OVITO 3.4.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">OVITO 2.9 Migration Guide</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021 OVITO GmbH.
+    </div>
+  </body>
+</html>

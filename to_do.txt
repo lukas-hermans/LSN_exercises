@@ -1,7 +1,4 @@
 ex1:
-    - make tools::count more efficient (binary search)
-    - make tools::prog_mean more efficient (do not always calculate whole sum)
-    - avoid "," at line end (usecols in np.loadtxt)
     - avoid repetition for uniform, exponential and lorentzian distribution 
 
 ex2:
@@ -12,8 +9,3 @@ ex3:
     - make tools::prog_mean more efficient (do not always calculate whole sum)
 
 ex4:
-
-
-
-- vector operation library, prog_mean?
-- comment makefile

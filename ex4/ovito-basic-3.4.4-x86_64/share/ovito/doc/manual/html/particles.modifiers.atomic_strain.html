@@ -1,0 +1,266 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Atomic strain</title><link rel="stylesheet" type="text/css" href="manual.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="OVITO User Manual"><link rel="up" href="particles.modifiers.html" title="Modifiers"><link rel="prev" href="particles.modifiers.assign_color.html" title="Assign color"><link rel="next" href="particles.modifiers.bond_analysis.html" title="Bond analysis pro"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><a href="https://www.ovito.org/"><img src="images/ovito_logo.png" border="0" width="84"></a><table width="100%" summary="Navigation header"><tr><td width="20%" align="left"><a accesskey="h" href="index.html">Table of Contents</a></td><th width="60%" align="center">Atomic strain</th><td width="20%" align="right"><a accesskey="u" href="particles.modifiers.html">Up</a></td></tr><tr><td width="20%" align="left"><a accesskey="p" href="particles.modifiers.assign_color.html">Prev</a> </td><th width="60%" align="center">Modifiers</th><td width="20%" align="right"> <a accesskey="n" href="particles.modifiers.bond_analysis.html">Next</a></td></tr></table></div><div class="section" id="particles.modifiers.atomic_strain"><div class="titlepage"><div><div><h3 class="title">Atomic strain</h3></div></div></div>
+  
+
+  <p>
+    </p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/modifiers/atomic_strain_panel.png" width="270"></div></div></div><p>
+    This modifier calculates the atomic-level deformation gradient and the strain tensor at each particle from the relative motion
+    of its neighbors. The two per-particle tensors represent versions of the corresponding <a class="ulink" href="https://en.wikipedia.org/wiki/Finite_strain_theory#Deformation_gradient_tensor" target="_top">
+    continuum kinematic quantities</a> obtained from averaging the discrete particle displacements over finite volumes around each particle.
+  </p>
+
+  <p>
+    The deformation calculation is based on two input particle configurations: a <span class="emphasis"><em>reference</em></span> (or initial) configuration
+    and a <span class="emphasis"><em>current</em></span> (or deformed) configuration. In other words, the local deformation is calculated with
+    respect to some explicitly specified initial arrangement of the input particles.
+    The modifier always considers the currently loaded particle positions as the current configuration.
+    The reference particle positions are by default taken from frame 0 of the same animation sequence.
+    Alternatively, the modifier supports loading the reference particle positions from a separate data file.
+  </p>
+
+  <p>
+    Conceptually, the calculation of various micromechanical quantities happens in several steps:
+    </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">First, the particle displacement vectors {<span class="mathphrase">u<sub>i</sub></span>} are calculated from the particle positions in the initial and the final configuration.</li><li class="listitem">Based on this information, the atomic <a class="ulink" href="https://en.wikipedia.org/wiki/Finite_strain_theory#Deformation_gradient_tensor" target="_top">deformation gradient tensor <span class="mathphrase">F</span></a> is calculated for each particle.</li><li class="listitem">Based on <span class="mathphrase">F</span>, the atomic <a class="ulink" href="https://en.wikipedia.org/wiki/Finite_strain_theory#Finite_strain_tensors" target="_top">Green-Lagrangian strain tensor <span class="mathphrase">E</span></a> is derived for each particle (<span class="mathphrase">E=1/2(F<sup>T</sup>F-I)</span>).</li><li class="listitem">Based on E, the <span class="emphasis"><em>von Mises</em></span> local shear invariant and the hydrostatic strain measure are calculated.</li><li class="listitem">Additionally, a <a class="ulink" href="https://en.wikipedia.org/wiki/Finite_strain_theory#Polar_decomposition_of_the_deformation_gradient_tensor" target="_top">polar decomposition of the atomic deformation gradient <span class="mathphrase">F</span></a> yields a local rotation tensor <span class="mathphrase">R</span> and a stretch tensor <span class="mathphrase">U</span>.</li><li class="listitem">Furthermore, a quantity knows as  <span class="mathphrase">D<sup>2</sup><sub>min</sub></span> may be calculated from the particle displacements
+        and the deformation gradient F, which is a measure for the non-affine part of the local deformation.</li></ol></div><p>
+  </p>
+
+  <p>
+    The modifier outputs these micromechanical quantities as new particle properties. You can use the <a class="link" href="particles.modifiers.color_coding.html" title="Color coding">Color coding modifier</a>, for example,
+    to visualize the values of these properties in OVITO or look at specific particles using the <a class="link" href="data_inspector.html" title="Data inspector">Data Inspector</a>.
+    Note that the displacements are only intermediate calculation results which are not output by the modifier.
+    If you need them, please use the <a class="link" href="particles.modifiers.displacement_vectors.html" title="Displacement vectors">Displacement vectors modifier</a>.
+  </p>
+
+  <div class="simplesect" id="idp3163584"><div class="titlepage"><div><div><h4 class="title">Role of the cutoff radius</h4></div></div></div>
+    
+    <p>
+      The <span class="emphasis"><em>cutoff radius</em></span> is a parameter controlling the range of neighbors taken
+      into account when computing the atomic deformation gradient tensor for a particle. In other words this parameter determines
+      the size of a spherical volume around the particle over which the relative motion of neighboring particles is averaged to obtain
+      the continuum deformation measure. As a rule of thumb: Use a smaller cutoff radius parameter to resolve all local details of the deformation field.
+      On the other hand, a large cutoff radius will yield slowly varying (smooth) deformation values at the atomic sites.
+    </p>
+    <p>
+      A typical choice for the cutoff radius parameter is to use the first minimum of the pair distribution function, i.e. placing
+      the cutoff halfway between the first and the second shell of neighbors in the system at hand. You can calculate the pair distribution
+      function for the current system using OVITO's <a class="link" href="particles.modifiers.coordination_analysis.html" title="Coordination analysis">Coordination Analysis</a> modifier.
+    </p>
+    <p>
+      Since the deformation gradient at each site is calculated from the relative motion of neighboring particles, it is important to ensure that sufficient
+      neighbors are within the given cutoff range (in the undeformed configuration). This puts a lower limit on the
+      cutoff radius that you can safely use. For three-dimensional systems, OVITO requires at a minimum three neighbors within
+      the cutoff range of the central particle in order to calculate a deformation gradient tensor. Furthermore, these three neighbors must not be co-planar.
+      If the cutoff radius has been chosen too small and there are less than three neighbors within range of the central particle,
+      the deformation gradient calculation and all subsequent calculations will fail for the particle. The modifier will notify you about this situation
+      in the status field and will, for diagnostic purposes, select all such "undercoordinated" particles for which the calculation failed.
+      Depending on the situation, you may react to this kind of condition by bumping up the cutoff radius parameter in order for more neighbors
+      to be included in the cutoff sphere.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3168768"><div class="titlepage"><div><div><h4 class="title">Two-dimensional systems</h4></div></div></div>
+    
+    <p>
+      Depending on the selected <a class="link" href="scene_objects.simulation_cell.html" title="Simulation cell">dimensionality</a> of the input simulation cell,
+      the atomic strain calculation is either performed in 2D or 3D mode. In 3D mode, all 9 components of the atomic
+      deformation gradient tensor are calculated from the relative motion vectors of neighboring particles using
+      a least-squares fit. In 2D mode, only 4 independent components are calculated:
+      </p><div class="informaltable">
+        <table class="informaltable" style="border-collapse: collapse;border-top: 1px solid ; border-bottom: 1px solid ; border-left: 1px solid ; border-right: 1px solid ; "><colgroup><col><col><col></colgroup><thead><tr><th style="border-right: 1px solid ; border-bottom: 1px solid ; "> </th><th style="border-right: 1px solid ; border-bottom: 1px solid ; ">3D mode</th><th style="border-bottom: 1px solid ; ">2D mode</th></tr></thead><tbody><tr><td style="border-right: 1px solid ; " valign="middle">Deformation gradient <span class="mathphrase">F</span>:</td><td style="border-right: 1px solid ; "><pre class="screen">
+                <span class="mathphrase">F<sub>xx</sub></span> <span class="mathphrase">F<sub>xy</sub></span> <span class="mathphrase">F<sub>xz</sub></span>
+                <span class="mathphrase">F<sub>yx</sub></span> <span class="mathphrase">F<sub>yy</sub></span> <span class="mathphrase">F<sub>yz</sub></span>
+                <span class="mathphrase">F<sub>zx</sub></span> <span class="mathphrase">F<sub>zy</sub></span> <span class="mathphrase">F<sub>zz</sub></span>
+                </pre>
+              </td><td style=""><pre class="screen">
+                <span class="mathphrase">F<sub>xx</sub></span> <span class="mathphrase">F<sub>xy</sub></span> 0
+                <span class="mathphrase">F<sub>yx</sub></span> <span class="mathphrase">F<sub>yy</sub></span> 0
+                0   0  1
+                </pre>
+              </td></tr></tbody></table>
+      </div><p>
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3188880"><div class="titlepage"><div><div><h4 class="title">More on the micromechanical quantities</h4></div></div></div>
+    
+    <p>
+      The atomic strain calculation in OVITO is based on finite-strain theory. Accordingly, strain is measured using the
+      <a class="ulink" href="https://en.wikipedia.org/wiki/Finite_strain_theory#Finite_strain_tensors" target="_top">Green-Lagrangian strain tensor</a>
+      <span class="mathphrase">E=1/2(F<sup>T</sup>F-I)</span>.
+      On the basis of this symmetric strain tensor, the modifier also calculates the <span class="emphasis"><em>von Mises</em></span> local shear invariant and the
+      volumetric (hydrostatic) part of the strain tensor and outputs these scalar quantities as particle properties named
+      <code class="literal">Shear Strain</code> and <code class="literal">Volumetric Strain</code>, respectively. The former is a good measure for shear deformations
+      along arbitrary directions.
+      </p><div class="informaltable">
+        <table class="informaltable" style="border-collapse: collapse;border-top: 1px solid ; border-bottom: 1px solid ; border-left: 1px solid ; border-right: 1px solid ; "><colgroup><col><col><col></colgroup><thead><tr><th style="border-right: 1px solid ; border-bottom: 1px solid ; "> </th><th style="border-right: 1px solid ; border-bottom: 1px solid ; ">3D mode</th><th style="border-bottom: 1px solid ; ">2D mode</th></tr></thead><tbody><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Shear strain</td><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">
+                
+                  [<span class="mathphrase">E<sub>xy</sub></span><sup>2</sup> +
+                   <span class="mathphrase">E<sub>xz</sub></span><sup>2</sup> +
+                   <span class="mathphrase">E<sub>yz</sub></span><sup>2</sup> +
+                    1/6
+                    ((<span class="mathphrase">E<sub>xx</sub></span> - <span class="mathphrase">E<sub>yy</sub></span>)<sup>2</sup> +
+                    (<span class="mathphrase">E<sub>xx</sub></span> - <span class="mathphrase">E<sub>zz</sub></span>)<sup>2</sup> +
+                    (<span class="mathphrase">E<sub>yy</sub></span> - <span class="mathphrase">E<sub>zz</sub></span>)<sup>2</sup>)]
+                    <sup>1/2</sup>
+                
+              </td><td style="border-bottom: 1px solid ; ">
+                
+                  [<span class="mathphrase">E<sub>xy</sub></span><sup>2</sup> +
+                    1/2 (<span class="mathphrase">E<sub>xx</sub></span> - <span class="mathphrase">E<sub>yy</sub></span>)<sup>2</sup>]
+                    <sup>1/2</sup>
+                
+              </td></tr><tr><td style="border-right: 1px solid ; ">Volumetric strain</td><td style="border-right: 1px solid ; ">
+                
+                  (<span class="mathphrase">E<sub>xx</sub></span> + <span class="mathphrase">E<sub>yy</sub></span> + <span class="mathphrase">E<sub>zz</sub></span>) / 3
+                
+              </td><td style="">
+                
+                  (<span class="mathphrase">E<sub>xx</sub></span> + <span class="mathphrase">E<sub>yy</sub></span>) / 2
+                
+              </td></tr></tbody></table>
+      </div><p>
+    </p>
+    <p>
+      The deformation gradient and the strain tensor both can only describe material deformations that are locally affine.
+      In fact, the atomic deformation gradient tensor is computed such that it best describes only the affine component of the
+      true deformation, which may actually be non-affine within the spherical sampling volumes. Falk &amp; Langer (see reference below) have proposed a measure to
+      quantify the deviation of the true deformation from the affine approximation that the atomic deformation
+      gradient represents. This measure, the <span class="emphasis"><em>non-affine squared displacement</em></span> (<span class="mathphrase">D<sup>2</sup><sub>min</sub></span>),
+      is basically the <a class="ulink" href="http://li.mit.edu/A/Graphics/A/annotate_atomic_strain/Doc/main.pdf" target="_top">residual of the least-squares fit</a> through which the deformation gradient is calculated.
+      It may be used as a diagnostic for identifying local irreversible shear transformations in amorphous solids, for example.
+    </p>
+    <p>
+      When calculating <span class="mathphrase">D<sup>2</sup><sub>min</sub></span>, OVITO follows the original formulation given by
+      Falk and Langer, which consists of summing up the squared differences between the actual displacements of neighbors and
+      the computed affine approximation. In the current implementation, this sum does <span class="emphasis"><em>not</em></span> get divided by the
+      number of neighbors within the cutoff range. Thus, the calculated <span class="mathphrase">D<sup>2</sup><sub>min</sub></span>
+      value for a particle is not normalized and will depend on the number of neighbors that are included in the selected cutoff volume. That means <span class="mathphrase">D<sup>2</sup><sub>min</sub></span> values will naturally rise
+      if you increase the cutoff radius.
+    </p>
+
+    <p>The atomic deformation gradient <span class="mathphrase">F</span> can be decomposed into the product
+    <span class="mathphrase">F=RU</span>
+    with <span class="mathphrase">R</span> being the rigid-body rotation tensor and <span class="mathphrase">U</span> the right stretch tensor.
+    <span class="mathphrase">U</span> is symmetric positive definite. The local rotation <span class="mathphrase">R</span> is encoded
+    as a quaternion R=(X, Y, Z, W) and is output by the modifier
+    as a particle property named <code class="literal">Rotation</code>. From this, the angle of rotation (in radians) for each particle can subsequently be
+    obtained as <span class="mathphrase">theta=2*acos(Rotation.W)</span>
+    using e.g. the <a class="link" href="particles.modifiers.compute_property.html" title="Compute property">Compute Property</a> modifier.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3233408"><div class="titlepage"><div><div><h4 class="title">Reference configuration</h4></div></div></div>
+    
+    <p>
+      By default, the modifier obtains the reference particle positions from the currently loaded
+      simulation sequence by evaluating the data pipeline at animation time 0. This default mode
+      is denoted as <span class="emphasis"><em>"Constant reference configuration"</em></span> in the user interface.
+      If desired, OVITO allows you to pick an animation frame other than 0 as reference.
+    </p>
+    <p>
+      Alternatively, you can let OVITO calculate incremental deformation quantities using
+      the <span class="emphasis"><em>"Relative to current frame"</em></span> option. In this mode, a sliding reference
+      configuration is used, based on a relative time offset with respect to the current configuration.
+      Negative offsets correspond to a reference configuration preceding the current configuration
+      in time. An offset of -1, for example, lets OVITO use the animation frame immediately preceding
+      the current frame as reference. Note that, in this case, deformation quantities cannot be calculated at
+      frame 0, because there is no preceding frame.
+    </p>
+    <p>
+      If you want to load the reference particle positions from a separate file instead of taking
+      them from the currently loaded dataset, you can select the "External file" data source option.
+      Activating this option will show an additional panel <span class="guilabel">"Reference: External file"</span> allowing you to
+      pick the file containing the undeformed particle positions.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3238032"><div class="titlepage"><div><div><h4 class="title">Particle identities</h4></div></div></div>
+    
+    <p>
+      In order to calculate the displacement vectors that enter in the deformation gradient calculation, OVITO needs to build a one-to-one mapping between the particles in the undeformed
+      and the deformed configuration. If the particles possess a property named <code class="literal">Particle Identifier</code>,
+      then OVITO will use this identity information to generate the mapping. In such a case, it is okay if the storage order of particles
+      in the input file(s) changes with time. However, if particles do not possess unique identifiers, then the modifier requires that
+      the reference configuration contains exactly the same number of particles as the current configuration
+      and it assumes that they are stored in the same order. This assumption is not always true as some simulation
+      codes reorder particles during a simulation run for performance reasons. If you forget to dump the particle IDs or atom IDs
+      in addition to the positions during a simulation, you should be aware that OVITO may compute wrong displacement vectors because of
+      an invalid default particle mapping. You can use the <a class="link" href="data_inspector.html" title="Data inspector">Data Inspector</a>
+      to check for the presence of the <code class="literal">Particle Identifier</code> property after file import.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3242320"><div class="titlepage"><div><div><h4 class="title">Affine mapping of the simulation cell</h4></div></div></div>
+    
+    <p>
+      Note: This option applies to systems with periodic boundary conditions. For non-periodic systems (and typically also for
+      systems with mixed boundary conditions) it should remain turned off.
+    </p>
+    <p>
+      The <span class="emphasis"><em>affine mapping</em></span> setting controls how OVITO treats situations in which the shape or volume of the periodic simulation cell
+      changes from the initial to the deformed configuration. Such a cell change typically occurs in simulations due to straining or
+      pressure/stress relaxation. Because the calculation of displacement vectors is ambiguous in such situations,
+      the <span class="emphasis"><em>affine mapping</em></span> option lets you control the precise calculation method.
+    </p>
+    <p>
+      If affine mapping is turned off (the default), atomic displacements are calculated simply by subtracting the initial particle position from
+      the current position. Any change of the simulation cell geometry is ignored.
+    </p>
+    <p>
+      The <span class="emphasis"><em>"To reference"</em></span> setting performs a remapping of the current particle positions into the reference simulation cell
+      before calculating the displacement vectors. For that, OVITO first computes an affine transformation from the current and the reference
+      simulation cell geometry and applies it to the particle coordinates. This mode may be used to effectively filter out contributions
+      to the atomic strain that stem from the uniform deformation of the simulation cell, retaining only the internal, non-uniform
+      deformation of the particles.
+      </p>
+      <p>
+      The <span class="emphasis"><em>"To current"</em></span> setting performs the opposite type of preprocessing: It transforms the particles of the undeformed configuration to the deformed
+      cell before calculating the displacements. It does that by applying the same affine transformation that the
+      simulation cell undergoes.
+      </p>
+  </div>
+
+  <div class="simplesect" id="idp3248528"><div class="titlepage"><div><div><h4 class="title">Minimum image convention</h4></div></div></div>
+    
+      <p>
+        This option tells OVITO whether or not to use the <a class="ulink" href="https://en.wikipedia.org/wiki/Periodic_boundary_conditions#Practical_implementation:_continuity_and_the_minimum_image_convention" target="_top">minimum image convention</a>
+        when calculating the displacement vectors for systems with periodic boundary conditions.
+        You should deactivate this option if you work with <span class="emphasis"><em>unwrapped</em></span> particle coordinates. In this case
+        OVITO assumes that particle trajectories are all continuous. On the other hand, if you work with
+        <span class="emphasis"><em>wrapped</em></span> particle coordinates, this option should be turned on. The minimum image convention
+        ensures that displacements are calculated correctly even when particles cross a periodic boundary of the cell
+        and were mapped back into the cell by the simulation code. On the other hand, if you intend to analyze a system where particles have moved by
+        more than half of the simulation box size, then the minimum image convention cannot be used. You <span class="emphasis"><em>must</em></span>
+        use unwrapped coordinates in this case, because large displacements would otherwise be folded back into the periodic cell thanks to
+        the minimum image convention.
+      </p>
+      <p>
+        The following figure shows the effect of the option on the calculated displacement vectors (which in turn affect the other kinematic deformation measures):
+          </p><div class="screenshot"><div class="mediaobject"><object type="image/svg+xml" data="images/modifiers/displacement_vectors_mapping.svg"></object></div></div><p>
+      </p>
+  </div>
+
+  <div class="simplesect" id="idp3255136"><div class="titlepage"><div><div><h4 class="title">Technical references</h4></div></div></div>
+    
+    <p>
+      More detailed information on the strain calculation method can be found in the following sources:
+      </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><a class="ulink" href="http://li.mit.edu/Archive/Activities/Archive/Papers/07/Shimizu07a.pdf" target="_top">Shimizu, Ogata, Li: Mater. Trans. 48 (2007), 2923</a></li><li class="listitem"><a class="ulink" href="http://li.mit.edu/A/Graphics/A/annotate_atomic_strain/Doc/main.pdf" target="_top">Li, Shimizu: Least-Square Atomic Strain</a></li><li class="listitem"><a class="ulink" href="http://li.mit.edu/A/Graphics/A/Doc/vonMisesInvariant.pdf" target="_top">Li: von Mises shear strain invariant</a></li><li class="listitem"><a class="ulink" href="http://dx.doi.org/10.1103/PhysRevE.57.7192" target="_top">Falk, Langer: Phys. Rev. E 57 (1998), 7192</a></li></ul></div><p>
+    </p>
+    <p>
+      Note that OVITO uses a convention where particle positions are column vectors.
+      Some other programs such as <span class="emphasis"><em>AtomEye</em></span> use a row-vector convention instead.
+      As a result, the computed deformation gradient tensors are transposed.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3262400"><div class="titlepage"><div><div><h4 class="title">See also</h4></div></div></div>
+    
+    <p>
+      </p><table border="0" summary="Simple list" class="simplelist"><tr><td><a class="link" href="particles.modifiers.displacement_vectors.html" title="Displacement vectors">Displacement vectors modifier</a></td></tr><tr><td><a class="pydoc-link" href="python/modules/ovito_modifiers.html#ovito.modifiers.AtomicStrainModifier" target="_top"><code class="classname">AtomicStrainModifier</code> (Python API)</a><a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a></td></tr></table><p>
+    </p>
+  </div>
+
+</div><p class="footer_copyright">© 2021  OVITO GmbH</p><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="particles.modifiers.assign_color.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="particles.modifiers.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="particles.modifiers.bond_analysis.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Assign color </td><td width="20%" align="center"><a accesskey="h" href="index.html">Table of Contents</a></td><td width="40%" align="right" valign="top"> Bond analysis<a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a></td></tr></table></div></body></html>

@@ -1,0 +1,209 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ovito &#8212; OVITO 3.4.4 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="shortcut icon" href="../_static/ovito.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ovito.data" href="ovito_data.html" />
+    <link rel="prev" title="OVITO 2.9 Migration Guide" href="../introduction/version_changes.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ovito_data.html" title="ovito.data"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../introduction/version_changes.html" title="OVITO 2.9 Migration Guide"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">OVITO 3.4.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="docutils literal notranslate"><span class="pre">ovito</span></code></a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ovito">
+<span id="ovito"></span><h1><code class="docutils literal notranslate"><span class="pre">ovito</span></code><a class="headerlink" href="#module-ovito" title="Permalink to this headline">¶</a></h1>
+<p>This module contains the <a class="reference internal" href="#ovito.Scene" title="ovito.Scene"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scene</span></code></a> class, which serves as a “universe” or context for all actions
+performed by a script. The global scene object is accessible as module-level variable <a class="reference internal" href="#ovito.scene" title="ovito.scene"><code class="xref py py-data docutils literal notranslate"><span class="pre">ovito.scene</span></code></a>.
+The scene manages a list of <a class="reference internal" href="ovito_pipeline.html#ovito.pipeline.Pipeline" title="ovito.pipeline.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a> objects, which will be visible in images and videos
+when rendering the scene through a <a class="reference internal" href="ovito_vis.html#ovito.vis.Viewport" title="ovito.vis.Viewport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Viewport</span></code></a>. Futhermore, you can save the entire
+scene including all pipelines to a <code class="file docutils literal notranslate"><span class="pre">.ovito</span></code> session state file, which can be opened in the graphical OVITO application.</p>
+<dl class="py data">
+<dt id="ovito.scene">
+<code class="sig-prename descclassname">ovito.</code><code class="sig-name descname">scene</code><a class="headerlink" href="#ovito.scene" title="Permalink to this definition">¶</a></dt>
+<dd><p>This module-level variable points to the global <a class="reference internal" href="#ovito.Scene" title="ovito.Scene"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scene</span></code></a> object,
+which serves as context for all operations performed by the script. The <a class="reference internal" href="#ovito.Scene" title="ovito.Scene"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scene</span></code></a> object
+represents the program state and provides access to the contents of the visualization scene:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ovito</span>
+
+<span class="c1"># Retrieve the output data of the pipeline that is currently selected in OVITO:</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">ovito</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">selected_pipeline</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py data">
+<dt id="ovito.version">
+<code class="sig-prename descclassname">ovito.</code><code class="sig-name descname">version</code><a class="headerlink" href="#ovito.version" title="Permalink to this definition">¶</a></dt>
+<dd><p>A module-level attribute reprting the OVITO program version number (as a tuple of three ints).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="ovito.version_string">
+<code class="sig-prename descclassname">ovito.</code><code class="sig-name descname">version_string</code><a class="headerlink" href="#ovito.version_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Module-level attribute reporting the OVITO program version (as a string).</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="ovito.Scene">
+<em class="property">class </em><code class="sig-prename descclassname">ovito.</code><code class="sig-name descname">Scene</code><a class="headerlink" href="#ovito.Scene" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class encompasses all data of an OVITO program session (basically everything that gets saved in a <code class="docutils literal notranslate"><span class="pre">.ovito</span></code> state file). It manages the list of objects (i.e. <a class="reference internal" href="ovito_pipeline.html#ovito.pipeline.Pipeline" title="ovito.pipeline.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a> instances) that are part of the three-dimensional scene and which will show up in rendered images.</p>
+<p>From a script’s point of view, there exists exactly one universal instance of this class at any time, which is accessible through the <a class="reference internal" href="#ovito.scene" title="ovito.scene"><code class="xref py py-data docutils literal notranslate"><span class="pre">ovito.scene</span></code></a> module-level variable. A script cannot create another <code class="xref py py-class docutils literal notranslate"><span class="pre">Scene</span></code> instance by itself.</p>
+<dl class="py method">
+<dt id="ovito.Scene.pipelines">
+<em class="property">property </em><code class="sig-name descname">pipelines</code><a class="headerlink" href="#ovito.Scene.pipelines" title="Permalink to this definition">¶</a></dt>
+<dd><p>The list of <a class="reference internal" href="ovito_pipeline.html#ovito.pipeline.Pipeline" title="ovito.pipeline.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a> objects that are currently part of the three-dimensional scene.
+Only pipelines in this list will display their output data in the viewports and in rendered images. You can add or remove a pipeline either by calling
+its <a class="reference internal" href="ovito_pipeline.html#ovito.pipeline.Pipeline.add_to_scene" title="ovito.pipeline.Pipeline.add_to_scene"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_to_scene()</span></code></a> or <a class="reference internal" href="ovito_pipeline.html#ovito.pipeline.Pipeline.remove_from_scene" title="ovito.pipeline.Pipeline.remove_from_scene"><code class="xref py py-meth docutils literal notranslate"><span class="pre">remove_from_scene()</span></code></a> methods or by directly manipulating this
+list using the standard Python <code class="docutils literal notranslate"><span class="pre">append()</span></code> and <code class="docutils literal notranslate"><span class="pre">del</span></code> statements:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ovito</span> <span class="k">import</span> <span class="n">scene</span>
+<span class="kn">from</span> <span class="nn">ovito.io</span> <span class="k">import</span> <span class="n">import_file</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">import_file</span><span class="p">(</span><span class="s1">&#39;input/simulation.dump&#39;</span><span class="p">)</span>
+
+<span class="c1"># Insert the pipeline into the visualization scene.</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">add_to_scene</span><span class="p">()</span>
+<span class="c1"># It&#39;s now part of the &#39;scene.pipelines&#39; list.</span>
+<span class="k">assert</span><span class="p">(</span><span class="n">pipeline</span> <span class="ow">in</span> <span class="n">scene</span><span class="o">.</span><span class="n">pipelines</span><span class="p">)</span>
+<span class="c1"># If needed, we can take it out again.</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">remove_from_scene</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ovito.Scene.save">
+<code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ovito.Scene.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the scene including all data pipelines that are currently part of it to an OVITO session state file. This function works like the <em>Save State As</em> menu function of OVITO. Note that pipelines that have not been added to the scene will not be saved to the state file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – Output file path</p>
+</dd>
+</dl>
+<p>The saved session state may be loaded again using the <strong class="command">-o</strong> <a class="reference internal" href="../introduction/running.html#preloading-program-state"><span class="std std-ref">command line option</span></a> of <strong class="program">ovitos</strong> or by opening the file in the <a class="reference external" href="./../../usage.import.html#usage.import.command_line">OVITO desktop application</a>. After loading the state file, the <a class="reference internal" href="#ovito.Scene.pipelines" title="ovito.Scene.pipelines"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pipelines</span></code></a> list will contain again all data pipelines that were part of the scene when it was saved. See also <a class="reference internal" href="../introduction/advanced_topics.html#saving-loading-pipelines"><span class="std std-ref">this section</span></a> for more information.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ovito.Scene.selected_pipeline">
+<em class="property">property </em><code class="sig-name descname">selected_pipeline</code><a class="headerlink" href="#ovito.Scene.selected_pipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <a class="reference internal" href="ovito_pipeline.html#ovito.pipeline.Pipeline" title="ovito.pipeline.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a> that is currently selected in the graphical OVITO application,
+or <code class="docutils literal notranslate"><span class="pre">None</span></code> if no pipeline is selected. Typically, this is the last pipeline that was added to the scene using
+<a class="reference internal" href="ovito_pipeline.html#ovito.pipeline.Pipeline.add_to_scene" title="ovito.pipeline.Pipeline.add_to_scene"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Pipeline.add_to_scene()</span></code></a>.</p>
+<p>This field can be useful for scripts running in the context of the graphical OVITO application which want to
+perform some action on the currently selected pipeline, e.g. insert a new modifier.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="ovito.enable_logging">
+<code class="sig-prename descclassname">ovito.</code><code class="sig-name descname">enable_logging</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ovito.enable_logging" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calling this function at the beginning of a Python script enables activity logging for OVITO’s internal operations. When performing long-running operations, OVITO will print messages to <code class="docutils literal notranslate"><span class="pre">stderr</span></code> indicating the current activity, e.g. file reading and writing, modifier execution, or rendering.</p>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../index.html">Table of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/running.html">OVITO’s Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/overview.html">High-level overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/file_io.html">File I/O</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/pipelines.html">Data pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/data_model.html">Data model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/data_manipulation.html">Manipulating data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/custom_modifiers.html">User-defined modifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/rendering.html">Rendering &amp; visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/advanced_topics.html">Advanced topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/examples.html">Code examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/version_changes.html">OVITO 2.9 Migration Guide</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">ovito</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="ovito_data.html"><code class="docutils literal notranslate"><span class="pre">ovito.data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="ovito_io.html"><code class="docutils literal notranslate"><span class="pre">ovito.io</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="ovito_io_ase.html"><code class="docutils literal notranslate"><span class="pre">ovito.io.ase</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="ovito_modifiers.html"><code class="docutils literal notranslate"><span class="pre">ovito.modifiers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="ovito_pipeline.html"><code class="docutils literal notranslate"><span class="pre">ovito.pipeline</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="ovito_vis.html"><code class="docutils literal notranslate"><span class="pre">ovito.vis</span></code></a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ovito_data.html" title="ovito.data"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../introduction/version_changes.html" title="OVITO 2.9 Migration Guide"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">OVITO 3.4.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="docutils literal notranslate"><span class="pre">ovito</span></code></a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021 OVITO GmbH.
+    </div>
+  </body>
+</html>

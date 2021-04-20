@@ -1,0 +1,219 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Compute property</title><link rel="stylesheet" type="text/css" href="manual.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="OVITO User Manual"><link rel="up" href="particles.modifiers.html" title="Modifiers"><link rel="prev" href="particles.modifiers.common_neighbor_analysis.html" title="Common neighbor analysis"><link rel="next" href="particles.modifiers.construct_surface_mesh.html" title="Construct surface mesh"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><a href="https://www.ovito.org/"><img src="images/ovito_logo.png" border="0" width="84"></a><table width="100%" summary="Navigation header"><tr><td width="20%" align="left"><a accesskey="h" href="index.html">Table of Contents</a></td><th width="60%" align="center">Compute property</th><td width="20%" align="right"><a accesskey="u" href="particles.modifiers.html">Up</a></td></tr><tr><td width="20%" align="left"><a accesskey="p" href="particles.modifiers.common_neighbor_analysis.html">Prev</a> </td><th width="60%" align="center">Modifiers</th><td width="20%" align="right"> <a accesskey="n" href="particles.modifiers.construct_surface_mesh.html">Next</a></td></tr></table></div><div class="section" id="particles.modifiers.compute_property"><div class="titlepage"><div><div><h3 class="title">Compute property</h3></div></div></div>
+  
+
+  <p>
+    </p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/modifiers/compute_property_panel.png" width="270"></div></div></div><p>
+    This modifier assigns new values to a per-particle or per-bond property by computing them according to a user-defined mathematical formula.
+    The modifier may also be used to create new <a class="link" href="usage.particle_properties.html" title="Particle properties">particles or bonds properties</a>.
+  </p>
+  <p>
+    The user-defined formula for computing the property values can include references to existing per-particle or per-bond data as well as
+    global parameters such as the simulation box dimensions or the current animation time. You can find a list of
+    all available input variables in the user interface of the modifier. Furthermore, the <span class="emphasis"><em>Compute property</em></span> modifier
+    supports performing computations that involve neighboring particles within a spherical volume around each particle.
+  </p>
+
+  <div class="simplesect" id="idp3537056"><div class="titlepage"><div><div><h4 class="title">Output property</h4></div></div></div>
+    
+    <p>
+      As described in the <a class="link" href="usage.particle_properties.html" title="Particle properties">introduction on particle properties</a>, certain properties
+      such as <code class="literal">Color</code> or <code class="literal">Radius</code> have a special meaning to the program as their values control the visual appearance of particles and bonds.
+      Thus, if you use the <span class="emphasis"><em>Compute property</em></span> modifier to set or modify
+      such properties, it will affect the visualization directly.
+      For instance, you can use the modifier to change the values of the <code class="literal">Position</code>
+      particle property and move particles around or set the <code class="literal">Color</code> property to give particles newly computed colors.
+      When setting the <code class="literal">Selection</code> property, the <span class="emphasis"><em>Compute property</em></span> modifier acts like a more powerful
+      version of the <a class="link" href="particles.modifiers.expression_select.html" title="Expression selection">Expression selection</a> modifier.
+    </p>
+    <p>
+      You can also use the <span class="emphasis"><em>Compute property</em></span> modifier to assign new kinds of properties to particles or bonds and use this information in
+      subsequent operations in the data pipeline or export it to an output file.
+      Simply enter a name of your choice for the new property into the <span class="emphasis"><em>Output property</em></span> field.
+      Note that property names in OVITO are always case-sensitive. All standard property names defined by the program are found in the
+      drop-down list box.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3544960"><div class="titlepage"><div><div><h4 class="title">Vector properties</h4></div></div></div>
+    
+    <p>
+      Some particle properties in OVITO such as <code class="literal">Position</code> or <code class="literal">Color</code> possess multiple components per particle.
+      In such cases, you'll have to enter a separate math expression for each vector component of the output property.
+      Note that, in the current program version, the modifier does not allow you to create user-defined vector properties.
+      You can only create scalar user-defined properties.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3547648"><div class="titlepage"><div><div><h4 class="title">Selective and conditional property assignment</h4></div></div></div>
+    
+    <p>
+      If the selected output property already exists, then the old values of the property will be overwritten with the new ones
+      computed by the modifier. The <span class="emphasis"><em>Compute only for selected elements</em></span> option, however, lets you restrict the
+      assignment to a subset of the particles or bonds and thus preserve the existing property values for some of the elements.
+    </p>
+
+    <p>
+      The ternary operator <code class="literal">?:</code> (described in the operator table below) allows you to use simple <span class="emphasis"><em>if-else</em></span> conditions
+      as part of the calculation.
+      For example, to make all particles in the upper half of the simulation box semi-transparent and the particles in the lower half fully opaque,
+      one could use the following conditional expression to set the values of the <code class="literal">Transparency</code> particle property:
+      </p><pre class="programlisting">(ReducedPosition.Z &gt; 0.5) ? 0.7 : 0.0</pre><p>
+    </p>
+
+    <p>
+      For more complex computations, which cannot be accomplished with static expressions like in this example, please
+      consider using the <a class="link" href="particles.modifiers.python_script.html" title="Python script modifier pro">Python script</a> modifier instead,
+      which lets you write custom modification functions in a real procedural programming language.
+    </p>
+
+  </div>
+
+  <div class="simplesect" id="idp3553952"><div class="titlepage"><div><div><h4 class="title">Including neighbor particles in the calculation</h4></div></div></div>
+    
+    <p>
+      In the standard case, the expression for computing the output value for a particle depends only on the values of existing properties
+      of the particle as well as global quantities such as the current simulation time. Optionally, the modifier allows you to specify
+      a formula that includes terms referring to the properties of neighboring particles within a certain range around
+      the central particle for which the output property value is being calculated.
+    </p>
+    <p>
+      Formally speaking, the modifier supports formulas of the following general form
+      </p><div class="screenshot"><div class="mediaobject"><img src="images/modifiers/compute_property_modifier_neighbor_formula.png"></div></div><p>
+      for computing the output property value <span class="emphasis"><em>P(i)</em></span> for some particle <span class="emphasis"><em>i</em></span>.
+      The first term, <span class="emphasis"><em>F(i)</em></span>, refers to the standard part of the expression, which only depends on the properties of particle <span class="emphasis"><em>i</em></span> itself.
+      The second term consists of contributions from all nearby particles within a spherical region of radius <span class="emphasis"><em>R<sub>c</sub></em></span>
+      centered around particle <span class="emphasis"><em>i</em></span>. These contributions are computed according to a second
+      user-defined function, <span class="emphasis"><em>G(j)</em></span>, which is evaluated for every neighbor particle <span class="emphasis"><em>j</em></span>. This formula for the user-defined function <span class="emphasis"><em>G(j)</em></span>
+      must be entered into the input field labeled <span class="emphasis"><em>Neighbor expression</em></span>, and it can depend on property values
+      of the current neighbor <span class="emphasis"><em>j</em></span>, property values of the central particle <span class="emphasis"><em>i</em></span>,
+      the distance and the vector between the two particles, as well as global quantities.
+    </p>
+    <p>
+      The neighbor term allows you to perform advanced computations that involve the local neighborhood of particles. For example, we can use this feature
+      to average an existing particle property (let's call it "<code class="literal">InputProperty</code>") over a spherical volume around each particle by using the following expressions:
+      </p><pre class="programlisting">F(i) := InputProperty / (NumNeighbors+1)
+G(j) := InputProperty / (NumNeighbors+1)</pre><p>
+      Note that <code class="literal">NumNeighbors</code> is a dynamic variable that represents the number of neighbors within the selected cutoff radius,
+      which is used in this example to normalize the resulting mean property value.
+      We can even weight the contributions from different neighbors according to their distance from the central particle by incorporating the <code class="literal">Distance</code>
+      dynamic variable in the function <span class="emphasis"><em>G(j)</em></span>. To give another example, the following pair of expressions computes the potential energy of each particle according to a Lennard-Jones function:
+      </p><pre class="programlisting">F(i) := 0
+G(j) := 4 * (Distance^-12 - Distance^-6)</pre><p>
+      In this case, no contribution is coming from the central particle itself.
+    </p>
+    <p>
+      Within the neighbor expression term, <span class="emphasis"><em>G(j)</em></span>, it is possible to refer to properties of
+      the central particle <span class="emphasis"><em>i</em></span> by prepending the @-symbol to the property name.
+      For example, we can use this feature to count the neighbors around a particle whose types are
+      different from the type of the central particle:
+      </p><pre class="programlisting">F(i) := 0
+G(j) := ParticleType != @ParticleType</pre><p>
+      Here, the negative comparison operator != will evaluate to 1 if the type of particle <span class="emphasis"><em>j</em></span> is
+      not equal to the type of particle <span class="emphasis"><em>i</em></span>; and 0 otherwise.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3571104"><div class="titlepage"><div><div><h4 class="title">Computations on bonds</h4></div></div></div>
+    
+    <p>
+      In addition to particle properties, the modifier also allows you to compute and assign new bond properties.
+      In bond-based mode, regular expression variables refer to existing properties of the current bond. Additionally, you can incorporate
+      the properties of the two adjacent particles connected by the current bond into the expression. When referring to a particle
+      property, you need to prepend <code class="literal">@1.</code> or <code class="literal">@2.</code> to the property name.
+      For example, we can use the following expression to set the <code class="literal">Selection</code> property
+      of bonds and thus select all bonds which connect two particles of different type and whose length exceeds a
+      threshold value of 2.8:
+      </p><pre class="programlisting">@1.ParticleType != @2.ParticleType &amp;&amp; BondLength &gt; 2.8</pre><p>
+      Note that, in general, the orientation of bonds is arbitrary. Thus, a bond can point from particle A to particle
+      B or vice versa, and accordingly <code class="literal">@1.</code> (and <code class="literal">@2.</code> alike) can refer to either one of the
+      two particles connected by the bond. This means, in some cases more complex expressions are necessary to account
+      for the two possibilities. For example, to select all bonds that connect pairs of particles of
+      type 1 and 2:
+      </p><pre class="programlisting">(@1.ParticleType == 1 &amp;&amp; @2.ParticleType == 2) || (@1.ParticleType == 2 &amp;&amp; @2.ParticleType == 1)</pre><p>
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3577008"><div class="titlepage"><div><div><h4 class="title">Expression syntax</h4></div></div></div>
+    
+    <p>
+      The expression syntax supported by the modifier is very
+      similar to the one of the C programming language. Variable names and function names are case-sensitive.
+      Variable names are restricted to alphanumeric characters and
+      underscores. OVITO automatically replaces invalid characters in input property names with an underscore to generate valid variable names
+      that can be referenced in expressions.
+      Arithmetic expressions can be composed from
+      constant values, input variables and math functions using the following operators
+      in the given order of precedence:
+   </p><div class="informaltable">
+   <table class="informaltable" style="border-collapse: collapse;border-top: 1px solid ; border-bottom: 1px solid ; border-left: 1px solid ; border-right: 1px solid ; "><colgroup><col><col></colgroup><thead><tr><th style="border-right: 1px solid ; border-bottom: 1px solid ; ">Operator</th><th style="border-bottom: 1px solid ; ">Description</th></tr></thead><tbody><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">(...)</td><td style="border-bottom: 1px solid ; ">expressions in parentheses are evaluated first</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">A^B</td><td style="border-bottom: 1px solid ; ">exponentiation (A raised to the power B)</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">A*B, A/B</td><td style="border-bottom: 1px solid ; ">multiplication and division</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">A+B, A-B</td><td style="border-bottom: 1px solid ; ">addition and subtraction</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">A==B, A!=B, A&lt;B, A&lt;=B, A&gt;B, A&gt;=B</td><td style="border-bottom: 1px solid ; ">comparison between A and B (result is either 0 or
+           1)</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">A &amp;&amp; B</td><td style="border-bottom: 1px solid ; ">logical AND operator: result is 1 if A and B differ from
+           0, else 0</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">A || B</td><td style="border-bottom: 1px solid ; ">logical OR operator: result is 1 if A or B differ from
+           0, else 0</td></tr><tr><td style="border-right: 1px solid ; ">A ? B : C</td><td style="">If A differs from 0 (i.e. is true), the resulting value of this expression
+           is B, else C.</td></tr></tbody></table>
+     </div>
+
+   <p>The expression parser supports the following functions:
+   </p><div class="informaltable">
+   <table class="informaltable" style="border-collapse: collapse;border-top: 1px solid ; border-bottom: 1px solid ; border-left: 1px solid ; border-right: 1px solid ; "><colgroup><col><col></colgroup><thead><tr><th style="border-right: 1px solid ; border-bottom: 1px solid ; ">Function name</th><th style="border-bottom: 1px solid ; ">Description</th></tr></thead><tbody><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">abs(A)</td><td style="border-bottom: 1px solid ; ">Absolute value of A. If A is negative, returns -A
+           otherwise returns A.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">acos(A)</td><td style="border-bottom: 1px solid ; ">Arc-cosine of A. Returns the angle, measured in radians,
+           whose cosine is A.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">acosh(A)</td><td style="border-bottom: 1px solid ; ">Same as acos() but for hyperbolic cosine.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">asin(A)</td><td style="border-bottom: 1px solid ; ">Arc-sine of A. Returns the angle, measured in radians,
+           whose sine is A.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">asinh(A)</td><td style="border-bottom: 1px solid ; ">Same as asin() but for hyperbolic sine.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">atan(A)</td><td style="border-bottom: 1px solid ; ">Arc-tangent of A. Returns the angle, measured in
+           radians, whose tangent is A.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">atan2(Y,X)</td><td style="border-bottom: 1px solid ; ">Two argument variant of the arctangent function. Returns
+           the angle, measured in radians. This function is documented
+           <a class="ulink" href="http://en.wikipedia.org/wiki/Atan2" target="_top">here</a>.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">atanh(A)</td><td style="border-bottom: 1px solid ; ">Same as atan() but for hyperbolic tangent.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">avg(A,B,...)</td><td style="border-bottom: 1px solid ; ">Returns the average of all arguments.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">cos(A)</td><td style="border-bottom: 1px solid ; ">Cosine of A. Returns the cosine of the angle A, where A
+           is measured in radians.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">cosh(A)</td><td style="border-bottom: 1px solid ; ">Same as cos() but for hyperbolic cosine.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">exp(A)</td><td style="border-bottom: 1px solid ; ">Exponential of A. Returns the value of e raised to the
+           power A where e is the base of the natural logarithm, i.e.
+           the non-repeating value approximately equal to
+           2.71828182846.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">fmod(A,B)</td><td style="border-bottom: 1px solid ; ">Returns the floating-point remainder of A/B (rounded towards zero).</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">rint(A)</td><td style="border-bottom: 1px solid ; ">Rounds A to the closest integer. 0.5 is rounded to
+           1.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">ln(A)</td><td style="border-bottom: 1px solid ; ">Natural (base e) logarithm of A.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">log10(A)</td><td style="border-bottom: 1px solid ; ">Base 10 logarithm of A.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">log2(A)</td><td style="border-bottom: 1px solid ; ">Base 2 logarithm of A.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">max(A,B,...)</td><td style="border-bottom: 1px solid ; ">Returns the maximum of all parameter values.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">min(A,B,...)</td><td style="border-bottom: 1px solid ; ">Returns the minimum of all parameter values.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">sign(A)</td><td style="border-bottom: 1px solid ; ">Returns: 1 if A is positive; -1 if A is negative; 0 if A is zero.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">sin(A)</td><td style="border-bottom: 1px solid ; ">Sine of A. Returns the sine of the angle A, where A is
+           measured in radians.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">sinh(A)</td><td style="border-bottom: 1px solid ; ">Same as sin() but for hyperbolic sine.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">sqrt(A)</td><td style="border-bottom: 1px solid ; ">Square root of a value.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">sum(A,B,...)</td><td style="border-bottom: 1px solid ; ">Returns the sum of all parameter values.</td></tr><tr><td style="border-right: 1px solid ; ">tan(A)</td><td style="">Tangent of A. Returns the tangent of the angle A, where
+           A is measured in radians.</td></tr></tbody></table>
+     </div><p>
+     </p>
+     <p> </p>
+  </div>
+
+  <div class="simplesect" id="idp3633808"><div class="titlepage"><div><div><h4 class="title">Additional example 1</h4></div></div></div>
+    
+    <p>
+      Our aim is to compute the linear velocity of each
+      particle based on the components v<sub>x</sub>,
+      v<sub>y</sub>, and v<sub>z</sub> of its velocity
+      vector. For this, we create a new user-defined property with the name "<code class="literal">Speed</code>" which is computed
+      according to the following expression: </p><pre class="programlisting">sqrt(Velocity.X^2 + Velocity.Y^2 + Velocity.Z^2)</pre><p>
+      Note that this expressions contains references to the X, Y, and Z components of the standard
+      <code class="literal">Velocity</code> particle property, which must be present in the
+      input dataset. The computed linear velocity values, stored in the new <code class="literal">Speed</code> property, can
+      subsequently be used to color particles with the <a class="link" href="particles.modifiers.color_coding.html" title="Color coding">Color Coding</a>
+      modifier, for instance.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3639232"><div class="titlepage"><div><div><h4 class="title">Additional example 2</h4></div></div></div>
+    
+    <p>
+      The <span class="emphasis"><em>Compute property</em></span> modifier can also be used to set
+      particle properties which are not modifiable by other means. One such example is
+      the per-particle radius: Let us assume you have already selected a subset of particles
+      and want to give these particles a different size.
+      You can use the <span class="emphasis"><em>Compute property</em></span> modifier to set
+      the value of the <code class="literal">Radius</code> particle property, which determines the
+      per-particle display radii (see <a class="link" href="visual_elements.particles.html" title="Particles (visual element)">here</a>).
+      The selection state of particles is determined by the current value of their
+      <code class="literal">Selection</code> property (non-zero means selected). The conditional
+      formula </p><pre class="programlisting">Selection ? 1.5 : 0.75</pre><p> sets a
+      radius depending on a particle's selection state.
+      The above expression will evaluate to 1.5 for selected particles, and to 0.75 for unselected particles.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp3642032"><div class="titlepage"><div><div><h4 class="title">See also</h4></div></div></div>
+  
+    <p>
+      <a class="pydoc-link" href="python/modules/ovito_modifiers.html#ovito.modifiers.ComputePropertyModifier" target="_top"><code class="classname">ComputePropertyModifier</code> (Python API)</a><a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a>
+    </p>
+  </div>
+
+</div><p class="footer_copyright">© 2021  OVITO GmbH</p><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="particles.modifiers.common_neighbor_analysis.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="particles.modifiers.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="particles.modifiers.construct_surface_mesh.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Common neighbor analysis </td><td width="20%" align="center"><a accesskey="h" href="index.html">Table of Contents</a></td><td width="40%" align="right" valign="top"> Construct surface mesh</td></tr></table></div></body></html>

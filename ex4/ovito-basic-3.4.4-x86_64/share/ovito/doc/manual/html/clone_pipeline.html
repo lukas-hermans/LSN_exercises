@@ -1,0 +1,168 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Pipeline cloning</title><link rel="stylesheet" type="text/css" href="manual.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="OVITO User Manual"><link rel="up" href="reference.pipelines.html" title="Data pipelines"><link rel="prev" href="data_sources.html" title="Data source"><link rel="next" href="python_code_generation.html" title="Python code generator pro"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><a href="https://www.ovito.org/"><img src="images/ovito_logo.png" border="0" width="84"></a><table width="100%" summary="Navigation header"><tr><td width="20%" align="left"><a accesskey="h" href="index.html">Table of Contents</a></td><th width="60%" align="center">Pipeline cloning</th><td width="20%" align="right"><a accesskey="u" href="reference.pipelines.html">Up</a></td></tr><tr><td width="20%" align="left"><a accesskey="p" href="data_sources.html">Prev</a> </td><th width="60%" align="center">Data pipelines</th><td width="20%" align="right"> <a accesskey="n" href="python_code_generation.html">Next</a></td></tr></table></div><div class="section" id="clone_pipeline"><div class="titlepage"><div><div><h3 class="title">Pipeline cloning</h3></div></div></div>
+  
+
+  <p>
+    </p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/clone_pipeline/clone_pipeline_menu_item.png" width="270"></div></div></div><p>
+
+    The <span class="emphasis"><em>Clone Pipeline</em></span> function of OVITO lets you duplicate the currently selected <a class="link" href="usage.modification_pipeline.html" title="Data pipeline">data pipeline</a>
+    in order to visualize multiple datasets side by side or visualize the same dataset in several different ways. The function can be invoked by selecting 
+    <span class="guimenuitem">Clone Pipeline</span> from the pipeline menu depicted on the right.
+  </p>
+
+  <p>
+    The <span class="emphasis"><em>Clone Pipeline</em></span> dialog will be displayed, letting you configure the cloning operation.
+    Once you close the dialog by pressing <span class="guibutton">Ok</span>, the cloning operation is executed according
+    to your settings as discussed below.
+  </p>
+
+  <p>
+    After the pipeline has been cloned, both the new copy and the existing data pipeline will be part of the
+    current visualization scene and you will now see two objects in the viewports.
+    The <a class="link" href="usage.import.multiple_datasets.html" title="Visualizing multiple datasets">drop-down listbox</a> at the top of the command panel's
+    modification page indicates which of the pipelines is the currently selected one, allowing you to switch
+    between the pipelines in the current scene. The modifiers of the currently selected pipeline are shown in the
+    <a class="link" href="usage.modification_pipeline.html#usage.modification_pipeline.pipeline_listbox" title="Pipeline editor">pipeline editor</a>.
+    You can also click on an object in the interactive viewports
+    in order to select the pipeline associated with that object. The currently
+    selected pipeline object is typically indicated by a white box color.
+  </p>
+
+  <div class="simplesect" id="idp2425760"><div class="titlepage"><div><div><h4 class="title">How pipeline cloning works</h4></div></div></div>
+    
+    <p>
+      </p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/clone_pipeline/clone_pipeline_dialog.png" width="459"></div></div></div><p>
+
+      A <a class="link" href="usage.modification_pipeline.html" title="Data pipeline">pipeline</a> in OVITO consists of a <a class="link" href="data_sources.html" title="Data source">data source</a> (typically an external data file feeding the pipeline)
+      and a linear sequence of <a class="link" href="">modifiers</a> that have been inserted into the pipeline. In the user interface of OVITO
+      the modifiers are typically laid out in a bottom-up fashion, with the data source at the bottom and the last modifier at the top.
+      The data source delivers an <span class="emphasis"><em>input dataset</em></span> (e.g. particles or other kinds of <a class="link" href="scene_objects.html" title="Data object types">data objects</a>), which is then processed by the modifiers one after the other.
+      The end result leaving the pipeline is what gets displayed in the 3d viewports, i.e., a graphical rendering of the data object(s) appearing in the three-dimensional
+      scene.
+    </p>
+    <p>
+      When cloning a pipeline, the data source and/or the modifiers of the original pipeline typically get copied over to the new pipeline.
+      However, you can configure for each of these parts individually whether they should be duplicated or rather be shared by the original
+      and the cloned pipeline. This gives you a great deal of flexibility:
+      If you decide, for example, that the two pipelines should share the same data source, then both pipelines will always be fed with the
+      same input dataset. If you subsequently pick a different input file for any one of the pipelines, this change will also affect the other pipeline as well.
+      This synchronized mode can be useful, for example, to visualize the same input data in several different ways, typically by employing different modifiers
+      in the two pipelines that share the same data source.
+    </p>
+    <p>
+      Another common use-case for OVITO'd pipeline cloning function is visualizing different input datasets side by side, always making sure that
+      all modifier operations get applied in exactly the same way to both input datasets. In this case you would choose to duplicate the
+      data source during the cloning operation and let the two pipelines share the modifiers instead. Then the pipelines will get fed with different input datasets,
+      but it is ensured that each dataset will pass through the exact same sequence of modification steps.
+    </p>
+    <p>
+      For any data source or modifier of the existing pipeline, you can choose between four different cloning modes in the
+      <span class="emphasis"><em>Clone Pipeline</em></span> dialog:
+      </p><div class="variablelist"><dl class="variablelist"><dt><span class="term">Copy</span></dt><dd>
+            <p>
+              This will create an independent copy of the original object. Changing the object's parameters in either the original
+              pipeline or the cloned pipeline will not affect the other pipeline.
+            </p>
+          </dd><dt><span class="term">Join</span></dt><dd>
+            <p>
+              The object will not be duplicated and the new pipeline will share the same object with the original pipeline.
+              In fact, choosing this option results in a <span class="emphasis"><em>branched</em></span> pipeline that starts at a single data source.
+              Data flowing through the pipeline will be unique up to the branching point, i.e. the last modifier that
+              was cloned using <span class="emphasis"><em>Join</em></span> mode. Beyond the branching point, the two pipeline branches will be
+              independent and can modify the data in different ways.
+            </p>
+          </dd><dt><span class="term">Share</span></dt><dd>
+            <p>
+              This cloning mode is only available for modifiers, not for the data source. It is a special variant of the
+              <span class="emphasis"><em>Join</em></span> mode providing some additional flexibility. The shared modifier becomes part of
+              both pipelines and subsequently changing the modifier's parameter will affect both pipelines
+              in the same way. However, the shared modifier can act on different data in the two pipelines, because
+              unlike in a branched pipeline setup, which is always restricted to a single unique data source,
+              the two pipelines can have different sources and/or modifiers preceding the shared modifier.
+            </p>
+          </dd><dt><span class="term">Skip</span></dt><dd>
+            <p>
+              This option simply leaves a modifier out in the cloned pipeline.
+            </p>
+          </dd></dl></div><p>
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp2446656"><div class="titlepage"><div><div><h4 class="title">Further options</h4></div></div></div>
+    
+    <p>
+      The location where the output data appears in the three-dimensional scene can be controlled independently
+      for each pipeline. Typically you don't want the data of the cloned pipeline to appear in the same
+      spatial location as the data of the original pipeline. This is why the <span class="emphasis"><em>Clone Pipeline</em></span> dialog
+      provides the option to displace the copied pipeline along the x, y or z-axis
+      so that the copy appears side by side with the original pipeline in the scene.
+    </p>
+    <p>
+      Note that you can change the positioning of a pipeline object at any time using the <span class="emphasis"><em>Move</em></span> and
+      <span class="emphasis"><em>Rotate</em></span> tools found in OVITO's toolbar. Using these tools you can
+      still adjust the exact positioning of either the original or the cloned pipeline later on
+      (see <a class="link" href="usage.import.multiple_datasets.html#usage.import.positioning_objects" title="Positioning datasets in the scene">here</a> for more information).
+    </p>
+    <p>
+      By default OVITO names each pipeline after the filename that serves as input for the pipeline.
+      The two input fields at the bottom of the <span class="emphasis"><em>Clone Pipeline</em></span> dialog allow you to override this default naming scheme and assign custom names
+      to the original and/or the cloned pipeline, which can be very helpful to differentiate the two pipelines in the user interface,
+      in particular if they share the same input file.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp2450288"><div class="titlepage"><div><div><h4 class="title">After cloning a pipeline</h4></div></div></div>
+    
+    <p>
+      After cloning a pipeline, some modifiers or the data source may be shared between the original and the cloned pipeline.
+      OVITO will indicate this in the user interface as we will see below.
+    </p>
+    <p>
+      For the following discussion, let us consider an example pipeline containing four modifiers, which are being cloned
+      according to the following schematic picture:
+      </p><div class="inlinefigure"><div class="screenshot"><div class="mediaobject"><img src="images/clone_pipeline/cloned_pipeline_example.png" width="594"></div></div></div><p>
+      The pipeline's data source and the first modifier (<span class="emphasis"><em>Cluster analysis</em></span>) are reused in the cloned
+      pipeline according to the selected mode <span class="emphasis"><em>Join</em></span>. Thus, the two resulting pipelines will share the
+      same upstream part. The <span class="emphasis"><em>Slice</em></span> modifier is the first item for which a clone mode other than <span class="emphasis"><em>
+      Join</em></span> is selected. Thus, the cloned pipeline branches off before this modifier, which is being skipped in the cloned
+      pipeline. Mode <span class="emphasis"><em>Copy</em></span> has been selected for the <span class="emphasis"><em>Expression selection</em></span> modifier.
+      Accordingly, an independent copy of this modifier will be created and inserted into the cloned pipeline. This will enable you to
+      change the selection expression in the second pipeline and select a different set of particles, for example.
+      Finally, the <span class="emphasis"><em>Assign color</em></span> modifier gets shared by both pipelines. That means the selected particles
+      in both pipelines will always get assigned the same color.
+    </p>
+    <p>
+      After the cloning operation has been executed, you will see the newly created pipeline
+      in the <a class="link" href="usage.modification_pipeline.html#usage.modification_pipeline.pipeline_listbox" title="Pipeline editor">pipeline editor</a> of OVITO:
+      </p><div class="inlinefigure"><div class="screenshot"><div class="mediaobject"><img src="images/clone_pipeline/cloned_pipeline_editor.png" width="270"></div></div></div><p>
+      The horizontal line labeled <span class="emphasis"><em>--Pipeline branch--</em></span> indicates that the part below the line
+      is shared by the current pipeline with other pipelines in the same scene. Inserting, removing or changing modifiers below this line is thus going to affect also
+      these other pipelines.
+    </p>
+    <p>
+      Some of the list entries in the pipeline editor are rendered using an italic font. OVITO uses the italic font to indicate that
+      an object is shared between two or more pipelines. The <span class="emphasis"><em>Assign color</em></span> modifier, for example, was cloned
+      using mode <span class="emphasis"><em>Share</em></span>. Thus, it is part of both the original pipeline and the cloned pipeline.
+      Changing the color parameter of the  <span class="emphasis"><em>Assign color</em></span> modifier will thus trigger a recomputation
+      of both pipelines in which the modifier is used.
+    </p>
+    <p>
+      You might realize later on that sharing the <span class="emphasis"><em>Assign color</em></span> modifier was not a good idea.
+      For instance, you may decide to assign a different color to the selected particles in the cloned pipeline but keep the color
+      in the original pipeline. To do this, OVITO provides the function <span class="emphasis"><em>Replace with independent copy</em></span>,
+      which is marked with a red circle in the screenshot above. It allows you to replace the shared <span class="emphasis"><em>Assign color</em></span> modifier
+      with an independent copy. Subsequently, changing the parameters of the modifier will no longer
+      affect the other pipeline.
+    </p>
+    <p>
+      Notice that also the <a class="link" href="visual_elements.html" title="Visual elements">visual elements</a> are displayed using an italic font in the pipeline editor.
+      This is because these visual elements are produced by the data source of the pipeline, which is located in the upstream section of the pipeline
+      that is shared by multiple pipelines. Again, because these visual elements are shared objects, changing their
+      parameters or turning their display on or off will affect the rendering of both datasets produced by the two pipelines.
+      In this case you can also use the function <span class="emphasis"><em>Replace with independent copy</em></span> to duplicate the visual elements
+      if needed and control the visual appearance of particles and bonds individually for the original and the cloned pipeline.
+    </p>
+  </div>
+
+</div><p class="footer_copyright">© 2021  OVITO GmbH</p><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="data_sources.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="reference.pipelines.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="python_code_generation.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Data source </td><td width="20%" align="center"><a accesskey="h" href="index.html">Table of Contents</a></td><td width="40%" align="right" valign="top"> Python code generator<a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a></td></tr></table></div></body></html>

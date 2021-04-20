@@ -1,0 +1,55 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Surface meshes</title><link rel="stylesheet" type="text/css" href="manual.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="OVITO User Manual"><link rel="up" href="scene_objects.html" title="Data object types"><link rel="prev" href="scene_objects.simulation_cell.html" title="Simulation cell"><link rel="next" href="scene_objects.triangle_mesh.html" title="Triangle meshes"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><a href="https://www.ovito.org/"><img src="images/ovito_logo.png" border="0" width="84"></a><table width="100%" summary="Navigation header"><tr><td width="20%" align="left"><a accesskey="h" href="index.html">Table of Contents</a></td><th width="60%" align="center">Surface meshes</th><td width="20%" align="right"><a accesskey="u" href="scene_objects.html">Up</a></td></tr><tr><td width="20%" align="left"><a accesskey="p" href="scene_objects.simulation_cell.html">Prev</a> </td><th width="60%" align="center">Data object types</th><td width="20%" align="right"> <a accesskey="n" href="scene_objects.triangle_mesh.html">Next</a></td></tr></table></div><div class="section" id="scene_objects.surface_mesh"><div class="titlepage"><div><div><h3 class="title">Surface meshes</h3></div></div></div>
+  
+
+  <p>
+		A surface mesh is a type of <a class="link" href="scene_objects.html" title="Data object types">data object</a> that represents two-dimensional, closed and orientable manifolds.
+	  Typically, surface meshes are generated within OVITO by modifiers such as <a class="link" href="particles.modifiers.construct_surface_mesh.html" title="Construct surface mesh">Construct surface mesh</a>,
+		<a class="link" href="particles.modifiers.create_isosurface.html" title="Create isosurface">Create isosurface</a> or <a class="link" href="particles.modifiers.coordination_polyhedra.html" title="Coordination polyhedra">Coordination polyhedra</a>.
+  </p>
+  <p>
+		The appearance of a surface mesh can be controlled through the parameter panel of the <a class="link" href="visual_elements.surface_mesh.html" title="Surface mesh (visual element)">Surface mesh visual element</a>,
+    which is located in the topmost section of the <a class="link" href="usage.modification_pipeline.html#usage.modification_pipeline.pipeline_listbox" title="Pipeline editor">pipeline editor</a>.
+  </p>
+  <div class="simplesect" id="idp2586976"><div class="titlepage"><div><div><h4 class="title">Surfaces embedded in periodic domains</h4></div></div></div>
+    
+    <p>
+      </p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="images/visual_elements/surface_mesh_example.png" width="270"></div></div></div><p>
+			Surface meshes may be embedded in a periodic domain, i.e. in a simulation cell with periodic boundary conditions.
+			That means the triangle faces of the surface mesh can connect vertices on opposite sides of a simulation box and wrap around correctly.
+			OVITO takes care of computing the intersections of the periodic mesh with the box boundaries and automatically produces a non-periodic representation of the triangle mesh
+			when it comes to rendering the surface.
+    </p>
+  </div>
+  <div class="simplesect" id="idp2588528"><div class="titlepage"><div><div><h4 class="title">Interior and exterior region</h4></div></div></div>
+    
+    <p>
+			As surface meshes are closed orientable manifolds, they define an <span class="emphasis"><em>interior</em></span> and an <span class="emphasis"><em>exterior</em></span> spatial region,
+      which are separated by the surface manifold. For example, if the surface mesh was constructed by the <a class="link" href="particles.modifiers.construct_surface_mesh.html" title="Construct surface mesh">Construct surface mesh</a> modifier
+      around a set of particles, then the volume enclosed by the surface represents the "filled" region and the outside region is the empty region.
+    </p>
+    <p>
+			Sometimes there is no interior region and the exterior region is infinite and fills all space. In this case the surface mesh is degenerate and
+			consists of no triangles. The opposite extreme is also possible in periodic domains: The interior region extends over the entire periodic domain
+			and there is no outside region. Again, the surface mesh will consist of zero triangles in this case.
+    </p>
+  </div>
+  <div class="simplesect" id="idp2595168"><div class="titlepage"><div><div><h4 class="title">Data export</h4></div></div></div>
+    
+    <p>
+			OVITO can export the surface as a triangle mesh.
+			During export, a non-periodic version is produced by truncating triangles at the periodic domain boundaries and generating "cap polygons" to fill the holes that
+			occur at the intersection of the interior region with the domain boundaries. To export the mesh, use OVITO's <a class="link" href="usage.export.html" title="Exporting data">file export function</a>
+			and select the <span class="emphasis"><em>VTK</em></span> output format.
+    </p>
+  </div>
+
+  <div class="simplesect" id="idp2597920"><div class="titlepage"><div><div><h4 class="title">See also</h4></div></div></div>
+    
+    <p>
+        <a class="pydoc-link" href="python/modules/ovito_data.html#ovito.data.SurfaceMesh" target="_top"><code class="classname">SurfaceMesh</code> (Python API)</a><a class="ovito-pro-tag" data-tooltip="This program feature is only available in the Pro edition of OVITO. Click to learn more." data-tooltip-position="bottom" href="https://www.ovito.org/about/ovito-pro/">
+    pro
+  </a>
+    </p>
+  </div>
+
+</div><p class="footer_copyright">© 2021  OVITO GmbH</p><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="scene_objects.simulation_cell.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="scene_objects.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="scene_objects.triangle_mesh.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Simulation cell </td><td width="20%" align="center"><a accesskey="h" href="index.html">Table of Contents</a></td><td width="40%" align="right" valign="top"> Triangle meshes</td></tr></table></div></body></html>
