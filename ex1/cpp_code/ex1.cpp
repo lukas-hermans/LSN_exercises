@@ -25,8 +25,8 @@ int main()
     int N_intervals = 100;                 // number of subintervals of [0, 1)
     double int_length = 1.0 / N_intervals; // length of each subinterval
 
-    int seed[4] = {0000, 0000, 0000}; // seed for Rannyu generator
-    Random rnd = Random(seed);        // prepared instance for Rannyu generator
+    int seed[4] = {0000, 0000, 0000, 0001}; // seed for Rannyu generator
+    Random rnd = Random(seed);              // prepared instance for Rannyu generator
 
     // calculate progressive mean & error for Rannyu generator as well as its variance & error
     std::vector<std::vector<double>> r_prog = blocking::prog_mean(rnd_variable, rnd, N, L);

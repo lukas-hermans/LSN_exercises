@@ -17,12 +17,12 @@ int main()
     double lambda = 1;        // lambda parameter for exponential draws
     double mu = 0, gamma = 1; // mu and gamma parameter for Lorentzian draw
 
-    int seed[4] = {4, 13, 9, 17}; // seed for Rannyu generator
-    Random rnd(seed);             // prepared instance for Rannyu generator
+    int seed[4] = {0000, 0000, 0000, 0001}; // seed for Rannyu generator
+    Random rnd(seed);                       // prepared instance for Rannyu generator
 
     write_dist(uni_variable, rnd, N_repetitions, N_terms, "../data/uniform.txt");
     write_dist(std::bind(exp_variable, std::placeholders::_1, lambda), rnd, N_repetitions, N_terms, "../data/exponential.txt");
-    write_dist(std::bind(lorentz_variable, std::placeholders::_1, mu, gamma), rnd, N_repetitions, N_terms, "../data/lorentzian.txt");
+    write_dist(std::bind(lorentz_variable, std::placeholders::_1, gamma, mu), rnd, N_repetitions, N_terms, "../data/lorentzian.txt");
 
     return 0;
 }
@@ -49,9 +49,9 @@ void write_dist(std::function<double(Random &)> dist_func, Random &rnd, int N_re
     {
         file << std::endl;
 
-        sum = 0;
         for (int n : N_terms)
         {
+            sum = 0;
             for (int j = 0; j < n; j++) // calculate sum of n terms
             {
                 sum += dist_func(rnd);
