@@ -11,10 +11,10 @@ ex2.exe: ex2.o random.o blocking.o
 	$(CC) ex2.o random.o blocking.o -o ex2.exe
 ex2.o: ex2.cpp
 	$(CC) -c ex2.cpp -o ex2.o $(CFLAGS)
-random.o: tools/random.cpp tools/random.h
-	$(CC) -c tools/random.cpp -o random.o $(CFLAGS)
-blocking.o: tools/blocking.cpp tools/blocking.h
-	$(CC) -c tools/blocking.cpp -o blocking.o $(CFLAGS)
+random.o: ../../tools/random.cpp ../../tools/random.h
+	$(CC) -c ../../tools/random.cpp -o random.o $(CFLAGS)
+blocking.o: ../../tools/blocking.cpp ../../tools/blocking.h
+	$(CC) -c ../../tools/blocking.cpp -o blocking.o $(CFLAGS)
 
 clean:
 	rm *.o *.exe seed.out

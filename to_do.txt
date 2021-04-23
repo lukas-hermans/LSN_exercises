@@ -1,5 +1,4 @@
 ex1:
-    - avoid repetition for uniform, exponential and lorentzian distribution 
 
 ex2:
     - make tools::prog_mean more efficient (do not always calculate whole sum)
@@ -9,3 +8,6 @@ ex3:
     - make tools::prog_mean more efficient (do not always calculate whole sum)
 
 ex4:
+
+
+- make a tools library

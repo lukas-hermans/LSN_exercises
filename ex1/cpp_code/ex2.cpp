@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 #include <functional>
-#include "tools/random.h"
+#include "../../tools/random.h"
 
 void write_dist(std::function<double(Random &)> dist_func, Random &rnd, int N_repetitions, std::vector<int> N_terms, std::string path);
 double uni_variable(Random &rnd);

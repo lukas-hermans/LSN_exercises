@@ -4,8 +4,8 @@
 #include <vector>
 #include <tuple>
 #include <functional>
-#include "tools/random.h"
-#include "tools/blocking.h"
+#include "../../tools/random.h"
+#include "../../tools/blocking.h"
 
 double rnd_variable(Random &rnd);
 double rnd_variance(Random &rnd);
@@ -15,7 +15,7 @@ double chi2(std::vector<int> counter, int N_intervals, int N_draws);
 int main()
 {
     // input ex. 01.1.1 & 01.1.2
-    int M = 150000; // number of throws
+    int M = 100000; // number of throws
     int N = 100;    // number of blocks
     int L = M / N;  // number of throws per block
 
