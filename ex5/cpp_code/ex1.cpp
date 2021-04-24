@@ -7,7 +7,7 @@
 #include "../../tools/blocking.h"
 #include "../../tools/metropolis.h"
 
-// TO DO: progressive mean + error, output exp. value and positions
+// TO DO: progressive mean + error, output exp. value and positions, clear method
 
 std::vector<double> T_uni(Random &rnd, std::vector<double> x_in, std::vector<double> x_min, std::vector<double> x_max);
 std::vector<double> T_gaussian(Random &rnd, std::vector<double> x_in, std::vector<double> mu, std::vector<double> sigma);
@@ -25,23 +25,66 @@ int main()
 
     std::vector<double> x0 = {0, 0, 0}; // starting position for Metropolis algorithm
 
-    // uniform trial transition probability
-    std::vector<double> x_min = {-0.5, -0.5, -0.5};
-    std::vector<double> x_max = {0.5, 0.5, 0.5};
+    // uniform trial transition probability (set to achieve approx. 50% acceptance rate)
+    std::vector<double> x_min_100 = {-1.2, -1.2, -1.2};
+    std::vector<double> x_max_100 = {1.2, 1.2, 1.2};
+    std::vector<double> x_min_210 = {-3, -3, -3};
+    std::vector<double> x_max_210 = {3, 3, 3};
 
-    // gaussian trial transition probability
-    std::vector<double> mu = {0, 0, 0};
-    std::vector<double> sigma = {1, 1, 1};
+    // gaussian trial transition probability (set to achieve approx. 50% acceptance rate)
+    std::vector<double> mu_100 = {0, 0, 0};
+    std::vector<double> sigma_100 = {0.75, 0.75, 0.75};
+    std::vector<double> mu_210 = {0, 0, 0};
+    std::vector<double> sigma_210 = {1.9, 1.9, 1.9};
 
-    Metropolis metropolis(rnd);
-    metropolis.T = std::bind(T_uni, std::placeholders::_1, std::placeholders::_2, x_min, x_max);
-    metropolis.p = pdf_210;
+    Metropolis metropolis(rnd); // instance for Metropolis algorithm
+    metropolis.save_step = 50;
+
+    // ************************** //
+    // *** uniform transition *** //
+    // ************************** //
     metropolis.set_x0(x0);
     metropolis.sample_func = r;
 
+    // ground state
+    metropolis.T = std::bind(T_uni, std::placeholders::_1, std::placeholders::_2, x_min_100, x_max_100);
+    metropolis.p = pdf_100;
     metropolis.do_many_steps(M, N);
+    std::cout << "acceptance rate for uni_100: " << metropolis.acc / (double)M << std::endl;
+    metropolis.write_x_history("../data/uni_100.xyz");
+    blocking::write_data(metropolis.blocking_data, "../data/uni_100.txt", "M, r_mean(M), r_error(M)");
+    metropolis.clean_cache();
 
-    blocking::write_data({metropolis.samples_block}, "../data/test.txt", "dummy");
+    // excited state
+    metropolis.T = std::bind(T_uni, std::placeholders::_1, std::placeholders::_2, x_min_210, x_max_210);
+    metropolis.p = pdf_210;
+    metropolis.do_many_steps(M, N);
+    std::cout << "acceptance rate for uni_210: " << metropolis.acc / (double)M << std::endl;
+    metropolis.write_x_history("../data/uni_210.xyz");
+    blocking::write_data(metropolis.blocking_data, "../data/uni_210.txt", "M, r_mean(M), r_error(M)");
+    metropolis.clean_cache();
+
+    // *************************** //
+    // *** gaussian transition *** //
+    // *************************** //
+
+    // ground state
+    metropolis.T = std::bind(T_gaussian, std::placeholders::_1, std::placeholders::_2, mu_100, sigma_100);
+    metropolis.p = pdf_100;
+    metropolis.do_many_steps(M, N);
+    std::cout << "acceptance rate for gaussian_100: " << metropolis.acc / (double)M << std::endl;
+    metropolis.write_x_history("../data/gaussian_100.xyz");
+    blocking::write_data(metropolis.blocking_data, "../data/gaussian_100.txt", "M, r_mean(M), r_error(M)");
+    metropolis.clean_cache();
+
+    // excited state
+    metropolis.T = std::bind(T_gaussian, std::placeholders::_1, std::placeholders::_2, mu_210, sigma_210);
+    metropolis.p = pdf_210;
+    metropolis.do_many_steps(M, N);
+    std::cout << "acceptance rate for gaussian_210: " << metropolis.acc / (double)M << std::endl;
+    metropolis.write_x_history("../data/gaussian_210.xyz");
+    blocking::write_data(metropolis.blocking_data, "../data/gaussian_210.txt", "M, r_mean(M), r_error(M)");
+    metropolis.clean_cache();
 
     return 0;
 }
@@ -73,18 +116,16 @@ std::vector<double> T_gaussian(Random &rnd, std::vector<double> x_in, std::vecto
 // Calculates value of pdf of hydrogen orbital 100 at position x.
 double pdf_100(std::vector<double> x)
 {
-    double r = sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
-    return 1 / M_PI * exp(-2 * r);
+    return 1 / M_PI * exp(-2 * r(x));
 }
 
 // Calculates value of pdf of hydrogen orbital 210 at position x.
 double pdf_210(std::vector<double> x)
 {
-    double r = sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
-    return 1 / (32 * M_PI) * x[2] * x[2] * exp(-r);
+    return 1 / (32 * M_PI) * x[2] * x[2] * exp(-r(x));
 }
 
-// calculates radius from given position vector
+// Calculates radius from given position vector.
 double r(std::vector<double> x)
 {
     return sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
