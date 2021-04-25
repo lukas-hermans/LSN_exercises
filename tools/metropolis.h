@@ -14,6 +14,7 @@ public:
     std::function<std::vector<double>(Random &, std::vector<double>)> T; // transition probability
     std::function<double(std::vector<double>)> p;                        // sample pdf
 
+    bool is_equi = true;                // boolean to indicate if algorithm is in equilibrating phase
     int step_count = 0;                 // counts how many steps have already been completed
     std::vector<double> x0, x_current;  // start position and current position
     int save_step;                      // difference between steps that should be save (not too large, to avoid memory overflow)
@@ -28,7 +29,7 @@ public:
 
     void set_x0(std::vector<double> x0);
     void do_step();
-    void do_many_steps(int M_throws, int N_blocks);
+    void do_many_steps(int M_throws, int N_blocks, int N_equi);
     void write_x_history(std::string path);
     void clean_cache();
 };

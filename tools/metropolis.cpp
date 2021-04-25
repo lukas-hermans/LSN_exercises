@@ -22,7 +22,6 @@ void Metropolis::set_x0(std::vector<double> x0)
 {
     this->x0 = x0;
     x_current = x0;
-    x.push_back(x_current);
 }
 
 // Calculate one step of Metroplis algorithm.
@@ -36,28 +35,46 @@ void Metropolis::do_step()
     if (r <= alpha) // accept trial
     {
         x_current = x_trial;
-        if (step_count % save_step == 0)
+        if (is_equi == false)
         {
-            x.push_back(x_current);
+            if (step_count % save_step == 0)
+            {
+                x.push_back(x_current);
+            }
+            acc += 1;
         }
-        acc += 1;
     }
     if (r > alpha) // reject trial
     {
-        if (step_count % save_step == 0)
+        if (is_equi == false)
         {
-            x.push_back(x_current);
+            if (step_count % save_step == 0)
+            {
+                x.push_back(x_current);
+            }
         }
     }
 
-    step_count += 1;
+    if (is_equi == false)
+    {
+        step_count += 1;
+    }
 }
 
 // Computes progressive mean and its error of sample_func using blocking method with N blocks of L steps of Metropolis algorithm.
+// N_equi is the number of steps chosen to equilibrate the Metropolis algorithm.
 // Same as prog_mean function in blocking.cpp but sample_func depends on memory of x (position history).
 // Stores results in blocking_data vector.
-void Metropolis::do_many_steps(int M_throws, int N_blocks)
+void Metropolis::do_many_steps(int M_throws, int N_blocks, int N_equi)
 {
+    // equilibrate the Metropolis algorithm
+    is_equi = true;
+    for (int i = 0; i < N_equi; i++)
+    {
+        this->do_step();
+    }
+    is_equi = false;
+
     int L = M_throws / N_blocks; // number of throws per block
     std::vector<double> av, av2;
 
