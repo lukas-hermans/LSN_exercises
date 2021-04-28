@@ -1,6 +1,10 @@
 #include <vector>
-#include "random/random.h"
-#include "tools/tools.h"
+#include <cmath>
+#include "../../tools/random.h"
+#include "../../tools/blocking.h"
+
+double g_uniform(Random &rnd);
+double f_importance(Random &rnd);
 
 int main()
 {
@@ -8,17 +12,28 @@ int main()
     int N = 100;    // number of blocks
     int L = M / N;  // number of throws per block
 
-    int seed[4] = {4, 13, 92, 17}; // seed for Rannyu generator
-    Random rnd = Random(seed);     // instance of random number generator
+    int seed[4] = {0000, 0000, 0000, 0001}; // seed for Rannyu generator
+    Random rnd = Random(seed);              // instance of random number generator
 
-    std::vector<double> I_uniform = rnd.blocking_method_uniform(N, L);
-    std::vector<double> I_p = rnd.blocking_method_p(N, L);
+    std::vector<std::vector<double>> I_uniform_prog = blocking::prog_mean(g_uniform, rnd, N, L);
+    std::vector<std::vector<double>> I_importance_prog = blocking::prog_mean(f_importance, rnd, N, L);
 
-    std::vector<std::vector<double>> I_uniform_prog = tools::prog_mean(I_uniform);
-    std::vector<std::vector<double>> I_p_prog = tools::prog_mean(I_p);
-
-    tools::write_data(tools::vec_arange(L, M, L), I_uniform_prog[0], I_uniform_prog[1], "../data/I_uniform_prog.txt", "I, I(M), I_error(M)");
-    tools::write_data(tools::vec_arange(L, M, L), I_p_prog[0], I_p_prog[1], "../data/I_p_prog.txt", "I, I(M), I_error(M)");
+    blocking::write_data(I_uniform_prog, "../data/I_uniform_prog.txt", "M, I_prog(M), error(M)");
+    blocking::write_data(I_importance_prog, "../data/I_importance_prog.txt", "M, I_prog(M), error(M)");
 
     return 0;
+}
+
+// Samples g(x) = pi/2*cos(pi*x/2) where x is distributed uniformly on [0, 1).
+double g_uniform(Random &rnd)
+{
+    double x = rnd.Rannyu(); // sample from p(x) = 1
+    return M_PI / 2 * cos(M_PI * x / 2);
+}
+
+// Samples f(x) = pi/2*cos(pi*x/2) / d(x) where x is distributed according to d(x) = 2*(1-x) on [0, 1).
+double f_importance(Random &rnd)
+{
+    double x = rnd.importance_draw(); // sample from d(x) = 2*(1-x)
+    return M_PI / 2 * cos(M_PI * x / 2) / (2 * (1 - x));
 }

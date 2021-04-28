@@ -114,6 +114,13 @@ double Random::lorentzian_draw(double gamma, double mu)
     return mu + gamma * tan(M_PI * (y_uniform - 0.5));
 }
 
+// Returns a random variable that follows the pdf d(x) = 2 * (1 - x) (computed via the inversion method from a uniformally distributed variable).
+double Random::importance_draw()
+{
+    double y_uniform = this->Rannyu();
+    return 1 - sqrt(1 - y_uniform);
+}
+
 /****************************************************************
 *****************************************************************
     _/    _/  _/_/_/  _/       Numerical Simulation Laboratory

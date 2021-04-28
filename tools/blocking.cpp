@@ -20,6 +20,19 @@ namespace blocking
         }
     }
 
+    std::vector<double> error(std::vector<double> av, std::vector<double> av_2, int n)
+    {
+        std::vector<double> error(av.size(), 0.0);
+        if (n > 1)
+        {
+            for (int i = 0; i < (int)av.size(); i++)
+            {
+                error[i] = sqrt((av_2[i] - pow(av[i], 2)) / (n - 1));
+            }
+        }
+        return error;
+    }
+
     // Computes progressive mean and its error using blocking method with N blocks of L throws.
     // Returns a vector that contains three nested vectors:
     //      1. Number of throws M

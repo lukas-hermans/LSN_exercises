@@ -1,13 +1,3 @@
-ex1:
-
-ex2:
-    - make tools::prog_mean more efficient (do not always calculate whole sum)
-    - implement p(x) = c(1-x^2) using rejection method
-
-ex3:
-    - make tools::prog_mean more efficient (do not always calculate whole sum)
-
-ex4:
 
 
 

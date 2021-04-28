@@ -35,6 +35,7 @@ public:
     double Gauss(double mean, double sigma);
     double exponential_draw(double lambda);
     double lorentzian_draw(double gamma, double mu);
+    double importance_draw();
 };
 
 #endif // __Random__
