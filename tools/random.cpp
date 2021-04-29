@@ -31,12 +31,39 @@ Random::Random(int seed[4])
     this->SetRandom(seed, p1, p2);
 }
 
+// Initialize an instance of Random that is prepared for the application of the Rannyu method.
+// If restart=1, seed from "seed.out" is used, otherwise from "seed.in".
+Random::Random(int restart)
+{
+    int p1, p2;
+    int seed[4];
+
+    ifstream Primes("../../tools/Primes");
+    Primes >> p1 >> p2;
+    Primes.close();
+
+    ifstream Seed;
+
+    if (restart == 1)
+    {
+        Seed.open("seed.out");
+        Seed >> seed[0] >> seed[1] >> seed[2] >> seed[3];
+    }
+    else
+    {
+        Seed.open("seed.in");
+        Seed >> seed[0] >> seed[1] >> seed[2] >> seed[3];
+    }
+
+    this->SetRandom(seed, p1, p2);
+}
+
 Random ::~Random() {}
 
 void Random ::SaveSeed()
 {
     ofstream WriteSeed;
-    WriteSeed.open("../../tools/seed.out");
+    WriteSeed.open("seed.out");
     if (WriteSeed.is_open())
     {
         WriteSeed << l1 << " " << l2 << " " << l3 << " " << l4 << endl;

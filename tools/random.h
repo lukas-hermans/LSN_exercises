@@ -25,6 +25,7 @@ public:
     // constructors
     Random();
     Random(int seed[4]);
+    Random(int restart);
     // destructor
     ~Random();
     // methods
