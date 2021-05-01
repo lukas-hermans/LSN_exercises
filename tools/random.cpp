@@ -141,6 +141,28 @@ double Random::lorentzian_draw(double gamma, double mu)
     return mu + gamma * tan(M_PI * (y_uniform - 0.5));
 }
 
+// Samples cos(phi) with phi between 0 and pi/2 using the rejection method.
+double Random::sample_cos()
+{
+    double x;
+    double y;
+    double r2;
+
+    bool reject = true;
+    while (reject == true) // loop until accepted
+    {
+        x = this->Rannyu(0, 1);
+        y = this->Rannyu(0, 1);
+        r2 = x * x + y * y;
+
+        if (r2 < 1)
+        {
+            return x / sqrt(r2); // sample of cos(phi)
+            reject = false;
+        }
+    }
+}
+
 // Returns a random variable that follows the pdf d(x) = 2 * (1 - x) (computed via the inversion method from a uniformally distributed variable).
 double Random::importance_draw()
 {

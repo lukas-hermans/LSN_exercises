@@ -36,6 +36,7 @@ public:
     double Gauss(double mean, double sigma);
     double exponential_draw(double lambda);
     double lorentzian_draw(double gamma, double mu);
+    double sample_cos();
     double importance_draw();
 };
 
