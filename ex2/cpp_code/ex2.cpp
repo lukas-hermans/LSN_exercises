@@ -8,20 +8,18 @@
 double r_sq(std::vector<double> xyz);
 void discrete_step(Random &rnd, std::vector<double> &xyz);
 void continuous_step(Random &rnd, std::vector<double> &xyz);
-std::vector<std::vector<double>> do_walk(Random &rnd, std::function<void(Random &, std::vector<double> &)> step_func, int N_steps, int N_blocks, int L);
+std::vector<std::vector<double>> do_walk(Random &rnd, std::function<void(Random &, std::vector<double> &)> step_func, int N_repetitions, int N_steps);
 
 int main()
 {
-    int N_repetitions = 10000;        // number of repetitions of random walk
-    int N_steps = 100;                // number of steps of random walker
-    int N_blocks = 100;               // number of blocks used for calculation of uncertainties (blocking method!)
-    int L = N_repetitions / N_blocks; // number of repetitions per block
+    int N_repetitions = 10000; // number of repetitions of random walk
+    int N_steps = 100;         // number of steps of random walker
 
     int seed[4] = {0000, 0000, 0000, 0001}; // seed for Rannyu generator
     Random rnd = Random(seed);              // instance of random number generator
 
-    std::vector<std::vector<double>> discrete_walk = do_walk(rnd, discrete_step, N_steps, N_blocks, L);
-    std::vector<std::vector<double>> continuous_walk = do_walk(rnd, continuous_step, N_steps, N_blocks, L);
+    std::vector<std::vector<double>> discrete_walk = do_walk(rnd, discrete_step, N_repetitions, N_steps);
+    std::vector<std::vector<double>> continuous_walk = do_walk(rnd, continuous_step, N_repetitions, N_steps);
 
     blocking::write_data(discrete_walk, "../data/discrete_walk.txt", "step, r_mean, r_error");
     blocking::write_data(continuous_walk, "../data/continuous_walk.txt", "step, r_mean, r_error");
@@ -58,7 +56,7 @@ void discrete_step(Random &rnd, std::vector<double> &xyz)
 void continuous_step(Random &rnd, std::vector<double> &xyz)
 {
     double phi = rnd.Rannyu(0, 2 * M_PI);
-    double theta = rnd.Rannyu(0, M_PI);
+    double theta = acos(1 - 2 * rnd.Rannyu(0, 1));
 
     xyz[0] += cos(phi) * sin(theta);
     xyz[1] += sin(phi) * sin(theta);
@@ -70,42 +68,37 @@ void continuous_step(Random &rnd, std::vector<double> &xyz)
 //      1. Number of steps: 1, 2, ..., N_steps
 //      2. Mean radius
 //      3. Error
-std::vector<std::vector<double>> do_walk(Random &rnd, std::function<void(Random &, std::vector<double> &)> step_func, int N_steps, int N_blocks, int L)
+std::vector<std::vector<double>> do_walk(Random &rnd, std::function<void(Random &, std::vector<double> &)> step_func, int N_repetitions, int N_steps)
 {
-    std::vector<double> xyz;                     // current position of walker
-    std::vector<double> step_list = {0};         // vector with 1, 2, ..., N_steps
-    std::vector<double> r2_block(N_steps);       // vector to store mean squared radius for current block
-    std::vector<double> r_av(N_steps + 1, 0.0);  // vector to store root of mean squared radius
-    std::vector<double> r_av2(N_steps + 1, 0.0); // vector to store mean squared radius
+    std::vector<double> xyz;
+    std::vector<double> r2_av(N_steps, 0.0);
+    std::vector<double> r2_av2(N_steps, 0.0);
 
-    // compute mean squared radius for 1, 2, ..., N_steps using N_blocks with L repetitions
-    for (int i = 0; i < N_blocks; i++) // loop over all blocks
+    for (int j = 0; j < N_repetitions; j++)
     {
-        std::fill(r2_block.begin(), r2_block.end(), 0.0);
-
-        //  compute mean squared radius for 1, 2, ..., N_steps for current block
-        for (int j = 0; j < L; j++) // loop over repetitions for current block
+        xyz = {0.0, 0.0, 0.0};            // starting point: origin
+        for (int k = 0; k < N_steps; k++) // do random walk with N_steps
         {
-            xyz = {0, 0, 0};
-
-            for (int k = 0; k < N_steps; k++) // do a random walk of in total N_steps for current repetition
-            {
-                step_func(rnd, xyz); // do a step
-                r2_block[k] += r_sq(xyz) / L;
-            }
-        }
-
-        for (int k = 0; k < N_steps; k++)
-        {
-            if (i == N_blocks - 1)
-                step_list.push_back(k + 1);
-
-            r_av[k + 1] += sqrt(r2_block[k]) / N_blocks; // add root of mean squared radius for k + 1 step to r_av
-            r_av2[k + 1] += r2_block[k] / N_blocks;      // add mean squared radius for k + 1 step to r_av2
+            step_func(rnd, xyz);
+            r2_av[k] += r_sq(xyz);
+            r2_av2[k] += r_sq(xyz) * r_sq(xyz);
         }
     }
 
-    std::vector<double> r_error = blocking::error(r_av, r_av2, N_blocks); // error on mean radius
+    std::vector<double> step_list;
+    std::vector<double> r2_error;
+    for (int i = 0; i < N_steps; i++)
+    {
+        r2_av[i] /= N_repetitions;
+        r2_av2[i] /= N_repetitions;
+        step_list.push_back(i + 1);
+        r2_error.push_back(blocking::error(r2_av[i], r2_av2[i], N_repetitions));
+    }
 
-    return {step_list, r_av, r_error};
+    // add starting point
+    step_list.insert(step_list.begin(), 0.0);
+    r2_av.insert(r2_av.begin(), 0.0);
+    r2_error.insert(r2_error.begin(), 0.0);
+
+    return {step_list, r2_av, r2_error};
 }

@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <cmath>
+#include <iostream>
 #include <functional>
 #include "random.h"
 #include "blocking.h"
@@ -12,25 +13,12 @@ namespace blocking
     {
         if (n == 1)
         {
-            return 0;
+            return 0.0;
         }
         else
         {
             return sqrt((av_2 - pow(av, 2)) / (n - 1));
         }
-    }
-
-    std::vector<double> error(std::vector<double> av, std::vector<double> av_2, int n)
-    {
-        std::vector<double> error(av.size(), 0.0);
-        if (n > 1)
-        {
-            for (int i = 0; i < (int)av.size(); i++)
-            {
-                error[i] = sqrt((av_2[i] - pow(av[i], 2)) / (n - 1));
-            }
-        }
-        return error;
     }
 
     // Computes progressive mean and its error using blocking method with N blocks of L throws.

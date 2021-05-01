@@ -161,6 +161,7 @@ double Random::sample_cos()
             reject = false;
         }
     }
+    return 0.0; // to avoid warning
 }
 
 // Returns a random variable that follows the pdf d(x) = 2 * (1 - x) (computed via the inversion method from a uniformally distributed variable).
