@@ -2,8 +2,15 @@
 #include <vector>
 #include <string>
 #include <fstream>
-#include "random/random.h"
-#include "tools/tools.h"
+#include <functional>
+#include <cmath>
+#include "../../tools/random.h"
+#include "../../tools/blocking.h"
+
+double C_direct(Random &rnd, double S_0, double T, double K, double r, double sigma);
+double P_direct(Random &rnd, double S_0, double T, double K, double r, double sigma);
+double C_discretized(Random &rnd, double N_steps, double S_0, double T, double K, double r, double sigma);
+double P_discretized(Random &rnd, double N_steps, double S_0, double T, double K, double r, double sigma);
 
 int main()
 {
@@ -15,27 +22,64 @@ int main()
 
     int N_steps = 100; // number of steps for discretized calculation (time of each step: T / N_steps)
 
-    int M = 5E6;   // number of throws
-    int N = 10000; // number of blocks
-    int L = M / N; // number of throws per block
+    int M = 100000; // number of throws
+    int N = 100;    // number of blocks
+    int L = M / N;  // number of throws per block
 
-    int seed[4] = {4, 13, 9, 17}; // seed for Rannyu generator
-    Random rnd = Random(seed);    // instance of random number generator
+    int seed[4] = {0000, 0000, 0000, 0001}; // seed for Rannyu generator
+    Random rnd = Random(seed);              // instance of random number generator
 
-    std::vector<double> C_direct = rnd.blocking_method_direct("call", N, L, S_0, T, K, r, sigma);
-    std::vector<double> P_direct = rnd.blocking_method_direct("put", N, L, S_0, T, K, r, sigma);
-    std::vector<double> C_discretized = rnd.blocking_method_discretized("call", N, L, N_steps, S_0, T, K, r, sigma);
-    std::vector<double> P_discretized = rnd.blocking_method_discretized("put", N, L, N_steps, S_0, T, K, r, sigma);
+    std::vector<std::vector<double>> C_direct_prog = blocking::prog_mean(std::bind(C_direct, std::placeholders::_1, S_0, T, K, r, sigma), rnd, N, L);
+    std::vector<std::vector<double>> P_direct_prog = blocking::prog_mean(std::bind(P_direct, std::placeholders::_1, S_0, T, K, r, sigma), rnd, N, L);
+    std::vector<std::vector<double>> C_discretized_prog = blocking::prog_mean(std::bind(C_discretized, std::placeholders::_1, N_steps, S_0, T, K, r, sigma), rnd, N, L);
+    std::vector<std::vector<double>> P_discretized_prog = blocking::prog_mean(std::bind(P_discretized, std::placeholders::_1, N_steps, S_0, T, K, r, sigma), rnd, N, L);
 
-    std::vector<std::vector<double>> C_direct_prog = tools::prog_mean(C_direct);
-    std::vector<std::vector<double>> P_direct_prog = tools::prog_mean(P_direct);
-    std::vector<std::vector<double>> C_discretized_prog = tools::prog_mean(C_discretized);
-    std::vector<std::vector<double>> P_discretized_prog = tools::prog_mean(P_discretized);
-
-    tools::write_data(tools::vec_arange(L, M, L), C_direct_prog[0], C_direct_prog[1], "../data/C_direct_prog.txt", "M, C(M), C_error(M)");
-    tools::write_data(tools::vec_arange(L, M, L), P_direct_prog[0], P_direct_prog[1], "../data/P_direct_prog.txt", "M, P(M), P_error(M)");
-    tools::write_data(tools::vec_arange(L, M, L), C_discretized_prog[0], C_discretized_prog[1], "../data/C_discretized_prog.txt", "M, C(M), C_error(M)");
-    tools::write_data(tools::vec_arange(L, M, L), P_discretized_prog[0], P_discretized_prog[1], "../data/P_discretized_prog.txt", "M, P(M), P_error(M)");
+    blocking::write_data(C_direct_prog, "../data/C_direct_prog.txt", "M, C(M), C_error(M)");
+    blocking::write_data(P_direct_prog, "../data/P_direct_prog.txt", "M, P(M), P_error(M)");
+    blocking::write_data(C_discretized_prog, "../data/C_discretized_prog.txt", "M, C(M), C_error(M)");
+    blocking::write_data(P_discretized_prog, "../data/P_discretized_prog.txt", "M, P(M), P_error(M)");
 
     return 0;
+}
+
+double C_direct(Random &rnd, double S_0, double T, double K, double r, double sigma)
+{
+    double Z = rnd.Gauss(0, 1);
+    double S_T = S_0 * exp((r - pow(sigma, 2) / 2) * T + sigma * Z * sqrt(T));
+    return exp(-r * T) * max(0.0, S_T - K);
+}
+
+double P_direct(Random &rnd, double S_0, double T, double K, double r, double sigma)
+{
+    double Z = rnd.Gauss(0, 1);
+    double S_T = S_0 * exp((r - pow(sigma, 2) / 2) * T + sigma * Z * sqrt(T));
+    return exp(-r * T) * max(0.0, K - S_T);
+}
+
+double C_discretized(Random &rnd, double N_steps, double S_0, double T, double K, double r, double sigma)
+{
+    double Z;
+    double S_disc = S_0;
+    for (int i = 0; i < N_steps; i++)
+    {
+        Z = rnd.Gauss(0, 1);
+        S_disc = S_disc * exp((r - 0.5 * pow(sigma, 2)) * T / N_steps + sigma * Z * sqrt(T / N_steps));
+    }
+    double S_T = S_disc;
+
+    return exp(-r * T) * max(0.0, S_T - K);
+}
+
+double P_discretized(Random &rnd, double N_steps, double S_0, double T, double K, double r, double sigma)
+{
+    double Z;
+    double S_disc = S_0;
+    for (int i = 0; i < N_steps; i++)
+    {
+        Z = rnd.Gauss(0, 1);
+        S_disc = S_disc * exp((r - 0.5 * pow(sigma, 2)) * T / N_steps + sigma * Z * sqrt(T / N_steps));
+    }
+    double S_T = S_disc;
+
+    return exp(-r * T) * max(0.0, K - S_T);
 }
