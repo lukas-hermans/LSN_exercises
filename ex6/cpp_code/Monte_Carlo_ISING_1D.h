@@ -11,6 +11,8 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 #ifndef __ISING__
 #define __ISING__
 
+#include <string>
+
 //Random numbers
 #include "../../tools/random.h"
 Random rnd;
@@ -36,13 +38,14 @@ int nspin;
 double beta, temp, J, h;
 
 // simulation
-int nstep, nblk, metro, restart;
+int nrep, nstep, nblk, exer, metro, restart;
 
 //functions
+void exercise(void);
 void Input(void);
 void Reset(int);
 void Accumulate(void);
-void Averages(int);
+void Averages(int, int = 1, string = "", string = "");
 void Move(int);
 void ConfFinal(void);
 void Measure(void);

@@ -14,43 +14,62 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 #include <cmath>
 #include <iomanip>
 #include <stdexcept>
+#include <string>
+#include <vector>
 #include "Monte_Carlo_ISING_1D.h"
 
 using namespace std;
 
 int main()
 {
-    Input(); //Inizialization
+    exercise(); // compute everything necessary for exercise 6
 
-    for (int iblk = 1; iblk <= nblk; ++iblk) //Simulation
-    {
-        Reset(iblk); //Reset block averages
+    // Input(); //Inizialization
 
-        for (int istep = 1; istep <= nstep; ++istep)
-        {
-            Move(metro);
-            Measure();
-            Accumulate(); //Update block averages
-        }
+    // for (int iblk = 1; iblk <= nblk; ++iblk) //Simulation
+    // {
+    //     Reset(iblk); //Reset block averages
 
-        Averages(iblk); //Print results for current block
-    }
+    //     for (int istep = 1; istep <= nstep; ++istep)
+    //     {
+    //         Move(metro);
+    //         Measure();
+    //         Accumulate(); //Update block averages
+    //     }
 
-    ConfFinal(); //Write final configuration
+    //     Averages(iblk); //Print results for current block
+    // }
+
+    // ConfFinal(); //Write final configuration
 
     return 0;
 }
 
-void exersice()
+// SOLUTION OF EXERCISE 6
+//
+// Does not use seed.in nor config.final but starts each run of a simulation with a random configuration.
+// Seed can be specified inside function.
+// Conducts simulation using Metropolis algorithm for h=0 and h=0.02.
+// Simulations are done on a range of temp./betas.
+// List of final values saved in data folder.
+// Same for Gibbs algorithm.
+//
+// So: choose algorithm --> choose h --> choose temp. --> do simulation (with data blocking) [fuction does all of this automatically]
+//
+//
+void exercise()
 {
+    exer = 1; // program should know that function exercise is executed
+
+    nrep = 30;     // number of repetitions for each method (metro and gibbs), influences spacing between temp. steps between 0.5 and 2
+    nblk = 20;     // total number of blocks
+    nstep = 10000; // number of steps per block
+
     nspin = 50; // number of spins
     J = 1;      // coupling constant
 
     int seed[4] = {0000, 0000, 0000, 0001}; // seed for Rannyu generator
     rnd = Random(seed);                     // prepared instance for Rannyu generator
-
-    nblk = 100;
-    nstep = 10000;
 
     //Prepare arrays for measurements
     iu = 0; //Energy
@@ -59,10 +78,64 @@ void exersice()
     ix = 3; //Magnetic susceptibility
 
     n_props = 4; //Number of observables
+
+    //initial configuration (T = inf)
+    for (int i = 0; i < nspin; ++i)
+    {
+        if (rnd.Rannyu() >= 0.5)
+            s[i] = 1;
+        else
+            s[i] = -1;
+    }
+
+    // create vectors for different simulations
+    vector<double> beta_list; // list of betas (inverse temperatures)
+    for (int i = 0; i < nrep; i++)
+    {
+        beta_list.push_back(1 / (0.5 + (2.0 - 0.5) / (nrep - 1) * i));
+    }
+
+    vector<int> metro_list = {1, 1, 0, 0};
+    vector<double> h_list = {0, 0.02, 0, 0.02};
+    vector<string> path_list = {"../data/metro_h=0.txt", "../data/metro_h=0.02.txt", "../data/gibbs_h=0.txt", "../data/gibbs_h=0.02.txt"};
+    ofstream file("../data/metro_equi", ios::app);
+    for (int sim_nr = 0; sim_nr < (int)metro_list.size(); sim_nr++)
+    {
+        ofstream remove_file(path_list[sim_nr]); // clear file
+
+        metro = metro_list[sim_nr];
+        h = h_list[sim_nr];
+
+        for (int irep = 1; irep <= nrep; ++irep) // loop over beta values/temperatures
+        {
+            beta = beta_list[irep - 1]; // take a irep-th. beta value (that is a certain temperature)
+
+            for (int iblk = 1; iblk <= nblk; ++iblk) // loop over blocks
+            {
+                Reset(iblk); //Reset block averages
+
+                for (int istep = 1; istep <= nstep; ++istep) // loop over steps in current block
+                {
+                    if (metro == 1 && h == 0 && irep == 1 && iblk == 1 && istep < 1000)
+                    {
+                        file << walker[iu] << endl;
+                    }
+
+                    Move(metro);
+                    Measure();
+                    Accumulate(); //Update block averages
+                }
+
+                Averages(iblk, irep, path_list[sim_nr], "T, u(T), u_error(T), c(T), c_error(T), chi(T), chi_error(T), m(T), m_error(T)"); //Print results for current block
+            }
+        }
+    }
 }
 
 void Input(void)
 {
+    exer = 0; // program should know that only one run of program and not function exersize is executed
+
     ifstream ReadInput;
 
     cout << "Classic 1D Ising model             " << endl;
@@ -162,7 +235,6 @@ void Move(int metro)
     double delta_E;
     double p_ratio;
     double alpha, r;
-    double energy_up, energy_down;
 
     for (int i = 0; i < nspin; ++i)
     {
@@ -190,7 +262,7 @@ void Move(int metro)
         else //Gibbs sampling
         {
             delta_E = Boltzmann(1, o) - Boltzmann(-1, o); // energy difference between spin up and spin down configuration
-            alpha = 1 / (1 + exp(-beta * delta_E));       // conditional property to get spin +1
+            alpha = 1 / (1 + exp(beta * delta_E));        // conditional property to get spin +1
 
             r = rnd.Rannyu(); // random number between 0 and 1
 
@@ -213,7 +285,6 @@ double Boltzmann(int sm, int ip)
 
 void Measure()
 {
-    int bin;
     double u = 0.0, m = 0.0;
 
     //cycle over spins
@@ -259,50 +330,71 @@ void Accumulate(void) //Update block averages
     blk_norm = blk_norm + 1.0;
 }
 
-void Averages(int iblk) //Print results for current block
+void Averages(int iblk, int irep, string path, string header) //Print results for current block
 {
-
-    ofstream Ene, Heat, Mag, Chi;
-    const int wd = 12;
-
-    cout << "Block number " << iblk << endl;
-    cout << "Acceptance rate " << accepted / attempted << endl
-         << endl;
-
-    Ene.open("output.ene.0", ios::app);
     stima_u = blk_av[iu] / blk_norm / (double)nspin; //Energy
     glob_av[iu] += stima_u;
     glob_av2[iu] += stima_u * stima_u;
     err_u = Error(glob_av[iu], glob_av2[iu], iblk);
-    Ene << setw(wd) << iblk << setw(wd) << stima_u << setw(wd) << glob_av[iu] / (double)iblk << setw(wd) << err_u << endl;
-    Ene.close();
 
-    Heat.open("output.heat.0", ios::app);
-    stima_x = blk_av[ix] / blk_norm / (double)nspin - (double)nspin * beta * beta * stima_u * stima_u; //Heat Capacity
-    glob_av[ix] += stima_x;
-    glob_av2[ix] += stima_x * stima_x;
-    err_x = Error(glob_av[ix], glob_av2[ix], iblk);
-    Heat << setw(wd) << iblk << setw(wd) << stima_x << setw(wd) << glob_av[ix] / (double)iblk << setw(wd) << err_x << endl;
-    Heat.close();
+    stima_c = blk_av[ic] / blk_norm / (double)nspin - (double)nspin * beta * beta * stima_u * stima_u; //Heat Capacity
+    glob_av[ic] += stima_c;
+    glob_av2[ic] += stima_c * stima_c;
+    err_c = Error(glob_av[ic], glob_av2[ic], iblk);
 
-    Mag.open("output.mag.0", ios::app);
     stima_m = blk_av[im] / blk_norm / (double)nspin; //Magnetization
     glob_av[im] += stima_m;
     glob_av2[im] += stima_m * stima_m;
     err_m = Error(glob_av[im], glob_av2[im], iblk);
-    Mag << setw(wd) << iblk << setw(wd) << stima_m << setw(wd) << glob_av[im] / (double)iblk << setw(wd) << err_m << endl;
-    Mag.close();
 
-    Chi.open("output.chi.0", ios::app);
     stima_x = blk_av[ix] / blk_norm / (double)nspin; //susceptibility
     glob_av[ix] += stima_x;
     glob_av2[ix] += stima_x * stima_x;
     err_x = Error(glob_av[ix], glob_av2[ix], iblk);
-    Chi << setw(wd) << iblk << setw(wd) << stima_x << setw(wd) << glob_av[ix] / (double)iblk << setw(wd) << err_x << endl;
-    Chi.close();
 
-    cout << "----------------------------" << endl
-         << endl;
+    if (exer == 0)
+    {
+        cout << "Block number " << iblk << endl;
+        cout << "Acceptance rate " << accepted / attempted << endl
+             << endl;
+
+        ofstream Ene, Heat, Mag, Chi;
+        const int wd = 12;
+
+        Ene.open("output.ene.0", ios::app);
+        Ene << setw(wd) << iblk << setw(wd) << stima_u << setw(wd) << glob_av[iu] / (double)iblk << setw(wd) << err_u << endl;
+        Ene.close();
+
+        Heat.open("output.heat.0", ios::app);
+        Heat << setw(wd) << iblk << setw(wd) << stima_c << setw(wd) << glob_av[ic] / (double)iblk << setw(wd) << err_c << endl;
+        Heat.close();
+
+        Mag.open("output.mag.0", ios::app);
+        Mag << setw(wd) << iblk << setw(wd) << stima_m << setw(wd) << glob_av[im] / (double)iblk << setw(wd) << err_m << endl;
+        Mag.close();
+
+        Chi.open("output.chi.0", ios::app);
+        Chi << setw(wd) << iblk << setw(wd) << stima_x << setw(wd) << glob_av[ix] / (double)iblk << setw(wd) << err_x << endl;
+        Chi.close();
+
+        cout << "----------------------------" << endl
+             << endl;
+    }
+
+    if ((exer == 1) && (iblk == nblk))
+    {
+        ofstream file(path, ios::app);
+
+        if (irep == 1)
+            file << header << endl;
+
+        file << 1 / beta << ", "
+             << glob_av[iu] / (double)iblk << ", " << err_u << ", "
+             << glob_av[ic] / (double)iblk << ", " << err_c << ", "
+             << glob_av[ix] / (double)iblk << ", " << err_x << ", "
+             << glob_av[im] / (double)iblk << ", " << err_m
+             << endl;
+    }
 }
 
 void ConfFinal(void)
