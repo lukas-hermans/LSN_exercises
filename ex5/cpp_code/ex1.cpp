@@ -16,15 +16,14 @@ double r(std::vector<double> x);
 int main()
 {
     int M = 1000000;    // number of throws
-    int N = 160;        // number of blocks
+    int N = 100;        // number of blocks
     int N_equi = 10000; // number of steps of Metropolis algorithm to equilibrate
-    // int N_equi = 0;
 
-    int seed[4] = {3618, 2056, 2826, 2305}; // seed for Rannyu generator
+    int seed[4] = {0000, 0000, 0000, 0001}; // seed for Rannyu generator
     Random rnd = Random(seed);              // prepared instance for Rannyu generator
 
-    std::vector<double> x0 = {0, 0, 0}; // starting position for Metropolis algorithm
-    // std::vector<double> x0 = {10, 10, 10};
+    std::vector<double> x0 = {0, 0, 0};             // starting position for Metropolis algorithm
+    std::vector<double> x0_far_away = {2000, 0, 0}; // starting far away position for Metropolis algorithm
 
     // uniform trial transition probability (set to achieve approx. 50% acceptance rate)
     std::vector<double> x_min_100 = {-1.2, -1.2, -1.2};
@@ -39,7 +38,7 @@ int main()
     std::vector<double> sigma_210 = {1.9, 1.9, 1.9};
 
     Metropolis metropolis(rnd); // instance for Metropolis algorithm
-    metropolis.save_step = 200;
+    metropolis.save_step = 200; // used for scatter plots in results presentation
 
     // ************************** //
     // *** uniform transition *** //
@@ -63,6 +62,16 @@ int main()
     std::cout << "acceptance rate for uni_210: " << metropolis.acc / (double)M << std::endl;
     metropolis.write_x_history("../data/uni_210.xyz");
     blocking::write_data(metropolis.blocking_data, "../data/uni_210.txt", "M, r_mean(M), r_error(M)");
+    metropolis.clean_cache();
+
+    metropolis.set_x0(x0_far_away);
+    // ground state, starting point far away
+    metropolis.T = std::bind(T_uni, std::placeholders::_1, std::placeholders::_2, x_min_100, x_max_100);
+    metropolis.p = pdf_100;
+    metropolis.do_many_steps(M, N, N_equi);
+    std::cout << "acceptance rate for uni_100_far_away: " << metropolis.acc / (double)M << std::endl;
+    metropolis.write_x_history("../data/uni_100_far_away.xyz");
+    blocking::write_data(metropolis.blocking_data, "../data/uni_100_far_away.txt", "M, r_mean(M), r_error(M)");
     metropolis.clean_cache();
 
     // *************************** //
