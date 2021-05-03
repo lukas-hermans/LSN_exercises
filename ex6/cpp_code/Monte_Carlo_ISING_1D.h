@@ -38,7 +38,7 @@ int nspin;
 double beta, temp, J, h;
 
 // simulation
-int nrep, nstep, nblk, exer, metro, restart;
+int nequi, nrep, nstep, nblk, exer, metro, restart;
 
 //functions
 void exercise(void);

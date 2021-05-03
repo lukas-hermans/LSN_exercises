@@ -56,14 +56,17 @@ int main()
 //
 // So: choose algorithm --> choose h --> choose temp. --> do simulation (with data blocking) [fuction does all of this automatically]
 //
-//
+// Equilibration before every simulation is ensured.
 void exercise()
 {
+    cout << "execute everything necessary for 6-th. exercise" << endl;
+
     exer = 1; // program should know that function exercise is executed
 
     nrep = 30;     // number of repetitions for each method (metro and gibbs), influences spacing between temp. steps between 0.5 and 2
     nblk = 20;     // total number of blocks
     nstep = 10000; // number of steps per block
+    nequi = 10000; // number of steps for equilibration
 
     nspin = 50; // number of spins
     J = 1;      // coupling constant
@@ -98,17 +101,60 @@ void exercise()
     vector<int> metro_list = {1, 1, 0, 0};
     vector<double> h_list = {0, 0.02, 0, 0.02};
     vector<string> path_list = {"../data/metro_h=0.txt", "../data/metro_h=0.02.txt", "../data/gibbs_h=0.txt", "../data/gibbs_h=0.02.txt"};
-    ofstream file("../data/metro_equi", ios::app);
-    for (int sim_nr = 0; sim_nr < (int)metro_list.size(); sim_nr++)
+
+    // open files to write equilibration measurements
+    ofstream file_metro05("../data/metro_equi_05.txt");
+    file_metro05 << "M, u(M), chi(M), m(M)" << endl;
+    ofstream file_metro2("../data/metro_equi_2.txt");
+    file_metro2 << "M, u(M), chi(M), m(M)" << endl;
+    ofstream file_gibbs05("../data/gibbs_equi_05.txt");
+    file_gibbs05 << "M, u(M), chi(M), m(M)" << endl;
+    ofstream file_gibbs2("../data/gibbs_equi_2.txt");
+    file_gibbs2 << "M, u(M), chi(M), m(M)" << endl;
+
+    for (int sim_nr = 0; sim_nr < (int)metro_list.size(); sim_nr++) // loop over different simulations
     {
         ofstream remove_file(path_list[sim_nr]); // clear file
 
         metro = metro_list[sim_nr];
         h = h_list[sim_nr];
 
+        cout << "metro = " << metro << ", h = " << h << endl;
+
         for (int irep = 1; irep <= nrep; ++irep) // loop over beta values/temperatures
         {
             beta = beta_list[irep - 1]; // take a irep-th. beta value (that is a certain temperature)
+
+            // equilibration
+            for (int iequi = 1; iequi <= nequi; iequi++)
+            {
+                Move(metro);
+                Measure();
+
+                // print equilibration process
+                if (irep == 1 && h == 0 && iequi <= 10000)
+                {
+                    if (metro == 1)
+                    {
+                        file_metro05 << iequi << ", " << walker[iu] / m_spin << ", " << walker[ix] / m_spin << ", " << walker[im] / m_spin << endl;
+                    }
+                    if (metro == 0)
+                    {
+                        file_gibbs05 << iequi << ", " << walker[iu] / m_spin << ", " << walker[ix] / m_spin << ", " << walker[im] / m_spin << endl;
+                    }
+                }
+                if (irep == nrep && h == 0 && iequi <= 10000)
+                {
+                    if (metro == 1)
+                    {
+                        file_metro2 << iequi << ", " << walker[iu] / m_spin << ", " << walker[ix] / m_spin << ", " << walker[im] / m_spin << endl;
+                    }
+                    if (metro == 0)
+                    {
+                        file_gibbs2 << iequi << ", " << walker[iu] / m_spin << ", " << walker[ix] / m_spin << ", " << walker[im] / m_spin << endl;
+                    }
+                }
+            }
 
             for (int iblk = 1; iblk <= nblk; ++iblk) // loop over blocks
             {
@@ -116,11 +162,6 @@ void exercise()
 
                 for (int istep = 1; istep <= nstep; ++istep) // loop over steps in current block
                 {
-                    if (metro == 1 && h == 0 && irep == 1 && iblk == 1 && istep < 1000)
-                    {
-                        file << walker[iu] << endl;
-                    }
-
                     Move(metro);
                     Measure();
                     Accumulate(); //Update block averages
