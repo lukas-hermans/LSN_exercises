@@ -17,7 +17,7 @@ public:
     bool is_equi = true;                // boolean to indicate if algorithm is in equilibrating phase
     int step_count = 0;                 // counts how many steps have already been completed
     std::vector<double> x0, x_current;  // start position and current position
-    int save_step;                      // difference between steps that should be save (not too large, to avoid memory overflow)
+    int save_step = 99999999;           // difference between steps that should be save (not too large, to avoid memory overflow)
     std::vector<std::vector<double>> x; // position history
     int acc = 0;                        // number of accepted trials
 
@@ -31,6 +31,7 @@ public:
     void do_step();
     void do_many_steps(int M_throws, int N_blocks, int N_equi);
     void write_x_history(std::string path);
+    void write_hist(std::string path, int nbins, double xlow, double xup, int M_throws, int N_blocks);
     void clean_cache();
 };
 

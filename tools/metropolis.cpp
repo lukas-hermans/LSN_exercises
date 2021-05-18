@@ -131,10 +131,58 @@ void Metropolis::write_x_history(std::string path)
     }
 }
 
+// Write histogram of positions with error to a file specified by path.
+// Works only for 1D case.
+void Metropolis::write_hist(std::string path, int nbins, double xlow, double xup, int M_throws, int N_blocks)
+{
+    int L = M_throws / N_blocks; // number of throws per block
+    double binwidth = (xup - xlow) / nbins;
+
+    std::vector<double> hist(nbins, 0.0);
+    std::vector<double> hist_av(nbins, 0.0);
+    std::vector<double> hist_av2(nbins, 0.0);
+    for (int i = 0; i < N_blocks; i++)
+    {
+        // histogram for current block
+        for (int j = 0; j < L; j++)
+        {
+            for (int k = 0; k < nbins; k++)
+            {
+                if (xlow + k * binwidth <= x[i * L + j][0] && x[i * L + j][0] < xlow + (k + 1) * binwidth)
+                {
+                    hist[k] += 1;
+                }
+            }
+        }
+
+        // save av and av2 for current block for all nbins entries
+        for (int j = 0; j < nbins; j++)
+        {
+            hist_av[j] += hist[j] / L;
+            hist_av2[j] += hist[j] / L * hist[j] / L;
+            hist[j] = 0;
+        }
+    }
+
+    // write histogram to specified file
+    std::ofstream file(path);
+    file << "x, pdf(x), error(x)" << std::endl;
+    double hist_average, hist_square_avg, error;
+    for (int i = 0; i < nbins; i++)
+    {
+        hist_average = hist_av[i] / N_blocks;
+        hist_square_avg = hist_av2[i] / N_blocks;
+        error = blocking::error(hist_average, hist_square_avg, N_blocks);
+        file << xlow + (i + 0.5) * binwidth << ", " << hist_average / binwidth << ", " << error / binwidth << std::endl;
+    }
+
+    file.close();
+}
+
 // Resets cache to start with a new Metropolis simulation.
 void Metropolis::clean_cache()
 {
-    x.resize(1);
+    x.resize(0);
     x_current = x0;
     for (int i = 0; i < (int)blocking_data.size(); i++)
     {

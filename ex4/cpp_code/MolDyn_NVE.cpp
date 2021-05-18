@@ -11,6 +11,7 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 #include <iostream> // cin, cout: Standard Input/Output Streams Library
 #include <fstream>  // Stream class to both read and write from/to files.
 #include <cmath>    // rint, pow
+#include <string>
 #include "MolDyn_NVE.h"
 
 using namespace std;
@@ -19,6 +20,28 @@ int main()
 {
     Input(); //Inizialization
     int nconf = 1;
+
+    // do equilibration to reach desired temperature
+    for (int iequi = 1; iequi <= nequi; iequi++)
+    {
+        cout << "***Number of equilibrations***: " << iequi << endl;
+        for (int istep = 1; istep <= equi_step; istep++)
+        {
+            Move(); //Move particles with Verlet algorithm
+
+            Measure(true, iequi, istep); //Properties measurement
+
+            if (istep == equi_step - 1 && iequi < nequi)
+            {
+                ConfBeforeFinal(); // Write penultimate configuration to restart
+            }
+        }
+        if (iequi < nequi)
+        {
+            ConfFinal(); //Write final configuration to restart
+            init_config(1);
+        }
+    }
 
     for (int iblk = 1; iblk <= nblk; ++iblk)
     {
@@ -35,11 +58,12 @@ int main()
                 cout << "Number of time-steps: " << istep << endl;
             }
 
+            Measure(false); //Properties measurement
+            Accumulate();   //Update block averages
+
             if (istep % 10 == 0)
             {
-                Measure(); //Properties measurement
                 //ConfXYZ(nconf); //Write actual configuration in XYZ format //Commented to avoid "filesystem full"!
-                Accumulate(); //Update block averages
                 nconf += 1;
             }
 
@@ -60,8 +84,7 @@ int main()
 //Prepare all stuff for the simulation
 void Input(void)
 {
-    ifstream ReadInput, ReadConf;
-    double ep, ek, pr, et, vir;
+    ifstream ReadInput;
 
     cout << "Classic Lennard-Jones fluid        " << endl;
     cout << "Molecular dynamics simulation in NVE ensemble  " << endl
@@ -92,23 +115,50 @@ void Input(void)
 
     ReadInput >> rcut;
     ReadInput >> delta;
+    ReadInput >> nequi;
+    ReadInput >> equi_step;
     ReadInput >> nblk;
     ReadInput >> nstep;
     ReadInput >> iprint;
 
     cout << "The program integrates Newton equations with the Verlet method " << endl;
     cout << "Time step = " << delta << endl;
+    cout << "Number of equilibrations = " << nequi << endl;
+    cout << "Number of equilibration steps = " << equi_step << endl;
     cout << "Number of blocks = " << nblk << endl;
     cout << "Number of steps = " << nstep << endl
          << endl;
     ReadInput.close();
+
+    //Tail corrections for potential energy and pressure
+    vtail = (8.0 * pi * rho) / (9.0 * pow(rcut, 9)) - (8.0 * pi * rho) / (3.0 * pow(rcut, 3));
+    ptail = (32.0 * pi * rho) / (9.0 * pow(rcut, 9)) - (16.0 * pi * rho) / (3.0 * pow(rcut, 3));
+    cout << "Tail correction for the potential energy = " << vtail << endl;
+    cout << "Tail correction for the virial           = " << ptail << endl;
 
     //Prepare array for measurements
     iv = 0;      //Potential energy
     ik = 1;      //Kinetic energy
     ie = 2;      //Total energy
     it = 3;      //Temperature
-    n_props = 4; //Number of observables
+    iw = 4;      //Virial
+    n_props = 5; //Number of observables
+
+    //measurement of g(r)
+    igofr = 5;
+    nbins = 100;
+    n_props = n_props + nbins;
+    bin_size = (box / 2.0) / (double)nbins;
+
+    init_config(restart);
+
+    return;
+}
+
+// intialize configurations (defined by restart bool-like)
+void init_config(int restart)
+{
+    ifstream ReadConf;
 
     if (restart == 1) // read final and penultimate configuration and move one time to get velocity
     {
@@ -170,7 +220,6 @@ void Input(void)
         }
         for (int idim = 0; idim < 3; ++idim)
             sumv[idim] /= (double)npart;
-        double sumv2 = 0.0, fs;
         for (int i = 0; i < npart; ++i)
         {
             vx[i] = vx[i] - sumv[0];
@@ -197,8 +246,6 @@ void Input(void)
         yold[i] = Pbc(y[i] - vy[i] * delta);
         zold[i] = Pbc(z[i] - vz[i] * delta);
     }
-
-    return;
 }
 
 //Update block averages
@@ -215,7 +262,35 @@ void Accumulate(void)
 //Print results for current block
 void Averages(int iblk)
 {
-    stima_pot = blk_av[iv] / blk_norm; // potential energy per particle
+    // reset average files and write header
+    if (iblk == 1)
+    {
+        ofstream Pot("../data/ave_epot.out");
+        ofstream Kin("../data/ave_ekin.out");
+        ofstream Tot("../data/ave_etot.out");
+        ofstream Temp("../data/ave_temp.out");
+        ofstream Pres("../data/ave_pres.out");
+        ofstream Gofr("../data/output.gofr.0");
+        ofstream Gave("../data/ave_gofr.0");
+
+        Pot << "M, epot, epot_error" << endl;
+        Kin << "M, ekin, ekin_error" << endl;
+        Tot << "M, etot, etot_error" << endl;
+        Temp << "M, temp, temp_error" << endl;
+        Pres << "M, pres, pres_error" << endl;
+        Gofr << "M, r, gofr (current block)" << endl;
+        Gave << "r, gofr, gofr_error" << endl;
+
+        Pot.close();
+        Kin.close();
+        Tot.close();
+        Temp.close();
+        Pres.close();
+        Gofr.close();
+        Gave.close();
+    }
+
+    stima_pot = blk_av[iv] / blk_norm + vtail; // potential energy per particle
     glob_av[iv] += stima_pot;
     glob_av2[iv] += stima_pot * stima_pot;
     err_pot = Error(glob_av[iv], glob_av2[iv], iblk);
@@ -233,25 +308,55 @@ void Averages(int iblk)
     stima_temp = blk_av[it] / blk_norm; // temperature
     glob_av[it] += stima_temp;
     glob_av2[it] += stima_temp * stima_temp;
-    err_etot = Error(glob_av[it], glob_av2[it], iblk);
+    err_temp = Error(glob_av[it], glob_av2[it], iblk);
 
-    ofstream Pot, Kin, Tot, Temp;
+    stima_pres = rho * temp + (blk_av[iw] / blk_norm + ptail * (double)npart) / vol; //Pressure
+    glob_av[iw] += stima_pres;
+    glob_av2[iw] += stima_pres * stima_pres;
+    err_press = Error(glob_av[iw], glob_av2[iw], iblk);
+
+    ofstream Pot, Kin, Tot, Temp, Pres, Gofr, Gave;
 
     Pot.open("../data/ave_epot.out", ios::app);
-    Pot << iblk * nstep << "," << stima_pot << ", " << err_pot << endl;
+    Pot << iblk * nstep << ", " << glob_av[iv] / (double)iblk << ", " << err_pot << endl;
     Pot.close();
 
     Kin.open("../data/ave_ekin.out", ios::app);
-    Kin << iblk * nstep << "," << stima_kin << ", " << err_kin << endl;
+    Kin << iblk * nstep << ", " << glob_av[ik] / (double)iblk << ", " << err_kin << endl;
     Kin.close();
 
     Tot.open("../data/ave_etot.out", ios::app);
-    Tot << iblk * nstep << "," << stima_etot << ", " << err_etot << endl;
+    Tot << iblk * nstep << ", " << glob_av[ie] / (double)iblk << ", " << err_etot << endl;
     Tot.close();
 
     Temp.open("../data/ave_temp.out", ios::app);
-    Temp << iblk * nstep << "," << stima_temp << ", " << err_temp << endl;
+    Temp << iblk * nstep << ", " << glob_av[it] / (double)iblk << ", " << err_temp << endl;
     Temp.close();
+
+    Pres.open("../data/ave_pres.out", ios::app);
+    Pres << iblk * nstep << "," << glob_av[iw] / (double)iblk << ", " << err_press << endl;
+    Pres.close();
+
+    Gofr.open("../data/output.gofr.0", ios::app);
+    Gave.open("../data/ave_gofr.0", ios::app);
+
+    //g(r)
+    for (int i = 0; i < nbins; i++)
+    {
+        stima_g = blk_av[i + 5] / blk_norm / (rho * m_part * 4 * M_PI / 3 * (pow(i * bin_size + bin_size, 3) - pow(i * bin_size, 3)));
+        glob_av[i + 5] += stima_g;
+        glob_av2[i + 5] += stima_g * stima_g;
+        err_gdir = Error(glob_av[i + 5], glob_av2[i + 5], iblk);
+
+        Gofr << iblk * nstep << ", " << (2 * i + 1) / 2.0 * bin_size << ", " << stima_g << endl;
+
+        if (iblk == nblk)
+        {
+            Gave << (2 * i + 1) / 2.0 * bin_size << ", " << glob_av[i + 5] / (double)iblk << ", " << err_gdir << endl;
+        }
+    }
+
+    Gofr.close();
 }
 
 //Reset block averages
@@ -335,20 +440,18 @@ double Force(int ip, int idir)
 }
 
 //Properties measurement
-void Measure()
+void Measure(bool equi, int iequi, int istep)
 {
-    int bin;
-    double v, t, vij;
+    double v, t, w, vij, wij;
     double dx, dy, dz, dr;
-    ofstream Epot, Ekin, Etot, Temp;
-
-    Epot.open("output_epot.dat", ios::app);
-    Ekin.open("output_ekin.dat", ios::app);
-    Temp.open("output_temp.dat", ios::app);
-    Etot.open("output_etot.dat", ios::app);
 
     v = 0.0; //reset observables
     t = 0.0;
+    w = 0.0;
+
+    //reset the hystogram of g(r)
+    for (int k = igofr; k < igofr + nbins; ++k)
+        walker[k] = 0.0;
 
     //cycle over pairs of particles
     for (int i = 0; i < npart - 1; ++i)
@@ -363,15 +466,29 @@ void Measure()
             dr = dx * dx + dy * dy + dz * dz;
             dr = sqrt(dr);
 
+            //update of the histogram of g(r)
+            for (int k = 0; k < nbins; k++)
+            {
+                if (k * bin_size <= dr && dr < (k + 1) * bin_size)
+                {
+                    walker[k + 5] += 2; // increment by 2 (see formula for g in lecture notes)
+                }
+            }
+
             if (dr < rcut)
             {
                 vij = 4.0 / pow(dr, 12) - 4.0 / pow(dr, 6);
+                wij = 1.0 / pow(dr, 12) - 0.5 / pow(dr, 6);
 
                 //Potential energy
                 v += vij;
+
+                //Pressure
+                w += wij;
             }
         }
     }
+    walker[iw] = 48.0 * w / 3.0;
 
     //Kinetic energy
     for (int i = 0; i < npart; ++i)
@@ -382,15 +499,33 @@ void Measure()
     walker[it] = (2.0 / 3.0) * t / (double)npart; //Temperature
     walker[ie] = (t + v) / (double)npart;         //Total energy per particle
 
-    Epot << walker[iv] << endl;
-    Ekin << walker[ik] << endl;
-    Temp << walker[it] << endl;
-    Etot << walker[ie] << endl;
+    if (equi == true)
+    {
+        if (iequi == 1 && istep == 1)
+        {
+            system("exec rm -r ../data/equilibration/*");
+        }
 
-    Epot.close();
-    Ekin.close();
-    Temp.close();
-    Etot.close();
+        ofstream Epot, Ekin, Etot, Temp, Pres;
+
+        Epot.open("../data/equilibration/output_epot_" + to_string(iequi) + ".dat", ios::app);
+        Ekin.open("../data/equilibration/output_ekin_" + to_string(iequi) + ".dat", ios::app);
+        Temp.open("../data/equilibration/output_temp_" + to_string(iequi) + ".dat", ios::app);
+        Etot.open("../data/equilibration/output_etot_" + to_string(iequi) + ".dat", ios::app);
+        Pres.open("../data/equilibration/output_pres_" + to_string(iequi) + ".dat", ios::app);
+
+        Epot << walker[iv] << endl;
+        Ekin << walker[ik] << endl;
+        Temp << walker[it] << endl;
+        Etot << walker[ie] << endl;
+        Pres << rho * temp + walker[iw] / vol << endl;
+
+        Epot.close();
+        Ekin.close();
+        Temp.close();
+        Etot.close();
+        Pres.close();
+    }
 
     return;
 }
