@@ -8,8 +8,8 @@
 
 int main()
 {
-    int seed[4] = {0000, 0000, 0000, 0001}; // seed for Rannyu generator
-    Random rnd = Random(seed);              // prepared instance for Rannyu generator
+    int seed[4] = {1033, 1282, 549, 641}; // seed for Rannyu generator
+    Random rnd = Random(seed);            // prepared instance for Rannyu generator
 
     int n_cities = 32;  // number of cities
     int pop_size = 500; // size of population
@@ -31,6 +31,8 @@ int main()
     genetic_salesman square_gen = genetic_salesman("../data/square/", rnd, pop_size, n_gens, square_map, p_c, p_m);
     square_gen.gen_start_pop();
     square_gen.evolute_pop();
+
+    rnd.SaveSeed();
 
     return 0;
 }

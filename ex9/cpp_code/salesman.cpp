@@ -102,18 +102,18 @@ void genetic_salesman::evolute_pop()
 // Selects mother and father individual in current population based on their fitness and stores them in mother/father vector.
 void genetic_salesman::selection()
 {
-    int mother_index_l1 = (int)(pop_size * pow(1 - rnd.Rannyu(), 2));
+    int mother_index_l1 = (int)(pop_size * pow(rnd.Rannyu(), 2));
     int father_index_l1;
     do
     {
-        father_index_l1 = (int)(pop_size * pow(1 - rnd.Rannyu(), 2));
+        father_index_l1 = (int)(pop_size * pow(rnd.Rannyu(), 2));
     } while (father_index_l1 == mother_index_l1);
 
-    int mother_index_l2 = (int)(pop_size * pow(1 - rnd.Rannyu(), 2));
+    int mother_index_l2 = (int)(pop_size * pow(rnd.Rannyu(), 2));
     int father_index_l2;
     do
     {
-        father_index_l2 = (int)(pop_size * pow(1 - rnd.Rannyu(), 2));
+        father_index_l2 = (int)(pop_size * pow(rnd.Rannyu(), 2));
     } while (father_index_l2 == mother_index_l2);
 
     mother_l1 = pop_l1[pop_order_l1[mother_index_l1]];
