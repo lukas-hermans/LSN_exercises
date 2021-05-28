@@ -13,8 +13,7 @@ genetic_salesman::genetic_salesman(string save_path, Random &rnd, int pop_size, 
 {
     n_cities = map.size();
     city_list = vec_arange(1, n_cities);
-    pop_fitness_l1 = std::vector<double>(pop_size, 0.0);
-    pop_fitness_l2 = std::vector<double>(pop_size, 0.0);
+    pop_fitness = std::vector<double>(pop_size, 0.0);
 }
 
 genetic_salesman::~genetic_salesman()
@@ -41,8 +40,7 @@ void genetic_salesman::gen_start_pop()
         }
 
         this->check_individual(new_individual);
-        pop_l1.push_back(new_individual); // add new individual to population
-        pop_l2.push_back(new_individual); // add new individual to population
+        pop.push_back(new_individual); // add new individual to population
     }
 
     this->compute_pop_fitness(); // compute fitness of current population
@@ -63,34 +61,28 @@ void genetic_salesman::evolute_pop()
             std::cout << "Generation: " << igen << "/" << n_gens << std::endl;
         }
 
-        pop_new_l1 = {};
-        pop_new_l2 = {};
+        pop_new = {};
 
         // create new population using selection, crossover and mutation until pop_size is reached
-        while ((int)pop_new_l2.size() != pop_size)
+        while ((int)pop_new.size() != pop_size)
         {
             this->selection(); // select new pair of parents (mother and father)
             this->crossover(); // perform crossover between parents
             this->mutation();  // perform random mutations on the parents
 
             // add parents (that are now children) to new population
-            this->check_individual(mother_l1);
-            pop_new_l1.push_back(mother_l1);
-            this->check_individual(father_l1);
-            pop_new_l1.push_back(father_l1);
-            this->check_individual(mother_l2);
-            pop_new_l2.push_back(mother_l2);
-            this->check_individual(father_l2);
-            pop_new_l2.push_back(father_l2);
+            this->check_individual(mother);
+            pop_new.push_back(mother);
+            this->check_individual(father);
+            pop_new.push_back(father);
 
-            if ((int)pop_new_l1.size() > pop_size || (int)pop_new_l2.size() > pop_size)
+            if ((int)pop_new.size() > pop_size)
             {
                 throw std::runtime_error("ERROR: NEW POPULATION TOO LARGE! PLEASE SELECT EVEN POPULATION SIZE!");
             }
         }
 
-        pop_l1 = pop_new_l1;
-        pop_l2 = pop_new_l2;
+        pop = pop_new;
 
         this->compute_pop_fitness();
         this->write_data(igen);
@@ -102,24 +94,15 @@ void genetic_salesman::evolute_pop()
 // Selects mother and father individual in current population based on their fitness and stores them in mother/father vector.
 void genetic_salesman::selection()
 {
-    int mother_index_l1 = (int)(pop_size * pow(rnd.Rannyu(), 2));
-    int father_index_l1;
+    int mother_index = (int)(pop_size * pow(rnd.Rannyu(), 2));
+    int father_index;
     do
     {
-        father_index_l1 = (int)(pop_size * pow(rnd.Rannyu(), 2));
-    } while (father_index_l1 == mother_index_l1);
+        father_index = (int)(pop_size * pow(rnd.Rannyu(), 2));
+    } while (father_index == mother_index);
 
-    int mother_index_l2 = (int)(pop_size * pow(rnd.Rannyu(), 2));
-    int father_index_l2;
-    do
-    {
-        father_index_l2 = (int)(pop_size * pow(rnd.Rannyu(), 2));
-    } while (father_index_l2 == mother_index_l2);
-
-    mother_l1 = pop_l1[pop_order_l1[mother_index_l1]];
-    father_l1 = pop_l1[pop_order_l1[father_index_l1]];
-    mother_l2 = pop_l2[pop_order_l2[mother_index_l2]];
-    father_l2 = pop_l2[pop_order_l2[father_index_l2]];
+    mother = pop[pop_order[mother_index]];
+    father = pop[pop_order[father_index]];
 }
 
 // Performs crossover between mother and father.
@@ -130,63 +113,31 @@ void genetic_salesman::crossover()
         int cut_index = rnd.Rannyu(1, n_cities - 2);
 
         // copy  of mother and father
-        std::vector<int> mother_l1_copy = mother_l1;
-        std::vector<int> father_l1_copy = father_l1;
+        std::vector<int> mother_copy = mother;
+        std::vector<int> father_copy = father;
 
         // last part of chromosomes to be crossed over
-        std::vector<int> mother_l1_cutted(mother_l1.begin() + cut_index, mother_l1.end());
-        std::vector<int> father_l1_cutted(father_l1.begin() + cut_index, father_l1.end());
+        std::vector<int> mother_cutted(mother.begin() + cut_index, mother.end());
+        std::vector<int> father_cutted(father.begin() + cut_index, father.end());
 
         // index of cutted part (e.g. for the mother this is the index in the father chromosome)
-        std::vector<int> mother_l1_cutted_index;
-        std::vector<int> father_l1_cutted_index;
-        for (int i = 0; i < (int)mother_l1_cutted.size(); i++)
+        std::vector<int> mother_cutted_index;
+        std::vector<int> father_cutted_index;
+        for (int i = 0; i < (int)mother_cutted.size(); i++)
         {
-            mother_l1_cutted_index.push_back(std::distance(father_l1.begin(), std::find(father_l1.begin(), father_l1.end(), mother_l1_cutted[i])));
-            father_l1_cutted_index.push_back(std::distance(mother_l1.begin(), std::find(mother_l1.begin(), mother_l1.end(), father_l1_cutted[i])));
+            mother_cutted_index.push_back(std::distance(father.begin(), std::find(father.begin(), father.end(), mother_cutted[i])));
+            father_cutted_index.push_back(std::distance(mother.begin(), std::find(mother.begin(), mother.end(), father_cutted[i])));
         }
 
         // sort indexes
-        std::sort(mother_l1_cutted_index.begin(), mother_l1_cutted_index.end());
-        std::sort(father_l1_cutted_index.begin(), father_l1_cutted_index.end());
+        std::sort(mother_cutted_index.begin(), mother_cutted_index.end());
+        std::sort(father_cutted_index.begin(), father_cutted_index.end());
 
         // change mother and father corresponding to performed crossover
-        for (int i = 0; i < (int)mother_l1_cutted.size(); i++)
+        for (int i = 0; i < (int)mother_cutted.size(); i++)
         {
-            mother_l1[cut_index + i] = father_l1_copy[mother_l1_cutted_index[i]];
-            father_l1[cut_index + i] = mother_l1_copy[father_l1_cutted_index[i]];
-        }
-    }
-    if (rnd.Rannyu() <= p_c)
-    {
-        int cut_index = rnd.Rannyu(1, n_cities - 2);
-
-        // copy  of mother and father
-        std::vector<int> mother_l2_copy = mother_l2;
-        std::vector<int> father_l2_copy = father_l2;
-
-        // last part of chromosomes to be crossed over
-        std::vector<int> mother_l2_cutted(mother_l2.begin() + cut_index, mother_l2.end());
-        std::vector<int> father_l2_cutted(father_l2.begin() + cut_index, father_l2.end());
-
-        // index of cutted part (e.g. for the mother this is the index in the father chromosome)
-        std::vector<int> mother_l2_cutted_index;
-        std::vector<int> father_l2_cutted_index;
-        for (int i = 0; i < (int)mother_l2_cutted.size(); i++)
-        {
-            mother_l2_cutted_index.push_back(std::distance(father_l2.begin(), std::find(father_l2.begin(), father_l2.end(), mother_l2_cutted[i])));
-            father_l2_cutted_index.push_back(std::distance(mother_l2.begin(), std::find(mother_l2.begin(), mother_l2.end(), father_l2_cutted[i])));
-        }
-
-        // sort indexes
-        std::sort(mother_l2_cutted_index.begin(), mother_l2_cutted_index.end());
-        std::sort(father_l2_cutted_index.begin(), father_l2_cutted_index.end());
-
-        // change mother and father corresponding to performed crossover
-        for (int i = 0; i < (int)mother_l2_cutted.size(); i++)
-        {
-            mother_l2[cut_index + i] = father_l2_copy[mother_l2_cutted_index[i]];
-            father_l2[cut_index + i] = mother_l2_copy[father_l2_cutted_index[i]];
+            mother[cut_index + i] = father_copy[mother_cutted_index[i]];
+            father[cut_index + i] = mother_copy[father_cutted_index[i]];
         }
     }
 }
@@ -196,43 +147,27 @@ void genetic_salesman::mutation()
 {
     // pair permutation
     if (rnd.Rannyu() <= p_m)
-        this->pair_permutation(mother_l1);
+        this->pair_permutation(mother);
     if (rnd.Rannyu() <= p_m)
-        this->pair_permutation(mother_l2);
-    if (rnd.Rannyu() <= p_m)
-        this->pair_permutation(father_l1);
-    if (rnd.Rannyu() <= p_m)
-        this->pair_permutation(father_l2);
+        this->pair_permutation(father);
 
     // shift mutation
     if (rnd.Rannyu() <= p_m)
-        this->shift_mutation(mother_l1);
+        this->shift_mutation(mother);
     if (rnd.Rannyu() <= p_m)
-        this->shift_mutation(mother_l2);
-    if (rnd.Rannyu() <= p_m)
-        this->shift_mutation(father_l1);
-    if (rnd.Rannyu() <= p_m)
-        this->shift_mutation(father_l2);
+        this->shift_mutation(father);
 
     // swap mutation
     if (rnd.Rannyu() <= p_m)
-        this->swap_mutation(mother_l1);
+        this->swap_mutation(mother);
     if (rnd.Rannyu() <= p_m)
-        this->swap_mutation(mother_l2);
-    if (rnd.Rannyu() <= p_m)
-        this->swap_mutation(father_l1);
-    if (rnd.Rannyu() <= p_m)
-        this->swap_mutation(father_l2);
+        this->swap_mutation(father);
 
     // inversion mutation
     if (rnd.Rannyu() <= p_m)
-        this->inversion_mutation(mother_l1);
+        this->inversion_mutation(mother);
     if (rnd.Rannyu() <= p_m)
-        this->inversion_mutation(mother_l2);
-    if (rnd.Rannyu() <= p_m)
-        this->inversion_mutation(father_l1);
-    if (rnd.Rannyu() <= p_m)
-        this->inversion_mutation(father_l2);
+        this->inversion_mutation(father);
 }
 
 // Performs a random pair permutation on given individual.
@@ -302,8 +237,8 @@ void genetic_salesman::check_individual(std::vector<int> individual)
     }
 }
 
-// Computes the fitness of the current population in stores it in vector pop_fitness_l1 and pop_fitness_l2.
-// The corresponding order of individuals are stored in pop_order_l1 and pop_order_l2.
+// Computes the fitness of the current population in stores it in vector pop_fitness.
+// The corresponding order of individuals are stored in pop_order.
 void genetic_salesman::compute_pop_fitness()
 {
     std::vector<int> individual;
@@ -313,7 +248,7 @@ void genetic_salesman::compute_pop_fitness()
     for (int i = 0; i < pop_size; i++) // loop over all individuals in current population
     {
         // compute fitness for current individual (which includes start city that is not part of individual vector) using L1 norm
-        individual = pop_l1[i];
+        individual = pop[i];
         fitness = 0;
         city_index_1 = 0;
         city_index_2 = individual[0];
@@ -328,100 +263,63 @@ void genetic_salesman::compute_pop_fitness()
         city_index_2 = 0;
         fitness += sqrt(pow(map[city_index_1].x - map[city_index_2].x, 2) + pow(map[city_index_1].y - map[city_index_2].y, 2));
 
-        pop_fitness_l1[i] = fitness;
-
-        // compute fitness for current individual (which includes start city that is not part of individual vector) using L2 norm
-        individual = pop_l2[i];
-        fitness = 0;
-        city_index_1 = 0;
-        city_index_2 = individual[0];
-        fitness += pow(map[city_index_1].x - map[city_index_2].x, 2) + pow(map[city_index_1].y - map[city_index_2].y, 2);
-        for (int j = 0; j < (int)individual.size() - 1; j++) // loop over city sequence in individual (except last one)
-        {
-            city_index_1 = individual[j];
-            city_index_2 = individual[j + 1];
-            fitness += pow(map[city_index_1].x - map[city_index_2].x, 2) + pow(map[city_index_1].y - map[city_index_2].y, 2);
-        }
-        city_index_1 = individual.back();
-        city_index_2 = 0;
-        fitness += pow(map[city_index_1].x - map[city_index_2].x, 2) + pow(map[city_index_1].y - map[city_index_2].y, 2);
-
-        pop_fitness_l2[i] = fitness;
+        pop_fitness[i] = fitness;
     }
 
-    // compute corresponding order vectors
-    pop_order_l1 = vec_arange(0, pop_size);
-    std::sort(pop_order_l1.begin(), pop_order_l1.end(), [&](int i, int j)
-              { return pop_fitness_l1[i] < pop_fitness_l1[j]; });
-
-    pop_order_l2 = vec_arange(0, pop_size);
-    std::sort(pop_order_l2.begin(), pop_order_l2.end(), [&](int i, int j)
-              { return pop_fitness_l2[i] < pop_fitness_l2[j]; });
+    // compute corresponding order vector
+    pop_order = vec_arange(0, pop_size);
+    std::sort(pop_order.begin(), pop_order.end(), [&](int i, int j)
+              { return pop_fitness[i] < pop_fitness[j]; });
 }
 
 // Writes best fitness and fitness for best half into file.
 // Also writes best path (i.e. a certain individual) to file.
-// Output for l1 and l2 norm.
+// Output for l1 norm.
 void genetic_salesman::write_data(int igen)
 {
     // reset files at beginning of new run and write header
     if (igen == 0)
     {
-        std::ofstream l1(save_path + "l1.txt"), l1_path(save_path + "l1_path.txt"), l2(save_path + "l2.txt"), l2_path(save_path + "l2_path.txt");
+        std::ofstream l1(save_path + "l1.txt"), l1_path(save_path + "l1_path.txt");
         l1 << "igen, l1_best, l1_mean" << std::endl;
         l1.close();
         l1_path.close();
-        l2 << "igen, l2_best, l2_mean" << std::endl;
-        l2.close();
-        l2_path.close();
     }
 
-    std::ofstream l1, l1_path, l2, l2_path;
+    std::ofstream l1, l1_path;
     l1.open(save_path + "l1.txt", std::ios_base::app);
     l1_path.open(save_path + "l1_path.txt", std::ios_base::app);
-    l2.open(save_path + "l2.txt", std::ios_base::app);
-    l2_path.open(save_path + "l2_path.txt", std::ios_base::app);
 
-    // compute mean of l1 and l2 norm for best half of population
+    // compute mean of l1 norm for best half of population
     double l1_mean = 0.0;
-    double l2_mean = 0.0;
     for (int i = 0; i < pop_size / 2; i++)
     {
-        l1_mean += pop_fitness_l1[pop_order_l1[i]];
-        l2_mean += pop_fitness_l2[pop_order_l2[i]];
+        l1_mean += pop_fitness[pop_order[i]];
     }
     l1_mean /= pop_size / 2;
-    l2_mean /= pop_size / 2;
 
-    l1 << igen << ", " << pop_fitness_l1[pop_order_l1[0]] << ", " << l1_mean << std::endl;
-    l2 << igen << ", " << pop_fitness_l2[pop_order_l2[0]] << ", " << l2_mean << std::endl;
+    l1 << igen << ", " << pop_fitness[pop_order[0]] << ", " << l1_mean << std::endl;
 
     l1.close();
-    l2.close();
 
-    // write best path to filef for l1 and l2
-    std::vector<int> l1_best = pop_l1[pop_order_l1[0]];
-    std::vector<int> l2_best = pop_l2[pop_order_l2[0]];
+    // write best path to filef for l1
+    std::vector<int> l1_best = pop[pop_order[0]];
 
     for (int i = 0; i < (int)l1_best.size(); i++)
     {
         l1_path << l1_best[i];
-        l2_path << l2_best[i];
 
         if (i < (int)l1_best.size() - 1)
         {
             l1_path << ", ";
-            l2_path << ", ";
         }
         else
         {
             l1_path << std::endl;
-            l2_path << std::endl;
         }
     }
 
     l1_path.close();
-    l2_path.close();
 }
 
 // Creates a vector of points (with x and y coordinate) of n_cities.

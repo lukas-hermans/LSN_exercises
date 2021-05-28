@@ -45,12 +45,12 @@ public:
 
     std::vector<int> city_list; // list of all cities in ascending order
 
-    std::vector<std::vector<int>> pop_l1, pop_l2;         // vector of current populations
-    std::vector<std::vector<int>> pop_new_l1, pop_new_l2; // vector of new populations
-    std::vector<double> pop_fitness_l1, pop_fitness_l2;   // vector of fitness for all individuals in current population
-    std::vector<int> pop_order_l1, pop_order_l2;          // contains order of index of all individuals of population (first index has highest fitness)
+    std::vector<std::vector<int>> pop;     // vector of current population
+    std::vector<std::vector<int>> pop_new; // vector of new population
+    std::vector<double> pop_fitness;       // vector of fitness for all individuals in current population
+    std::vector<int> pop_order;            // contains order of index of all individuals of population (first index has highest fitness)
 
-    std::vector<int> mother_l1, father_l1, mother_l2, father_l2; // parent individuals
+    std::vector<int> mother, father; // parent individuals
 };
 
 std::vector<point> make_map(Random &rnd, int n_cities, std::string type);
