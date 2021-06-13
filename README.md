@@ -6,5 +6,6 @@ This is my (= Lukas Hermans') repository for the exercise delivery for the "Nume
 For each of the 12 exercise sheets, I created a folder with the name "exi" where i is the number of the corresponding exercise sheet. 
 
 Each folder contains a Jupyter-Notebook (e.g. "LSN_Exercises_01.ipynb"), a sub-folder "cpp_code", and a sub-folder "data". In the Jupyter-Notebook, I present my solution to the exercise sheet with figures and detailed explanations. The sub-folder "cpp_code" includes all the C++ code used for the calculations in each exercise sheet. It also contains a "makefile", from which the hierarchy of the C++ and header files should become obvious. The generated data is saved in the sub-folder "data", which is accessed by the Jupyter-Notebook.
+In addition to the folders of the 12 exercise sheets, I created a folder called "tools" that includes libraries (e.g., the random number generated or routines for the Metropolis algorithm) that are used in several exercise sheets.
 
 The last two exercise sheets 11 and 12 do not contain the subfolders because all the computations (with Python and Keras) are included in the Jupyter-Notebook.
