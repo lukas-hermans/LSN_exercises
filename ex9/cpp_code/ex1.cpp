@@ -26,11 +26,11 @@ int main()
 
     genetic_salesman circle_gen = genetic_salesman("../data/circle/", rnd, pop_size, n_gens, circle_map, p_c, p_m);
     circle_gen.gen_start_pop();
-    circle_gen.evolute_pop();
+    circle_gen.evolute_pop(n_gens);
 
     genetic_salesman square_gen = genetic_salesman("../data/square/", rnd, pop_size, n_gens, square_map, p_c, p_m);
     square_gen.gen_start_pop();
-    square_gen.evolute_pop();
+    square_gen.evolute_pop(n_gens);
 
     rnd.SaveSeed();
 
