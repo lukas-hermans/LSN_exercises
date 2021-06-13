@@ -1,0 +1,2 @@
+igen, l1_best, l1_mean
+0, 30.1407, -nan

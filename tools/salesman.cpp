@@ -6,10 +6,12 @@
 #include <fstream>
 #include <exception>
 #include <numeric>
-#include "../../tools/random.h"
+#include "./random.h"
 #include "salesman.h"
 
-genetic_salesman::genetic_salesman(string save_path, Random &rnd, int pop_size, int n_gens, std::vector<point> map, double p_c, double p_m) : save_path(save_path), rnd(rnd), pop_size(pop_size), n_gens(n_gens), map(map), p_c(p_c), p_m(p_m)
+// Instance constructure.
+// p_c is not used for simulated annealing.
+genetic_salesman::genetic_salesman(string save_path, Random &rnd, int pop_size, int n_gens, std::vector<point> map, double p_c, double p_m, int rank) : save_path(save_path), rnd(rnd), pop_size(pop_size), n_gens(n_gens), map(map), p_c(p_c), p_m(p_m), rank(rank)
 {
     n_cities = map.size();
     city_list = vec_arange(1, n_cities);
@@ -23,40 +25,57 @@ genetic_salesman::~genetic_salesman()
 // Generates the start popoulation where every combination of cities (that occur exactly ones) has equal probability.
 void genetic_salesman::gen_start_pop()
 {
-    std::vector<int> remaining_cities, new_individual;
-    int add_city_index;
+    std::vector<int> new_individual;
 
     for (int i = 0; i < pop_size; i++) // loop over population (i.e. over all individuals in population)
     {
-        remaining_cities = city_list; // initially, the salesman has not visited any city
-        new_individual = {};
-
-        for (int j = 1; j < n_cities; j++) // loop over all cities (except first that we fix) to create new individual
-        {
-            add_city_index = (int)rnd.Rannyu(0, remaining_cities.size()); // random index of remaining_city vector (note that (int) alwys rounds down)
-
-            new_individual.push_back(remaining_cities[add_city_index]);
-            remaining_cities.erase(remaining_cities.begin() + add_city_index); // drop drawn city (salesman visits every city exactly once)
-        }
-
+        new_individual = this->gen_individual();
         this->check_individual(new_individual);
         pop.push_back(new_individual); // add new individual to population
     }
-
     this->compute_pop_fitness(); // compute fitness of current population
-    this->write_data(0);         // write data
 
-    std::cout << "Generated start population successfully" << std::endl;
+    this->write_data(0); // write data
+
+    if (rank == -1)
+    {
+        std::cout << "Generated start population successfully" << std::endl;
+    }
+
+    current_gen = 1;
 }
 
-void genetic_salesman::evolute_pop()
+// Generates a new random individual.
+std::vector<int> genetic_salesman::gen_individual()
 {
-    std::cout << std::endl
-              << "Evolution starts" << std::endl;
+    std::vector<int> remaining_cities, new_individual;
+    int add_city_index;
 
-    for (int igen = 1; igen < n_gens + 1; igen++) // loop over all generations
+    remaining_cities = city_list; // initially, the salesman has not visited any city
+    new_individual = {};
+
+    for (int j = 1; j < n_cities; j++) // loop over all cities (except first that we fix) to create new individual
     {
-        if (igen % 10 == 0)
+        add_city_index = (int)rnd.Rannyu(0, remaining_cities.size()); // random index of remaining_city vector (note that (int) alwys rounds down)
+
+        new_individual.push_back(remaining_cities[add_city_index]);
+        remaining_cities.erase(remaining_cities.begin() + add_city_index); // drop drawn city (salesman visits every city exactly once)
+    }
+
+    return new_individual;
+}
+
+void genetic_salesman::evolute_pop(int steps)
+{
+    if (rank == -1)
+    {
+        std::cout << std::endl
+                  << "Evolution starts" << std::endl;
+    }
+
+    for (int igen = 1; igen < steps + 1; igen++) // loop over all generations
+    {
+        if (igen % 10 == 0 && rank == -1)
         {
             std::cout << "Generation: " << igen << "/" << n_gens << std::endl;
         }
@@ -85,10 +104,82 @@ void genetic_salesman::evolute_pop()
         pop = pop_new;
 
         this->compute_pop_fitness();
-        this->write_data(igen);
+        this->write_data(current_gen);
+
+        current_gen += 1;
     }
 
-    std::cout << "Evolution finished successfully" << std::endl;
+    if (rank == -1)
+    {
+        std::cout << "Evolution finished successfully" << std::endl;
+    }
+}
+
+void genetic_salesman::sim_anneal(std::vector<double> beta_list)
+{
+    std::cout << std::endl
+              << "Simulated annealing starts" << std::endl;
+
+    double beta; // current beta/temperature value
+
+    std::vector<int> individual = this->gen_individual();
+    std::vector<int> individual_new;
+    double boltzmann;
+    double fitness_current, fitness_new;
+
+    std::ofstream file(save_path + "l1_sim.txt");
+    file << "beta, l1" << std::endl;
+    std::ofstream file_path(save_path + "l1_path_sim.txt");
+
+    for (int ibeta = 1; ibeta < (int)beta_list.size() + 1; ibeta++) // loop over all betas/temperatures
+    {
+        beta = beta_list[ibeta - 1];
+
+        if (ibeta % 20 == 0)
+        {
+            std::cout << "beta = " << beta << std::endl;
+        }
+
+        for (int igen = 1; igen < n_gens + 1; igen++) // loop over steps for each temperature (here called generations)
+        {
+            fitness_current = this->compute_individual_fitness(individual);
+
+            individual_new = individual;
+            this->pair_permutation(individual_new);
+            fitness_new = this->compute_individual_fitness(individual_new);
+
+            // Metropolis acceptance rule
+            if (fitness_new <= fitness_current)
+            {
+                individual = individual_new;
+            }
+            else
+            {
+                boltzmann = exp(-beta * (fitness_new - fitness_current));
+                if (rnd.Rannyu() <= boltzmann)
+                {
+                    individual = individual_new;
+                }
+            }
+        }
+        file << beta << ", " << fitness_current << std::endl;
+        for (int i = 0; i < (int)individual.size(); i++)
+        {
+            file_path << individual[i];
+            if (i < (int)individual.size() - 1)
+            {
+                file_path << ", ";
+            }
+            else
+            {
+                file_path << std::endl;
+            }
+        }
+    }
+
+    file.close();
+
+    std::cout << "Simulated annealing finished successfully" << std::endl;
 }
 
 // Selects mother and father individual in current population based on their fitness and stores them in mother/father vector.
@@ -143,6 +234,7 @@ void genetic_salesman::crossover()
 }
 
 // Performs several mutations each with probability p_m and changes mother and father correspondingly.
+// Only mother is changed if member variable only_mother==1.
 void genetic_salesman::mutation()
 {
     // pair permutation
@@ -242,34 +334,40 @@ void genetic_salesman::check_individual(std::vector<int> individual)
 void genetic_salesman::compute_pop_fitness()
 {
     std::vector<int> individual;
-    double fitness;
-    int city_index_1, city_index_2;
 
     for (int i = 0; i < pop_size; i++) // loop over all individuals in current population
     {
-        // compute fitness for current individual (which includes start city that is not part of individual vector) using L1 norm
         individual = pop[i];
-        fitness = 0;
-        city_index_1 = 0;
-        city_index_2 = individual[0];
-        fitness += sqrt(pow(map[city_index_1].x - map[city_index_2].x, 2) + pow(map[city_index_1].y - map[city_index_2].y, 2));
-        for (int j = 0; j < (int)individual.size() - 1; j++) // loop over city sequence in individual (except last one)
-        {
-            city_index_1 = individual[j];
-            city_index_2 = individual[j + 1];
-            fitness += sqrt(pow(map[city_index_1].x - map[city_index_2].x, 2) + pow(map[city_index_1].y - map[city_index_2].y, 2));
-        }
-        city_index_1 = individual.back();
-        city_index_2 = 0;
-        fitness += sqrt(pow(map[city_index_1].x - map[city_index_2].x, 2) + pow(map[city_index_1].y - map[city_index_2].y, 2));
-
-        pop_fitness[i] = fitness;
+        pop_fitness[i] = this->compute_individual_fitness(individual);
     }
 
     // compute corresponding order vector
     pop_order = vec_arange(0, pop_size);
     std::sort(pop_order.begin(), pop_order.end(), [&](int i, int j)
               { return pop_fitness[i] < pop_fitness[j]; });
+}
+
+// Compute fitness for an individual (which includes start city that is not part of individual vector) using L1 norm.
+double genetic_salesman::compute_individual_fitness(std::vector<int> individual)
+{
+    int city_index_1, city_index_2;
+    double fitness;
+
+    fitness = 0;
+    city_index_1 = 0;
+    city_index_2 = individual[0];
+    fitness += sqrt(pow(map[city_index_1].x - map[city_index_2].x, 2) + pow(map[city_index_1].y - map[city_index_2].y, 2));
+    for (int j = 0; j < (int)individual.size() - 1; j++) // loop over city sequence in individual (except last one)
+    {
+        city_index_1 = individual[j];
+        city_index_2 = individual[j + 1];
+        fitness += sqrt(pow(map[city_index_1].x - map[city_index_2].x, 2) + pow(map[city_index_1].y - map[city_index_2].y, 2));
+    }
+    city_index_1 = individual.back();
+    city_index_2 = 0;
+    fitness += sqrt(pow(map[city_index_1].x - map[city_index_2].x, 2) + pow(map[city_index_1].y - map[city_index_2].y, 2));
+
+    return fitness;
 }
 
 // Writes best fitness and fitness for best half into file.
@@ -280,15 +378,35 @@ void genetic_salesman::write_data(int igen)
     // reset files at beginning of new run and write header
     if (igen == 0)
     {
-        std::ofstream l1(save_path + "l1.txt"), l1_path(save_path + "l1_path.txt");
+        std::ofstream l1, l1_path;
+        if (rank == -1)
+        {
+            l1.open(save_path + "l1.txt");
+            l1_path.open(save_path + "l1_path.txt");
+        }
+        else
+        {
+            l1.open(save_path + "l1_rank=" + std::to_string(rank) + ".txt");
+            l1_path.open(save_path + "l1_path_rank=" + std::to_string(rank) + ".txt");
+        }
         l1 << "igen, l1_best, l1_mean" << std::endl;
         l1.close();
         l1_path.close();
     }
 
     std::ofstream l1, l1_path;
-    l1.open(save_path + "l1.txt", std::ios_base::app);
-    l1_path.open(save_path + "l1_path.txt", std::ios_base::app);
+
+    if (rank == -1)
+    {
+
+        l1.open(save_path + "l1.txt", std::ios_base::app);
+        l1_path.open(save_path + "l1_path.txt", std::ios_base::app);
+    }
+    else
+    {
+        l1.open(save_path + "l1_rank=" + std::to_string(rank) + ".txt", std::ios_base::app);
+        l1_path.open(save_path + "l1_path_rank=" + std::to_string(rank) + ".txt", std::ios_base::app);
+    }
 
     // compute mean of l1 norm for best half of population
     double l1_mean = 0.0;
@@ -302,9 +420,8 @@ void genetic_salesman::write_data(int igen)
 
     l1.close();
 
-    // write best path to filef for l1
+    // write best path to file for l1
     std::vector<int> l1_best = pop[pop_order[0]];
-
     for (int i = 0; i < (int)l1_best.size(); i++)
     {
         l1_path << l1_best[i];
@@ -374,6 +491,19 @@ std::vector<int> vec_arange(int from, int to)
     for (int i = from; i < to; i++)
     {
         vec.push_back(i);
+    }
+
+    return vec;
+}
+
+std::vector<double> vec_linspace(double from, double to, int steps)
+{
+    std::vector<double> vec;
+    double step_width = (to - from) / (steps - 1);
+
+    for (int i = 0; i < steps; i++)
+    {
+        vec.push_back(i * step_width + from);
     }
 
     return vec;

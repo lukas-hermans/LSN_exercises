@@ -4,7 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include "../../tools/random.h"
-#include "salesman.h"
+#include "../../tools/salesman.h"
 
 int main()
 {

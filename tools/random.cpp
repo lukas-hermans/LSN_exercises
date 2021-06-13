@@ -17,7 +17,23 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 
 using namespace std;
 
-Random ::Random() {}
+Random::Random() {}
+
+Random ::Random(int seed[4], int prime_line)
+{
+    prime_line += 1;
+
+    int p1, p2;
+
+    ifstream Primes("../../tools/Primes");
+    for (int i = 1; i < prime_line; i++)
+        Primes >> p1 >> p2;
+
+    Primes >> p1 >> p2;
+    Primes.close();
+
+    this->SetRandom(seed, p1, p2);
+}
 
 // Initialize an instance of Random that is prepared for the application of the Rannyu method.
 Random::Random(int seed[4])
